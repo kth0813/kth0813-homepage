@@ -14,7 +14,7 @@ function UserList() {
 
   useEffect(() => {
     fetchUsers();
-  }, [currentPage, pageSize]); // 페이지 번호나 출력 개수가 바뀌면 다시 호출
+  }, [fetchUsers, currentPage, pageSize]); // 페이지 번호나 출력 개수가 바뀌면 다시 호출
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
