@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "./supabaseClient";
 
@@ -17,19 +17,7 @@ function BoardDetail() {
 
   const loginUser = JSON.parse(localStorage.getItem("loginUser"));
 
-  useEffect(() => {
-    const loadData = async () => {
-      // 1. 조회수 증가 (RPC)
-      const { error: rpcError } = await supabase.rpc("increment_hit", { row_id: seq });
-      if (rpcError) console.error("조회수 증가 실패:", rpcError.message);
-
-      fetchPostDetail();
-      fetchComments();
-    };
-    loadData();
-  }, [seq]);
-
-  async function fetchPostDetail() {
+  const fetchPostDetail = useCallback(async () => {
     const { data, error } = await supabase.from("board").select(`*, user:user_seq ( name )`).eq("seq", seq).eq("del_yn", "N").single();
 
     if (error) {
@@ -38,13 +26,24 @@ function BoardDetail() {
     } else {
       setPost(data);
     }
-  }
+  });
 
-  async function fetchComments() {
+  const fetchComments = useCallback(async () => {
     const { data, error } = await supabase.from("board_comment").select(`*, user:user_seq ( name )`).eq("board_seq", seq).order("seq", { ascending: true });
 
     if (!error) setComments(data);
-  }
+  });
+
+  useEffect(() => {
+    const loadData = async () => {
+      const { error: rpcError } = await supabase.rpc("increment_hit", { row_id: seq });
+      if (rpcError) console.error("조회수 증가 실패:", rpcError.message);
+
+      fetchPostDetail();
+      fetchComments();
+    };
+    loadData();
+  }, [seq, fetchPostDetail, fetchComments]);
 
   const handlePostDelete = async () => {
     if (!window.confirm("정말 이 게시글을 삭제할 거야?")) return;

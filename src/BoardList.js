@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
 import { Link, useNavigate } from "react-router-dom";
 import { showAlert } from "./Alert";
@@ -17,11 +17,7 @@ function BoardList() {
   const navigate = useNavigate();
   const loginUser = JSON.parse(localStorage.getItem("loginUser"));
 
-  useEffect(() => {
-    fetchPosts();
-  }, [currentPage, pageSize]);
-
-  async function fetchPosts() {
+  const fetchPosts = useCallback(async () => {
     setLoading(true);
     const from = (currentPage - 1) * pageSize;
     const to = from + pageSize - 1;
@@ -53,7 +49,11 @@ function BoardList() {
       setTotalCount(count || 0);
     }
     setLoading(false);
-  }
+  });
+
+  useEffect(() => {
+    fetchPosts();
+  }, [currentPage, pageSize, fetchPosts]);
 
   // 글쓰기 버튼 클릭 핸들러
   const handleWriteClick = () => {
