@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
 
 function UserList() {
@@ -16,7 +16,7 @@ function UserList() {
     fetchUsers();
   }, [currentPage, pageSize]); // 페이지 번호나 출력 개수가 바뀌면 다시 호출
 
-  async function fetchUsers() {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
 
     // 1. 페이징 인덱스 계산 (0부터 시작)
@@ -38,7 +38,7 @@ function UserList() {
       setTotalCount(count || 0);
     }
     setLoading(false);
-  }
+  }, [currentPage, pageSize, searchKeyword, searchType]);
 
   // 검색 버튼 클릭 시 (항상 1페이지로 리셋)
   const handleSearch = (e) => {

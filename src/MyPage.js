@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
 import { useNavigate, Link } from "react-router-dom";
 import { showAlert } from "./Alert";
@@ -13,6 +13,15 @@ function MyPage() {
 
   const loginUser = JSON.parse(localStorage.getItem("loginUser"));
 
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    const { data: userData } = await supabase.from("user").select("id, name, profile_url").eq("seq", loginUser.seq).single();
+    if (userData) setUserInfo(userData);
+    const { data: postsData } = await supabase.from("board").select("seq, title, cre_date, hit").eq("user_seq", loginUser.seq).eq("del_yn", "N").order("seq", { ascending: false });
+    if (postsData) setMyPosts(postsData);
+    setLoading(false);
+  }, [loginUser?.seq]);
+
   useEffect(() => {
     if (!loginUser) {
       showAlert("로그인이 필요한 서비스야.");
@@ -20,16 +29,7 @@ function MyPage() {
       return;
     }
     fetchData();
-  }, []);
-
-  async function fetchData() {
-    setLoading(true);
-    const { data: userData } = await supabase.from("user").select("id, name, profile_url").eq("seq", loginUser.seq).single();
-    if (userData) setUserInfo(userData);
-    const { data: postsData } = await supabase.from("board").select("seq, title, cre_date, hit").eq("user_seq", loginUser.seq).eq("del_yn", "N").order("seq", { ascending: false });
-    if (postsData) setMyPosts(postsData);
-    setLoading(false);
-  }
+  }, [loginUser, navigate, fetchData]);
 
   const handleUpdate = async () => {
     if (!userInfo.name) {

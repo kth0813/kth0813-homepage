@@ -30,7 +30,7 @@ function SignIn() {
       const filePath = `${fileName}`;
 
       // Storage 업로드
-      const { data: uploadData, error: uploadError } = await supabase.storage.from("profiles").upload(filePath, profileFile);
+      const { error: uploadError } = await supabase.storage.from("profiles").upload(filePath, profileFile);
 
       if (uploadError) {
         showAlert("이미지 업로드 실패: " + uploadError.message);
