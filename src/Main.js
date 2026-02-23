@@ -1,96 +1,72 @@
 import { useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
+import { Link } from "react-router-dom";
 
 function Main() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ userCount: 0, boardCount: 0 });
+  const [recentPosts, setRecentPosts] = useState([]);
+  const loginUser = JSON.parse(localStorage.getItem("loginUser"));
 
   useEffect(() => {
-    fetchUsers();
+    fetchDashboardData();
   }, []);
 
-  async function fetchUsers() {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("user")
-      .select("seq, id, name, cre_date")
-      .order("seq", { ascending: true });
+  async function fetchDashboardData() {
+    const { count: uCount } = await supabase.from("user").select("*", { count: "exact", head: true }).eq("del_yn", "N");
+    const { count: bCount } = await supabase.from("board").select("*", { count: "exact", head: true }).eq("del_yn", "N");
 
-    if (error) {
-      console.error("데이터 호출 에러:", error.message);
-    } else {
-      setUsers(data);
-    }
-    setLoading(false);
+    setStats({ userCount: uCount || 0, boardCount: bCount || 0 });
+
+    const { data: posts } = await supabase.from("board").select(`seq, title, cre_date, user:user_seq ( name )`).eq("del_yn", "N").order("seq", { ascending: false }).limit(5);
+
+    setRecentPosts(posts || []);
   }
 
   return (
-    <div>
-      <h2 style={{ marginBottom: "20px" }}>🏠 메인 대시보드</h2>
-      <p>홈페이지에 오신 걸 환영해! 현재 등록된 사용자 목록이야.</p>
+    <div className="page-container">
+      <section className="dashboard-welcome">
+        <h2>{loginUser ? `${loginUser.name}님, 어서오세요!` : "방문해주셔서 감사합니다!"}</h2>
+        <p>오늘도 즐거운 코딩 되세요. 현재 우리 서비스의 현황입니다.</p>
+      </section>
 
-      {loading ? (
-        <p>데이터를 불러오는 중...</p>
-      ) : (
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            marginTop: "20px",
-            backgroundColor: "#fff",
-          }}
-        >
-          <thead>
-            <tr
-              style={{
-                backgroundColor: "#f8f9fa",
-                borderBottom: "2px solid #dee2e6",
-              }}
-            >
-              <th style={tableHeaderStyle}>No</th>
-              <th style={tableHeaderStyle}>아이디</th>
-              <th style={tableHeaderStyle}>이름</th>
-              <th style={tableHeaderStyle}>생성일</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.length > 0 ? (
-              users.map((user) => (
-                <tr key={user.seq} style={{ borderBottom: "1px solid #eee" }}>
-                  <td style={tableCellStyle}>{user.seq}</td>
-                  <td style={tableCellStyle}>{user.id}</td>
-                  <td style={tableCellStyle}>{user.name}</td>
-                  <td style={tableCellStyle}>
-                    {new Date(user.cre_date).toLocaleDateString()}
+      <div className="stat-cards">
+        <div className="stat-card">
+          <h4>총 회원 수</h4>
+          <p className="stat-value">{stats.userCount} 명</p>
+        </div>
+        <div className="stat-card">
+          <h4>전체 게시글</h4>
+          <p className="stat-value">{stats.boardCount} 개</p>
+        </div>
+      </div>
+
+      <section style={{ marginTop: "32px" }}>
+        <div className="page-header" style={{ marginBottom: "16px" }}>
+          <h3 className="page-title" style={{ fontSize: "20px" }}>최근 올라온 글</h3>
+          <Link to="/board" className="text-link" style={{ fontSize: "14px" }}>
+            더보기
+          </Link>
+        </div>
+        <div className="table-wrapper">
+          <table className="data-table">
+            <tbody>
+              {recentPosts.map((post) => (
+                <tr key={post.seq}>
+                  <td>
+                    <Link to={`/board/${post.seq}`} className="text-link" style={{ color: "var(--text-main)" }}>
+                      {post.title}
+                    </Link>
                   </td>
+                  <td style={{ width: "100px", textAlign: "right", color: "var(--text-muted)" }}>{post.user?.name}</td>
+                  <td style={{ width: "120px", textAlign: "right", color: "var(--text-muted)", fontSize: "14px" }}>{new Date(post.cre_date).toLocaleDateString()}</td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan="4"
-                  style={{ textAlign: "center", padding: "20px" }}
-                >
-                  등록된 사용자가 없어.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      )}
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   );
 }
-
-const tableHeaderStyle = {
-  padding: "12px",
-  textAlign: "left",
-  borderBottom: "1px solid #ddd",
-};
-
-const tableCellStyle = {
-  padding: "12px",
-  borderBottom: "1px solid #ddd",
-};
 
 export default Main;

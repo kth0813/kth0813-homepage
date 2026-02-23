@@ -1,16 +1,5 @@
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-const linkStyle = {
-  color: "#fff",
-  marginRight: "15px",
-  textDecoration: "none",
-};
-const btnStyle = {
-  background: "none",
-  border: "1px solid #fff",
-  color: "#fff",
-  cursor: "pointer",
-};
+import { Link, useNavigate } from "react-router-dom";
+
 function Layout({ children }) {
   const navigate = useNavigate();
   const loginUser = JSON.parse(localStorage.getItem("loginUser"));
@@ -20,65 +9,45 @@ function Layout({ children }) {
     window.location.reload();
   };
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <header
-        style={{
-          height: "60px",
-          background: "#333",
-          color: "#fff",
-          display: "flex",
-          alignItems: "center",
-          padding: "0 20px",
-        }}
-      >
-        <h2 onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
+    <div className="app-container">
+      <header className="app-header">
+        <h2 onClick={() => navigate("/")}>
           KTH Home
         </h2>
-        <div style={{ marginLeft: "auto" }}>
+        <div className="header-right">
           {loginUser ? (
             <>
-              <span style={{ marginRight: "15px" }}>{loginUser.name}님</span>
-              <button onClick={handleLogout} style={btnStyle}>
+              <Link to="/mypage" className="header-link" style={{ fontWeight: "bold", marginRight: "5px", display: "flex", alignItems: "center", gap: "8px" }}>
+                {loginUser.profile_url ? (
+                  <img src={loginUser.profile_url} alt="프로필" style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover" }} />
+                ) : (
+                  <span>👤</span>
+                )}
+                {loginUser.name}님
+              </Link>
+              <button onClick={handleLogout} className="header-btn">
                 로그아웃
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" style={linkStyle}>
+              <Link to="/login" className="header-link">
                 로그인
               </Link>
-              <Link to="/signin" style={linkStyle}>
+              <Link to="/signin" className="header-link">
                 회원가입
               </Link>
             </>
           )}
         </div>
       </header>
-      <div style={{ display: "flex", flex: 1 }}>
-        <nav
-          style={{
-            width: "200px",
-            background: "#f4f4f4",
-            borderRight: "1px solid #ddd",
-            padding: "20px",
-          }}
-        >
-          <ul style={{ listStyle: "none", padding: 0 }}>
-            <li style={{ marginBottom: "10px" }}>
-              <Link to="/">🏠 홈</Link>
-            </li>
-            <li style={{ marginBottom: "10px" }}>
-              <Link to="/users">👥 사용자 목록</Link>
-            </li>
-            <li style={{ marginBottom: "10px" }}>
-              <Link to="/board">📋 게시판</Link>
-            </li>
-          </ul>
+      <div className="app-body">
+        <nav className="app-nav">
+          <Link to="/" className="nav-link">🏠 홈</Link>
+          <Link to="/users" className="nav-link">👥 사용자 목록</Link>
+          <Link to="/board" className="nav-link">📋 게시판</Link>
         </nav>
-
-        <main style={{ flex: 1, padding: "20px", overflowY: "auto" }}>
-          {children}
-        </main>
+        <main className="app-main">{children}</main>
       </div>
     </div>
   );
