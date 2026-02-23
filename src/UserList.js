@@ -12,10 +12,6 @@ function UserList() {
   const [searchType, setSearchType] = useState("id"); // id 또는 name
   const [searchKeyword, setSearchKeyword] = useState("");
 
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers, currentPage, pageSize]); // 페이지 번호나 출력 개수가 바뀌면 다시 호출
-
   const fetchUsers = useCallback(async () => {
     setLoading(true);
 
@@ -39,6 +35,10 @@ function UserList() {
     }
     setLoading(false);
   }, [currentPage, pageSize, searchKeyword, searchType]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers, currentPage, pageSize]); // 페이지 번호나 출력 개수가 바뀌면 다시 호출
 
   // 검색 버튼 클릭 시 (항상 1페이지로 리셋)
   const handleSearch = (e) => {
