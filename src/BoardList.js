@@ -49,11 +49,11 @@ function BoardList() {
       setTotalCount(count || 0);
     }
     setLoading(false);
-  });
+  }, [currentPage, pageSize, searchKeyword, searchType]);
 
   useEffect(() => {
     fetchPosts();
-  }, [currentPage, pageSize, fetchPosts]);
+  }, [fetchPosts]);
 
   // 글쓰기 버튼 클릭 핸들러
   const handleWriteClick = () => {

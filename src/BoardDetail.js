@@ -26,13 +26,13 @@ function BoardDetail() {
     } else {
       setPost(data);
     }
-  });
+  }, [seq, navigate]);
 
   const fetchComments = useCallback(async () => {
     const { data, error } = await supabase.from("board_comment").select(`*, user:user_seq ( name )`).eq("board_seq", seq).order("seq", { ascending: true });
 
     if (!error) setComments(data);
-  });
+  }, [seq]);
 
   useEffect(() => {
     const loadData = async () => {
