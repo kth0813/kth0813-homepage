@@ -30,7 +30,7 @@ function MyPage() {
       return;
     }
     fetchData();
-  }, [loginUser?.seq, navigate, fetchData]);
+  }, [loginUser, navigate, fetchData]);
 
   const handleUpdate = async () => {
     if (!userInfo.name) {

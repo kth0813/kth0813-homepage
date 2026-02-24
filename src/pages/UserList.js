@@ -47,7 +47,7 @@ function UserList() {
       return;
     }
     fetchUsers();
-  }, [fetchUsers, currentPage, pageSize, loginUser?.admin_yn, navigate]);
+  }, [fetchUsers, currentPage, pageSize, loginUser, navigate]);
 
   const handleSearch = (e) => {
     e.preventDefault();
