@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { supabase } from "../supabaseClient";
 import { useNavigate, Link } from "react-router-dom";
 import { showAlert } from "../utils/Alert";
 import dayjs from "dayjs";
+import { SkeletonLine, SkeletonCircle, SkeletonRect } from "../components/Skeleton";
 
 function MyPage() {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ function MyPage() {
   const [loading, setLoading] = useState(true);
   const [newProfileFile, setNewProfileFile] = useState(null);
 
-  const loginUser = JSON.parse(localStorage.getItem("loginUser"));
+  const loginUser = useMemo(() => JSON.parse(localStorage.getItem("loginUser")), []);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -87,7 +88,32 @@ function MyPage() {
     }
   };
 
-  if (loading) return <div style={{ padding: "40px", textAlign: "center" }}>로딩 중...</div>;
+  if (loading) {
+    return (
+      <div className="page-container">
+        <div className="page-header" style={{ borderBottom: "1px solid var(--border-color)", paddingBottom: "20px", marginBottom: "32px" }}>
+          <SkeletonLine width="200px" height="32px" />
+        </div>
+        <div className="mypage-grid">
+          <section className="mypage-section">
+            <SkeletonLine width="150px" height="24px" style={{ marginBottom: "24px" }} />
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "24px" }}>
+              <SkeletonCircle size="100px" style={{ marginBottom: "12px" }} />
+              <SkeletonLine width="200px" height="24px" />
+            </div>
+            <SkeletonRect width="100%" height="48px" style={{ marginBottom: "20px" }} />
+            <SkeletonRect width="100%" height="48px" style={{ marginBottom: "20px" }} />
+            <SkeletonRect width="100%" height="48px" style={{ marginBottom: "24px" }} />
+            <SkeletonRect width="100%" height="48px" />
+          </section>
+          <section className="mypage-section">
+            <SkeletonLine width="200px" height="24px" style={{ marginBottom: "24px" }} />
+            <SkeletonRect width="100%" height="400px" />
+          </section>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page-container">

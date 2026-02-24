@@ -1,13 +1,14 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { supabase } from "../supabaseClient";
 import dayjs from "dayjs";
 import { Highlight } from "../utils/Highlight";
 import { useNavigate } from "react-router-dom";
 import { showAlert } from "../utils/Alert";
+import { SkeletonLine } from "../components/Skeleton";
 
 function UserList() {
   const navigate = useNavigate();
-  const loginUser = JSON.parse(localStorage.getItem("loginUser"));
+  const loginUser = useMemo(() => JSON.parse(localStorage.getItem("loginUser")), []);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -114,11 +115,22 @@ function UserList() {
           </thead>
           <tbody>
             {loading ? (
-              <tr>
-                <td colSpan="4" style={{ textAlign: "center", padding: "40px" }}>
-                  로딩 중...
-                </td>
-              </tr>
+              Array.from({ length: 5 }).map((_, index) => (
+                <tr key={`skeleton-${index}`}>
+                  <td>
+                    <SkeletonLine height="20px" width="30px" />
+                  </td>
+                  <td>
+                    <SkeletonLine height="20px" width="120px" />
+                  </td>
+                  <td>
+                    <SkeletonLine height="20px" width="80px" />
+                  </td>
+                  <td>
+                    <SkeletonLine height="20px" width="120px" />
+                  </td>
+                </tr>
+              ))
             ) : users.length > 0 ? (
               users.map((user) => (
                 <tr key={user.seq}>

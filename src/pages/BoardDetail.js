@@ -7,6 +7,7 @@ import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { showAlert } from "../utils/Alert";
+import { SkeletonLine, SkeletonRect } from "../components/Skeleton";
 
 function BoardDetail() {
   const { seq } = useParams();
@@ -92,7 +93,23 @@ function BoardDetail() {
     if (!error) fetchComments();
   }
 
-  if (!post) return <div style={{ padding: "40px", textAlign: "center" }}>로딩 중...</div>;
+  if (!post) {
+    return (
+      <div className="detail-container">
+        <div className="detail-header">
+          <SkeletonLine width="100px" height="16px" style={{ marginBottom: "8px" }} />
+          <SkeletonLine width="60%" height="40px" style={{ marginBottom: "12px" }} />
+          <div className="detail-meta">
+            <SkeletonLine width="200px" height="20px" />
+            <SkeletonLine width="50px" height="20px" />
+          </div>
+        </div>
+        <div className="detail-body">
+          <SkeletonRect width="100%" height="200px" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="detail-container">

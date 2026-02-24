@@ -17,6 +17,14 @@ function Join() {
       return;
     }
 
+    const hasEnglish = /[a-zA-Z]/.test(userId);
+    const isOnlyEngNum = /^[a-zA-Z0-9]+$/.test(userId);
+
+    if (!hasEnglish || !isOnlyEngNum) {
+      showAlert("아이디는 영문이 포함되어야 하고 숫자만 함께 쓸 수 있어. (한글, 특수문자 불가)");
+      return;
+    }
+
     let profileUrl = "";
 
     if (profileFile) {

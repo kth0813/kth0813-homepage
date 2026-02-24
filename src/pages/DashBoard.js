@@ -4,10 +4,12 @@ import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 import PostChart from "../components/PostChart";
 import UserChart from "../components/UserChart";
+import { SkeletonLine } from "../components/Skeleton";
 
 function DashBoard() {
   const [stats, setStats] = useState({ userCount: 0, boardCount: 0 });
   const [recentPosts, setRecentPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const loginUser = JSON.parse(localStorage.getItem("loginUser"));
 
   useEffect(() => {
@@ -15,6 +17,7 @@ function DashBoard() {
   }, []);
 
   async function fetchDashboardData() {
+    setLoading(true);
     const { count: uCount } = await supabase.from("user").select("*", { count: "exact", head: true }).eq("del_yn", "N");
     const { count: bCount } = await supabase.from("board").select("*", { count: "exact", head: true }).eq("del_yn", "N");
 
@@ -23,6 +26,7 @@ function DashBoard() {
     const { data: posts } = await supabase.from("board").select(`seq, title, cre_date, user:user_seq ( name )`).eq("del_yn", "N").order("seq", { ascending: false }).limit(5);
 
     setRecentPosts(posts || []);
+    setLoading(false);
   }
 
   return (
@@ -35,11 +39,11 @@ function DashBoard() {
       <div className="stat-cards">
         <div className="stat-card">
           <h4>총 회원 수</h4>
-          <p className="stat-value">{stats.userCount} 명</p>
+          {loading ? <SkeletonLine width="60px" height="38px" style={{ marginTop: "4px" }} /> : <p className="stat-value">{stats.userCount} 명</p>}
         </div>
         <div className="stat-card">
           <h4>전체 게시글</h4>
-          <p className="stat-value">{stats.boardCount} 개</p>
+          {loading ? <SkeletonLine width="60px" height="38px" style={{ marginTop: "4px" }} /> : <p className="stat-value">{stats.boardCount} 개</p>}
         </div>
       </div>
       <div style={{ display: "flex", gap: "24px", marginBottom: "32px" }}>
@@ -69,17 +73,31 @@ function DashBoard() {
               </tr>
             </thead>
             <tbody>
-              {recentPosts.map((post) => (
-                <tr key={post.seq}>
-                  <td>
-                    <Link to={`/board/${post.seq}`} className="text-link" style={{ color: "var(--text-main)" }}>
-                      {post.title}
-                    </Link>
-                  </td>
-                  <td>{post.user?.name}</td>
-                  <td>{dayjs(post.cre_date).format("YYYY.MM.DD HH:mm")}</td>
-                </tr>
-              ))}
+              {loading
+                ? Array.from({ length: 5 }).map((_, index) => (
+                    <tr key={`skeleton-${index}`}>
+                      <td>
+                        <SkeletonLine height="20px" width="80%" />
+                      </td>
+                      <td>
+                        <SkeletonLine height="20px" width="60px" />
+                      </td>
+                      <td>
+                        <SkeletonLine height="20px" width="100px" />
+                      </td>
+                    </tr>
+                  ))
+                : recentPosts.map((post) => (
+                    <tr key={post.seq}>
+                      <td>
+                        <Link to={`/board/${post.seq}`} className="text-link" style={{ color: "var(--text-main)" }}>
+                          {post.title}
+                        </Link>
+                      </td>
+                      <td>{post.user?.name}</td>
+                      <td>{dayjs(post.cre_date).format("YYYY.MM.DD HH:mm")}</td>
+                    </tr>
+                  ))}
             </tbody>
           </table>
         </div>

@@ -127,6 +127,12 @@ ul {
   color: var(--primary-color);
 }
 
+.nav-link.active {
+  background-color: #e2e8f0;
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
 .nav-group {
   display: flex;
   flex-direction: column;
@@ -301,6 +307,18 @@ ul {
   font-size: 24px;
   color: var(--header-bg);
   font-weight: 700;
+}
+
+.page-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.page-description {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 0px;
 }
 
 .filter-bar {
@@ -765,4 +783,30 @@ ul {
   align-items: center;
   justify-content: center;
   border: 2px solid var(--border-color);
+}
+
+/* ================== Skeleton UI ================== */
+@keyframes skeleton-loading {
+  0% {
+    background-color: hsl(200, 20%, 80%);
+  }
+  100% {
+    background-color: hsl(200, 20%, 95%);
+  }
+}
+
+.skeleton {
+  animation: skeleton-loading 1s linear infinite alternate;
+}
+
+.skeleton-line {
+  border-radius: 4px;
+}
+
+.skeleton-circle {
+  border-radius: 50%;
+}
+
+.skeleton-rect {
+  border-radius: var(--radius-md);
 }

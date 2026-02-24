@@ -1,8 +1,17 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 function TopMenu() {
   const navigate = useNavigate();
   const loginUser = JSON.parse(localStorage.getItem("loginUser"));
+  const [globalSearchKeyword, setGlobalSearchKeyword] = useState("");
+
+  const handleGlobalSearch = (e) => {
+    e.preventDefault();
+    if (!globalSearchKeyword.trim()) return;
+    navigate(`/board?globalKeyword=${encodeURIComponent(globalSearchKeyword)}`);
+    setGlobalSearchKeyword(""); // 검색 후 초기화
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("loginUser");
@@ -12,7 +21,25 @@ function TopMenu() {
 
   return (
     <header className="app-header">
-      <h2 onClick={() => navigate("/")}>KTH homepage</h2>
+      <h2 onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
+        KTH homepage
+      </h2>
+
+      {/* 전역 검색창 추가 */}
+      <form onSubmit={handleGlobalSearch} style={{ display: "flex", gap: "8px", margin: "0 auto", alignItems: "center" }}>
+        <input
+          type="text"
+          placeholder="전체 게시글 검색..."
+          value={globalSearchKeyword}
+          onChange={(e) => setGlobalSearchKeyword(e.target.value)}
+          className="input-field"
+          style={{ width: "250px", padding: "8px 12px", borderRadius: "20px" }}
+        />
+        <button type="submit" className="btn-secondary" style={{ padding: "8px 16px", borderRadius: "20px" }}>
+          검색
+        </button>
+      </form>
+
       <div className="header-right">
         {loginUser ? (
           <>

@@ -16,6 +16,25 @@ function BoardWrite() {
   const category_seq = searchParams.get("category");
 
   const loginUser = JSON.parse(localStorage.getItem("loginUser"));
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(category_seq ? Number(category_seq) : 1);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      let query = supabase.from("category").select("*").order("seq", { ascending: true });
+      if (loginUser?.admin_yn !== "Y") {
+        query = query.eq("seq", 1);
+      }
+      const { data } = await query;
+      if (data) {
+        setCategories(data);
+        if (!selectedCategory && data.length > 0) {
+          setSelectedCategory(data[0].seq);
+        }
+      }
+    };
+    fetchCategories();
+  }, [loginUser?.admin_yn, selectedCategory]);
 
   useEffect(() => {
     if (seq) {
@@ -24,6 +43,7 @@ function BoardWrite() {
         if (data && !error) {
           setTitle(data.title);
           setContents(data.contents);
+          if (data.category_seq) setSelectedCategory(data.category_seq);
         } else {
           showAlert("게시글 정보를 불러올 수 없어.");
           navigate(-1);
@@ -44,7 +64,8 @@ function BoardWrite() {
         .from("board")
         .update({
           title,
-          contents
+          contents,
+          category_seq: selectedCategory
         })
         .eq("seq", seq);
 
@@ -61,17 +82,13 @@ function BoardWrite() {
         showAlert("수정 실패: " + error.message);
       }
     } else {
-      const insertData = { title, contents, user_seq: loginUser.seq, del_yn: "N" };
-
-      if (category_seq) {
-        insertData.category_seq = category_seq;
-      }
+      const insertData = { title, contents, user_seq: loginUser.seq, del_yn: "N", category_seq: selectedCategory };
 
       const { error } = await supabase.from("board").insert([insertData]);
 
       if (!error) {
         showAlert("등록 완료!");
-        navigate(category_seq ? `/board?category=${category_seq}` : "/board");
+        navigate(selectedCategory ? `/board?category=${selectedCategory}` : "/board");
       } else {
         showAlert("등록 실패: " + error.message);
       }
@@ -95,14 +112,18 @@ function BoardWrite() {
         </div>
       </div>
 
-      <input
-        type="text"
-        placeholder="제목을 입력하세요"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        className="input-field"
-        style={{ fontSize: "20px", padding: "16px", marginBottom: "24px" }}
-      />
+      <div style={{ display: "flex", gap: "12px", marginBottom: "24px" }}>
+        {loginUser?.admin_yn === "Y" && (
+          <select className="select-field" value={selectedCategory} onChange={(e) => setSelectedCategory(Number(e.target.value))} style={{ width: "200px" }}>
+            {categories.map((cat) => (
+              <option key={cat.seq} value={cat.seq}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        )}
+        <input type="text" placeholder="제목을 입력하세요" value={title} onChange={(e) => setTitle(e.target.value)} className="input-field" style={{ fontSize: "20px", padding: "16px", flex: 1 }} />
+      </div>
 
       <div
         className="editor-container"

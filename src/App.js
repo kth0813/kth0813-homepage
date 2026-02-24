@@ -8,6 +8,8 @@ import BoardList from "./pages/BoardList";
 import BoardDetail from "./pages/BoardDetail";
 import BoardWrite from "./pages/BoardWrite";
 import MyPage from "./pages/MyPage";
+import NotFound from "./pages/NotFound";
+import MenuManage from "./pages/MenuManage";
 import "./css/App.css";
 
 function App() {
@@ -24,6 +26,8 @@ function App() {
           <Route path="/board/:seq" element={<BoardDetail />} />
           <Route path="/board/write" element={<BoardWrite />} />
           <Route path="/board/edit/:seq" element={<BoardWrite />} />
+          <Route path="/menus" element={<MenuManage />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>
     </Router>

@@ -1,14 +1,21 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 
 function LeftMenu() {
   const [categories, setCategories] = useState([]);
   const loginUser = JSON.parse(localStorage.getItem("loginUser"));
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const currentCategory = searchParams.get("category");
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const { data, error } = await supabase.from("category").select("seq, name").eq("del_yn", "N").order("seq", { ascending: true });
+      let query = supabase.from("category").select("seq, name, show_yn").eq("del_yn", "N");
+      if (loginUser?.admin_yn !== "Y") {
+        query = query.eq("show_yn", "Y");
+      }
+      const { data, error } = await query.order("order", { ascending: true, nullsFirst: false }).order("seq", { ascending: true });
 
       if (!error) {
         setCategories(data);
@@ -17,17 +24,17 @@ function LeftMenu() {
       }
     };
     fetchCategories();
-  }, []);
+  }, [loginUser?.admin_yn]);
 
   return (
     <nav className="app-nav">
-      <Link to="/" className="nav-link">
+      <Link to="/" className={`nav-link ${location.pathname === "/" ? "active" : ""}`}>
         📊 대시보드
       </Link>
       {categories.length > 0 ? (
         categories.map((cat) => (
-          <Link key={cat.seq} to={`/board?category=${cat.seq}`} className="nav-link">
-            📝 {cat.name}
+          <Link key={cat.seq} to={`/board?category=${cat.seq}`} className={`nav-link ${location.pathname === "/board" && currentCategory === String(cat.seq) ? "active" : ""}`}>
+            📝 {cat.show_yn === "N" ? `[비공개] ${cat.name}` : cat.name}
           </Link>
         ))
       ) : (
@@ -38,8 +45,11 @@ function LeftMenu() {
       {loginUser?.admin_yn === "Y" && (
         <div className="nav-group">
           <div className="nav-group-title">🛡️ 관리자 메뉴</div>
-          <Link to="/users" className="nav-link sub-link">
+          <Link to="/users" className={`nav-link sub-link ${location.pathname === "/users" ? "active" : ""}`}>
             👥 사용자 목록
+          </Link>
+          <Link to="/menus" className={`nav-link sub-link ${location.pathname === "/menus" ? "active" : ""}`}>
+            ⚙️ 메뉴 관리
           </Link>
         </div>
       )}
