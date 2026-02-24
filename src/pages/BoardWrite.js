@@ -1,20 +1,37 @@
-import { useState } from "react";
-import { supabase } from "./supabaseClient";
-import { useNavigate } from "react-router-dom";
-
-// 상세페이지에서 썼던 마크다운 컴포넌트들 동일하게 사용
+import { useState, useEffect } from "react";
+import { supabase } from "../supabaseClient";
+import { useNavigate, useSearchParams, useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { showAlert } from "./Alert";
+import { showAlert } from "../utils/Alert";
 
 function BoardWrite() {
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [contents, setContents] = useState("");
-  const [viewMode, setViewMode] = useState("split"); // split, write, preview
+  const [viewMode, setViewMode] = useState("split");
+  const { seq } = useParams();
+  const [searchParams] = useSearchParams();
+  const category_seq = searchParams.get("category");
 
   const loginUser = JSON.parse(localStorage.getItem("loginUser"));
+
+  useEffect(() => {
+    if (seq) {
+      const fetchPost = async () => {
+        const { data, error } = await supabase.from("board").select("*").eq("seq", seq).single();
+        if (data && !error) {
+          setTitle(data.title);
+          setContents(data.contents);
+        } else {
+          showAlert("게시글 정보를 불러올 수 없어.");
+          navigate(-1);
+        }
+      };
+      fetchPost();
+    }
+  }, [seq, navigate]);
 
   const handleSave = async () => {
     if (!title.trim() || !contents.trim()) {
@@ -22,27 +39,49 @@ function BoardWrite() {
       return;
     }
 
-    const { error } = await supabase.from("board").insert([
-      {
-        title,
-        contents,
-        user_seq: loginUser.seq,
-        del_yn: "N"
-      }
-    ]);
+    if (seq) {
+      let query = supabase
+        .from("board")
+        .update({
+          title,
+          contents
+        })
+        .eq("seq", seq);
 
-    if (!error) {
-      showAlert("등록 완료!");
-      navigate("/board");
+      if (loginUser.admin_yn !== "Y") {
+        query = query.eq("user_seq", loginUser.seq);
+      }
+
+      const { error } = await query;
+
+      if (!error) {
+        showAlert("수정 완료!");
+        navigate(`/board/${seq}`);
+      } else {
+        showAlert("수정 실패: " + error.message);
+      }
     } else {
-      showAlert("등록 실패: " + error.message);
+      const insertData = { title, contents, user_seq: loginUser.seq, del_yn: "N" };
+
+      if (category_seq) {
+        insertData.category_seq = category_seq;
+      }
+
+      const { error } = await supabase.from("board").insert([insertData]);
+
+      if (!error) {
+        showAlert("등록 완료!");
+        navigate(category_seq ? `/board?category=${category_seq}` : "/board");
+      } else {
+        showAlert("등록 실패: " + error.message);
+      }
     }
   };
 
   return (
     <div className="page-container" style={{ maxWidth: "1200px" }}>
       <div className="editor-top-bar">
-        <h2 className="page-title">📝 새 글 작성</h2>
+        <h2 className="page-title">{seq ? "📝 게시글 수정" : "📝 새 글 작성"}</h2>
         <div className="editor-tabs">
           <button onClick={() => setViewMode("write")} className={`tab-btn ${viewMode === "write" ? "active" : ""}`}>
             Write
@@ -71,7 +110,6 @@ function BoardWrite() {
           flexDirection: viewMode === "write" ? "column" : viewMode === "preview" ? "column" : "row"
         }}
       >
-        {/* 입력창 (Write) */}
         {(viewMode === "write" || viewMode === "split") && (
           <textarea
             placeholder="마크다운 문법으로 내용을 입력하세요... (예: # 제목, **강조**, ```js 코드)"
@@ -82,7 +120,6 @@ function BoardWrite() {
           />
         )}
 
-        {/* 미리보기창 (Preview) */}
         {(viewMode === "preview" || viewMode === "split") && (
           <div className="editor-preview" style={{ flex: viewMode === "split" ? 1 : "none", height: viewMode === "preview" ? "100%" : "auto" }}>
             <ReactMarkdown
@@ -105,11 +142,11 @@ function BoardWrite() {
       </div>
 
       <div className="action-bar" style={{ justifyContent: "flex-end" }}>
-        <button onClick={() => navigate("/board")} className="btn-outline">
+        <button onClick={() => navigate(seq ? `/board/${seq}` : category_seq ? `/board?category=${category_seq}` : "/board")} className="btn-outline">
           취소
         </button>
         <button onClick={handleSave} className="btn-primary" style={{ width: "auto", padding: "10px 30px" }}>
-          등록하기
+          {seq ? "수정하기" : "등록하기"}
         </button>
       </div>
     </div>

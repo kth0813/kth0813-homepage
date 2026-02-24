@@ -1,30 +1,34 @@
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "./supabaseClient";
+import { supabase } from "../supabaseClient";
+import dayjs from "dayjs";
+import { Highlight } from "../utils/Highlight";
+import { useNavigate } from "react-router-dom";
+import { showAlert } from "../utils/Alert";
 
 function UserList() {
+  const navigate = useNavigate();
+  const loginUser = JSON.parse(localStorage.getItem("loginUser"));
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 페이징 및 검색 상태 관리
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [searchType, setSearchType] = useState("id"); // id 또는 name
+  const [searchType, setSearchType] = useState("id");
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [activeSearchType, setActiveSearchType] = useState("id");
+  const [activeSearchKeyword, setActiveSearchKeyword] = useState("");
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
 
-    // 1. 페이징 인덱스 계산 (0부터 시작)
     const from = (currentPage - 1) * pageSize;
     const to = from + pageSize - 1;
 
-    // 2. 쿼리 생성 (전체 카운트를 위해 count: 'exact' 설정)
     let query = supabase.from("user").select("seq, id, name, cre_date", { count: "exact" }).eq("del_yn", "N").order("seq", { ascending: false }).range(from, to);
 
-    // 검색 조건 추가
-    if (searchKeyword.trim()) {
-      query = query.ilike(searchType, `%${searchKeyword}%`);
+    if (activeSearchKeyword.trim()) {
+      query = query.ilike(activeSearchType, `%${activeSearchKeyword}%`);
     }
 
     const { data, error, count } = await query;
@@ -34,36 +38,51 @@ function UserList() {
       setTotalCount(count || 0);
     }
     setLoading(false);
-  }, [currentPage, pageSize, searchKeyword, searchType]);
+  }, [currentPage, pageSize, activeSearchType, activeSearchKeyword]);
 
   useEffect(() => {
+    if (!loginUser || loginUser.admin_yn !== "Y") {
+      showAlert("관리자만 접근할 수 있는 페이지야.");
+      navigate("/");
+      return;
+    }
     fetchUsers();
-  }, [fetchUsers, currentPage, pageSize]); // 페이지 번호나 출력 개수가 바뀌면 다시 호출
+  }, [fetchUsers, currentPage, pageSize, loginUser?.admin_yn, navigate]);
 
-  // 검색 버튼 클릭 시 (항상 1페이지로 리셋)
   const handleSearch = (e) => {
     e.preventDefault();
+    setActiveSearchType(searchType);
+    setActiveSearchKeyword(searchKeyword);
     setCurrentPage(1);
-    fetchUsers();
   };
 
-  // 전체 페이지 수 계산
   const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
     <div className="page-container">
       <div className="page-header">
-        <h2 className="page-title">👥 유저 관리 목록</h2>
+        <h2 className="page-title">👥 사용자 목록</h2>
       </div>
 
-      {/* 상단 검색 및 필터 바 */}
       <div className="filter-bar">
         <form onSubmit={handleSearch} className="filter-group">
           <select value={searchType} onChange={(e) => setSearchType(e.target.value)} className="select-field">
             <option value="id">아이디</option>
             <option value="name">이름</option>
           </select>
-          <input type="text" placeholder="검색어 입력" value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)} className="input-field" style={{ width: "200px" }} />
+          <input
+            type="text"
+            placeholder="검색어 입력"
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+            className="input-field"
+            style={{ width: "200px" }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSearch(e);
+              }
+            }}
+          />
           <button type="submit" className="btn-secondary">
             검색
           </button>
@@ -83,15 +102,14 @@ function UserList() {
         </select>
       </div>
 
-      {/* 유저 테이블 리스트 */}
       <div className="table-wrapper">
         <table className="data-table">
           <thead>
             <tr>
-              <th>Seq</th>
-              <th>아이디</th>
-              <th>이름</th>
-              <th>가입일</th>
+              <th style={{ width: "15%" }}>번호</th>
+              <th style={{ width: "40%" }}>아이디</th>
+              <th style={{ width: "30%" }}>이름</th>
+              <th style={{ width: "15%" }}>가입일</th>
             </tr>
           </thead>
           <tbody>
@@ -105,11 +123,9 @@ function UserList() {
               users.map((user) => (
                 <tr key={user.seq}>
                   <td>{user.seq}</td>
-                  <td className="text-link" style={{ cursor: "pointer" }}>
-                    {user.id}
-                  </td>
-                  <td>{user.name}</td>
-                  <td style={{ color: "var(--text-muted)", fontSize: "14px" }}>{new Date(user.cre_date).toLocaleString()}</td>
+                  <td>{Highlight(user.id, activeSearchKeyword)}</td>
+                  <td>{Highlight(user.name, activeSearchKeyword)}</td>
+                  <td style={{ color: "var(--text-muted)", fontSize: "14px" }}>{dayjs(user.cre_date).format("YYYY.MM.DD HH:mm")}</td>
                 </tr>
               ))
             ) : (
@@ -123,7 +139,6 @@ function UserList() {
         </table>
       </div>
 
-      {/* 하단 페이지네이션 번호 */}
       {totalPages > 0 && (
         <div className="pagination">
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (

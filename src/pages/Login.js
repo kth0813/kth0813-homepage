@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { supabase } from "./supabaseClient";
+import { useState, useRef } from "react";
+import { supabase } from "../supabaseClient";
 import bcrypt from "bcryptjs";
 import { useNavigate } from "react-router-dom";
-import { showAlert } from "./Alert";
+import { showAlert } from "../utils/Alert";
 
 function Login() {
   const navigate = useNavigate();
@@ -14,7 +14,8 @@ function Login() {
       const { data: user, error } = await supabase.from("user").select("*").eq("id", userId).single();
 
       if (error || !user) {
-        showAlert("아이디를 확인해줘.");
+        if (error) showAlert(JSON.stringify(error));
+        else showAlert("아이디를 확인해줘.");
         return;
       }
 
@@ -30,7 +31,8 @@ function Login() {
           seq: user.seq,
           id: user.id,
           name: user.name,
-          profile_url: user.profile_url
+          profile_url: user.profile_url,
+          admin_yn: user.admin_yn
         };
 
         localStorage.setItem("loginUser", JSON.stringify(loginUser));
@@ -45,13 +47,27 @@ function Login() {
     }
   };
 
+  const pwdInputRef = useRef(null);
+
+  const handleIdKeyDown = (e) => {
+    if (e.key === "Enter") {
+      pwdInputRef.current?.focus();
+    }
+  };
+
+  const handlePwdKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleLogin();
+    }
+  };
+
   return (
     <div className="auth-container">
       <div className="auth-box">
         <h2>로그인</h2>
         <div className="auth-form">
-          <input className="input-field" placeholder="아이디" onChange={(e) => setUserId(e.target.value)} />
-          <input className="input-field" type="password" placeholder="비밀번호" onChange={(e) => setUserPwd(e.target.value)} />
+          <input className="input-field" placeholder="아이디" onChange={(e) => setUserId(e.target.value)} onKeyDown={handleIdKeyDown} />
+          <input className="input-field" type="password" placeholder="비밀번호" onChange={(e) => setUserPwd(e.target.value)} onKeyDown={handlePwdKeyDown} ref={pwdInputRef} />
           <button className="btn-primary" onClick={handleLogin}>
             로그인
           </button>

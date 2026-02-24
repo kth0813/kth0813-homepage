@@ -1,17 +1,17 @@
 import { useState } from "react";
-import { supabase } from "./supabaseClient";
+import { supabase } from "../supabaseClient";
 import bcrypt from "bcryptjs";
 import { useNavigate } from "react-router-dom";
-import { showAlert } from "./Alert";
+import { showAlert } from "../utils/Alert";
 
-function SignIn() {
+function Join() {
   const navigate = useNavigate();
   const [userId, setUserId] = useState("");
   const [userPwd, setUserPwd] = useState("");
   const [userName, setUserName] = useState("");
   const [profileFile, setProfileFile] = useState(null);
 
-  const handleSignIn = async () => {
+  const handleJoin = async () => {
     if (!userId || !userPwd || !userName) {
       showAlert("모든 정보를 입력해줘.");
       return;
@@ -29,7 +29,6 @@ function SignIn() {
       const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
       const filePath = `${fileName}`;
 
-      // Storage 업로드
       const { error: uploadError } = await supabase.storage.from("profiles").upload(filePath, profileFile);
 
       if (uploadError) {
@@ -79,7 +78,7 @@ function SignIn() {
             <input type="file" accept="image/*" onChange={(e) => setProfileFile(e.target.files[0])} style={{ marginTop: "5px", fontSize: "12px" }} />
           </div>
 
-          <button className="btn-primary" style={{ marginTop: "20px" }} onClick={handleSignIn}>
+          <button className="btn-primary" style={{ marginTop: "20px" }} onClick={handleJoin}>
             가입하기
           </button>
         </div>
@@ -88,4 +87,4 @@ function SignIn() {
   );
 }
 
-export default SignIn;
+export default Join;

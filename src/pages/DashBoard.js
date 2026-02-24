@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
-import { supabase } from "./supabaseClient";
+import { supabase } from "../supabaseClient";
 import { Link } from "react-router-dom";
+import dayjs from "dayjs";
+import PostChart from "../components/PostChart";
+import UserChart from "../components/UserChart";
 
-function Main() {
+function DashBoard() {
   const [stats, setStats] = useState({ userCount: 0, boardCount: 0 });
   const [recentPosts, setRecentPosts] = useState([]);
   const loginUser = JSON.parse(localStorage.getItem("loginUser"));
@@ -26,7 +29,7 @@ function Main() {
     <div className="page-container">
       <section className="dashboard-welcome">
         <h2>{loginUser ? `${loginUser.name}님, 어서오세요!` : "방문해주셔서 감사합니다!"}</h2>
-        <p>오늘도 즐거운 코딩 되세요. 현재 우리 서비스의 현황입니다.</p>
+        <p>오늘도 즐거운 하루 되세요.</p>
       </section>
 
       <div className="stat-cards">
@@ -39,16 +42,32 @@ function Main() {
           <p className="stat-value">{stats.boardCount} 개</p>
         </div>
       </div>
-
+      <div style={{ display: "flex", gap: "24px", marginBottom: "32px" }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <UserChart />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <PostChart />
+        </div>
+      </div>
       <section style={{ marginTop: "32px" }}>
         <div className="page-header" style={{ marginBottom: "16px" }}>
-          <h3 className="page-title" style={{ fontSize: "20px" }}>최근 올라온 글</h3>
+          <h3 className="page-title" style={{ fontSize: "20px" }}>
+            최근 올라온 글
+          </h3>
           <Link to="/board" className="text-link" style={{ fontSize: "14px" }}>
             더보기
           </Link>
         </div>
         <div className="table-wrapper">
           <table className="data-table">
+            <thead>
+              <tr>
+                <th style={{ width: "55%" }}>제목</th>
+                <th style={{ width: "30%" }}>작성자</th>
+                <th style={{ width: "15%" }}>작성일</th>
+              </tr>
+            </thead>
             <tbody>
               {recentPosts.map((post) => (
                 <tr key={post.seq}>
@@ -57,8 +76,8 @@ function Main() {
                       {post.title}
                     </Link>
                   </td>
-                  <td style={{ width: "100px", textAlign: "right", color: "var(--text-muted)" }}>{post.user?.name}</td>
-                  <td style={{ width: "120px", textAlign: "right", color: "var(--text-muted)", fontSize: "14px" }}>{new Date(post.cre_date).toLocaleDateString()}</td>
+                  <td>{post.user?.name}</td>
+                  <td>{dayjs(post.cre_date).format("YYYY.MM.DD HH:mm")}</td>
                 </tr>
               ))}
             </tbody>
@@ -69,4 +88,4 @@ function Main() {
   );
 }
 
-export default Main;
+export default DashBoard;

@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "./supabaseClient";
+import { supabase } from "../supabaseClient";
 import { useNavigate, Link } from "react-router-dom";
-import { showAlert } from "./Alert";
+import { showAlert } from "../utils/Alert";
+import dayjs from "dayjs";
 
 function MyPage() {
   const navigate = useNavigate();
-  const [userInfo, setUserInfo] = useState({ id: "", name: "", profile_url: "" }); // pwd 제거
-  const [passwords, setPasswords] = useState({ newPwd: "", confirmPwd: "" }); // 새 비번용
+  const [userInfo, setUserInfo] = useState({ id: "", name: "", profile_url: "" });
+  const [passwords, setPasswords] = useState({ newPwd: "", confirmPwd: "" });
   const [myPosts, setMyPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newProfileFile, setNewProfileFile] = useState(null);
@@ -29,7 +30,7 @@ function MyPage() {
       return;
     }
     fetchData();
-  }, [loginUser, navigate, fetchData]);
+  }, [loginUser?.seq, navigate, fetchData]);
 
   const handleUpdate = async () => {
     if (!userInfo.name) {
@@ -178,7 +179,7 @@ function MyPage() {
                           {post.title}
                         </Link>
                       </td>
-                      <td style={{ color: "var(--text-muted)", fontSize: "14px" }}>{new Date(post.cre_date).toLocaleDateString()}</td>
+                      <td style={{ color: "var(--text-muted)", fontSize: "14px" }}>{dayjs(post.cre_date).format("YYYY.MM.DD")}</td>
                       <td style={{ color: "var(--text-muted)" }}>{post.hit || 0}</td>
                     </tr>
                   ))

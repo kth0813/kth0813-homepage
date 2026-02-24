@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { supabase } from "./supabaseClient";
+import { supabase } from "../supabaseClient";
+import dayjs from "dayjs";
 
-// 마크다운 및 코드 하이라이팅 관련 임포트
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { showAlert } from "./Alert";
+import { showAlert } from "../utils/Alert";
 
 function BoardDetail() {
   const { seq } = useParams();
@@ -14,6 +14,7 @@ function BoardDetail() {
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
+  const [categoryName, setCategoryName] = useState("전체 게시판");
 
   const loginUser = JSON.parse(localStorage.getItem("loginUser"));
 
@@ -25,11 +26,15 @@ function BoardDetail() {
       navigate("/board");
     } else {
       setPost(data);
+      if (data.category_seq) {
+        const { data: catData } = await supabase.from("category").select("name").eq("seq", data.category_seq).single();
+        if (catData) setCategoryName(catData.name);
+      }
     }
   }, [seq, navigate]);
 
   const fetchComments = useCallback(async () => {
-    const { data, error } = await supabase.from("board_comment").select(`*, user:user_seq ( name )`).eq("board_seq", seq).order("seq", { ascending: true });
+    const { data, error } = await supabase.from("board_comment").select(`*, user:user_seq ( name, profile_url )`).eq("board_seq", seq).order("seq", { ascending: true });
 
     if (!error) setComments(data);
   }, [seq]);
@@ -47,7 +52,12 @@ function BoardDetail() {
 
   const handlePostDelete = async () => {
     if (!window.confirm("정말 이 게시글을 삭제할 거야?")) return;
-    const { error } = await supabase.from("board").update({ del_yn: "Y" }).eq("seq", seq).eq("user_seq", loginUser.seq);
+
+    let query = supabase.from("board").update({ del_yn: "Y" }).eq("seq", seq);
+    if (loginUser.admin_yn !== "Y") {
+      query = query.eq("user_seq", loginUser.seq);
+    }
+    const { error } = await query;
 
     if (!error) {
       navigate("/board");
@@ -72,7 +82,12 @@ function BoardDetail() {
 
   async function handleCommentDelete(cSeq) {
     if (!window.confirm("댓글을 삭제할래?")) return;
-    const { error } = await supabase.from("board_comment").update({ del_yn: "Y" }).eq("seq", cSeq);
+
+    let query = supabase.from("board_comment").update({ del_yn: "Y" }).eq("seq", cSeq);
+    if (loginUser.admin_yn !== "Y") {
+      query = query.eq("user_seq", loginUser.seq);
+    }
+    const { error } = await query;
 
     if (!error) fetchComments();
   }
@@ -81,18 +96,17 @@ function BoardDetail() {
 
   return (
     <div className="detail-container">
-      {/* 게시글 헤더 */}
       <div className="detail-header">
+        <div style={{ color: "var(--primary-color)", fontSize: "14px", fontWeight: "bold", marginBottom: "8px" }}>[{categoryName}]</div>
         <h2 className="detail-title">{post.title}</h2>
         <div className="detail-meta">
           <span>
-            작성자: <strong>{post.user?.name}</strong> | 작성일: {new Date(post.cre_date).toLocaleString()}
+            작성자: <strong>{post.user?.name}</strong> | 작성일: {dayjs(post.cre_date).format("YYYY.MM.DD HH:mm")}
           </span>
           <span>👁️ {post.hit}</span>
         </div>
       </div>
 
-      {/* 마크다운 본문 영역 */}
       <div className="detail-body">
         <ReactMarkdown
           children={post.contents}
@@ -111,12 +125,11 @@ function BoardDetail() {
         />
       </div>
 
-      {/* 제어 버튼 */}
       <div className="action-bar">
-        <button onClick={() => navigate("/board")} className="btn-outline">
+        <button onClick={() => navigate(post.category_seq ? `/board?category=${post.category_seq}` : "/board")} className="btn-outline">
           목록으로
         </button>
-        {loginUser && loginUser.seq === post.user_seq && (
+        {loginUser && (loginUser.seq === post.user_seq || loginUser.admin_yn === "Y") && (
           <div className="action-bar-right">
             <button onClick={() => navigate(`/board/edit/${post.seq}`)} className="btn-outline">
               수정
@@ -128,7 +141,6 @@ function BoardDetail() {
         )}
       </div>
 
-      {/* 댓글 섹션 */}
       <section className="comment-section">
         <h4>💬 댓글 {comments.length}</h4>
         <div className="comment-list">
@@ -139,11 +151,12 @@ function BoardDetail() {
               ) : (
                 <>
                   <div className="comment-meta">
+                    {c.user?.profile_url ? <img src={c.user.profile_url} alt="프로필" className="comment-img" /> : <div className="comment-profile">👤</div>}
                     <strong className="comment-author">{c.user?.name}</strong>
-                    <span className="comment-date">{new Date(c.cre_date).toLocaleString()}</span>
+                    <span className="comment-date">{dayjs(c.cre_date).format("YYYY.MM.DD HH:mm")}</span>
                   </div>
                   <p className="comment-content">{c.contents}</p>
-                  {loginUser && loginUser.seq === c.user_seq && (
+                  {loginUser && (loginUser.seq === c.user_seq || loginUser.admin_yn === "Y") && (
                     <button onClick={() => handleCommentDelete(c.seq)} className="btn-text-danger">
                       삭제
                     </button>
