@@ -9,7 +9,6 @@ function Join() {
   const [userId, setUserId] = useState("");
   const [userPwd, setUserPwd] = useState("");
   const [userName, setUserName] = useState("");
-  const [profileFile, setProfileFile] = useState(null);
 
   const handleJoin = async () => {
     if (!userId || !userPwd || !userName) {
@@ -25,32 +24,6 @@ function Join() {
       return;
     }
 
-    let profileUrl = "";
-
-    if (profileFile) {
-      if (profileFile.size > 10 * 1024 * 1024) {
-        showAlert("파일 용량은 10MB를 초과할 수 없어.");
-        return;
-      }
-
-      const fileExt = profileFile.name.split(".").pop();
-      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      const { error: uploadError } = await supabase.storage.from("profiles").upload(filePath, profileFile);
-
-      if (uploadError) {
-        showAlert("이미지 업로드 실패: " + uploadError.message);
-        return;
-      }
-
-      const {
-        data: { publicUrl }
-      } = supabase.storage.from("profiles").getPublicUrl(filePath);
-
-      profileUrl = publicUrl;
-    }
-
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(userPwd, salt);
 
@@ -59,8 +32,7 @@ function Join() {
         id: userId,
         name: userName,
         pwd: hashedPassword,
-        pwd_version: 1,
-        profile_url: profileUrl
+        pwd_version: 1
       }
     ]);
 
@@ -80,11 +52,6 @@ function Join() {
           <input className="input-field" placeholder="아이디" onChange={(e) => setUserId(e.target.value)} />
           <input className="input-field" placeholder="이름" onChange={(e) => setUserName(e.target.value)} />
           <input className="input-field" type="password" placeholder="비밀번호" onChange={(e) => setUserPwd(e.target.value)} />
-
-          <div style={{ textAlign: "left", marginTop: "10px" }}>
-            <label style={{ fontSize: "13px", color: "#666" }}>프로필 사진 (이미지, 10MB 이하)</label>
-            <input type="file" accept="image/*" onChange={(e) => setProfileFile(e.target.files[0])} style={{ marginTop: "5px", fontSize: "12px" }} />
-          </div>
 
           <button className="btn-primary" style={{ marginTop: "20px" }} onClick={handleJoin}>
             가입하기
