@@ -98,21 +98,7 @@ function DashBoard() {
                         {post.user?.profile_url ? (
                           <img src={post.user?.profile_url} alt="프로필" className="comment-img" style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover" }} />
                         ) : (
-                          <div
-                            className="comment-profile"
-                            style={{
-                              width: "24px",
-                              height: "24px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              backgroundColor: "#f0f0f0",
-                              borderRadius: "50%",
-                              fontSize: "12px"
-                            }}
-                          >
-                            👤
-                          </div>
+                          <div className="mini-comment-profile">👤</div>
                         )}
                         {post.user?.name}
                       </td>

@@ -606,6 +606,16 @@ ul {
   border: 1px solid var(--border-color, #ddd);
 }
 
+.mini-comment-profile {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .comment-img {
   width: 28px;
   height: 28px;

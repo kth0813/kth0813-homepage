@@ -26,7 +26,7 @@ function Main() {
       const postPromises = cats.map(async (cat) => {
         const { data: posts } = await supabase
           .from("board")
-          .select(`seq, title, cre_date, user:user_seq ( name )`)
+          .select(`seq, title, cre_date, user:user_seq ( name, profile_url )`)
           .eq("category_seq", cat.seq)
           .eq("del_yn", "N")
           .order("seq", { ascending: false })
@@ -103,7 +103,19 @@ function Main() {
                                 {post.title}
                               </Link>
                             </td>
-                            <td style={{ color: "var(--text-muted)", textAlign: "center", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{post.user?.name}</td>
+                            <td
+                              style={{ display: "flex", alignItems: "center", gap: "6px", justifyContent: "center", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+                              title={post.user?.name}
+                            >
+                              {post.user?.profile_url ? (
+                                <img src={post.user?.profile_url} alt="프로필" style={{ width: "20px", height: "20px", borderRadius: "50%", objectFit: "cover" }} />
+                              ) : (
+                                <div className="mini-comment-profile" style={{ width: "20px", height: "20px" }}>
+                                  👤
+                                </div>
+                              )}
+                              <span style={{ color: "var(--text-muted)" }}>{post.user?.name}</span>
+                            </td>
                             <td style={{ color: "var(--text-muted)", textAlign: "right", whiteSpace: "nowrap" }}>{dayjs(post.cre_date).format("YYYY.MM.DD HH:mm")}</td>
                           </tr>
                         ))
