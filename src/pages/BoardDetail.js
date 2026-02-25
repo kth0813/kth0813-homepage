@@ -21,7 +21,7 @@ function BoardDetail() {
   const loginUser = JSON.parse(localStorage.getItem("loginUser"));
 
   const fetchPostDetail = useCallback(async () => {
-    const { data, error } = await supabase.from("board").select(`*, user:user_seq ( name )`).eq("seq", seq).eq("del_yn", "N").single();
+    const { data, error } = await supabase.from("board").select(`*, user:user_seq ( name, profile_url )`).eq("seq", seq).eq("del_yn", "N").single();
 
     if (error) {
       showAlert("존재하지 않거나 삭제된 게시글이야.");
@@ -140,8 +140,19 @@ function BoardDetail() {
         <div style={{ color: "var(--primary-color)", fontSize: "14px", fontWeight: "bold", marginBottom: "8px" }}>[{categoryName}]</div>
         <h2 className="detail-title">{post.title}</h2>
         <div className="detail-meta">
-          <span>
-            작성자: <strong>{post.user?.name}</strong> | 작성일: {dayjs(post.cre_date).format("YYYY.MM.DD HH:mm")}
+          <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            작성자:{" "}
+            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              {post.user?.profile_url ? (
+                <img src={post.user?.profile_url} alt="프로필" style={{ width: "20px", height: "20px", borderRadius: "50%", objectFit: "cover" }} />
+              ) : (
+                <div style={{ width: "20px", height: "20px", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#f0f0f0", borderRadius: "50%", fontSize: "10px" }}>
+                  👤
+                </div>
+              )}
+              <strong>{post.user?.name}</strong>
+            </span>{" "}
+            | 작성일: {dayjs(post.cre_date).format("YYYY.MM.DD HH:mm")}
           </span>
           <span>👁️ {post.hit}</span>
         </div>

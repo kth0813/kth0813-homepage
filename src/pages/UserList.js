@@ -26,7 +26,7 @@ function UserList() {
     const from = (currentPage - 1) * pageSize;
     const to = from + pageSize - 1;
 
-    let query = supabase.from("user").select("seq, id, name, cre_date", { count: "exact" }).eq("del_yn", "N").order("seq", { ascending: false }).range(from, to);
+    let query = supabase.from("user").select("seq, id, name, profile_url, cre_date", { count: "exact" }).eq("del_yn", "N").order("seq", { ascending: false }).range(from, to);
 
     if (activeSearchKeyword.trim()) {
       query = query.ilike(activeSearchType, `%${activeSearchKeyword}%`);
@@ -136,7 +136,19 @@ function UserList() {
                 <tr key={user.seq}>
                   <td>{user.seq}</td>
                   <td>{Highlight(user.id, activeSearchKeyword)}</td>
-                  <td>{Highlight(user.name, activeSearchKeyword)}</td>
+                  <td style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    {user.profile_url ? (
+                      <img src={user.profile_url} alt="프로필" className="comment-img" style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover" }} />
+                    ) : (
+                      <div
+                        className="comment-profile"
+                        style={{ width: "24px", height: "24px", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#f0f0f0", borderRadius: "50%", fontSize: "12px" }}
+                      >
+                        👤
+                      </div>
+                    )}
+                    {Highlight(user.name, activeSearchKeyword)}
+                  </td>
                   <td style={{ color: "var(--text-muted)", fontSize: "14px" }}>{dayjs(user.cre_date).format("YYYY.MM.DD HH:mm")}</td>
                 </tr>
               ))
