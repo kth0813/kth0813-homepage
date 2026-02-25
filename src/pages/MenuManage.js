@@ -10,9 +10,9 @@ function MenuManage() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [newMenu, setNewMenu] = useState({ name: "", description: "", order: 10, show_yn: "Y" });
+  const [newMenu, setNewMenu] = useState({ name: "", description: "", order: 2, show_yn: "Y" });
   const [editingSeq, setEditingSeq] = useState(null);
-  const [editMenu, setEditMenu] = useState({ name: "", description: "", order: 10, show_yn: "Y" });
+  const [editMenu, setEditMenu] = useState({ name: "", description: "", order: 2, show_yn: "Y" });
 
   const fetchCategories = useCallback(async () => {
     setLoading(true);
@@ -33,16 +33,35 @@ function MenuManage() {
     fetchCategories();
   }, [fetchCategories, loginUser, navigate]);
 
+  useEffect(() => {
+    if (categories.length > 0) {
+      const maxOrder = Math.max(...categories.map((c) => c.order || 0));
+      setNewMenu((prev) => ({ ...prev, order: Math.max(2, maxOrder + 1) }));
+    }
+  }, [categories]);
+
   const handleAdd = async () => {
     if (!newMenu.name.trim()) {
       showAlert("메뉴 이름을 입력해줘.");
       return;
     }
+
+    if (newMenu.order < 2) {
+      showAlert("순서는 2 이상이어야 해.");
+      return;
+    }
+
+    const isDuplicateOrder = categories.some((cat) => cat.order === newMenu.order);
+    if (isDuplicateOrder) {
+      showAlert("이미 사용 중인 순서야. 다른 숫자를 지정해줘.");
+      return;
+    }
+
     const { error } = await supabase.from("category").insert([{ name: newMenu.name, description: newMenu.description, order: newMenu.order, show_yn: newMenu.show_yn, del_yn: "N" }]);
     if (error) {
       showAlert("메뉴 생성 실패: " + error.message);
     } else {
-      setNewMenu({ name: "", description: "", order: 10, show_yn: "Y" });
+      setNewMenu((prev) => ({ name: "", description: "", order: prev.order + 1, show_yn: "Y" }));
       fetchCategories();
       showAlert("메뉴가 생성되었어!");
     }
@@ -55,7 +74,7 @@ function MenuManage() {
 
   const cancelEdit = () => {
     setEditingSeq(null);
-    setEditMenu({ name: "", description: "", order: 10, show_yn: "Y" });
+    setEditMenu({ name: "", description: "", order: 2, show_yn: "Y" });
   };
 
   const handleUpdate = async () => {
@@ -63,6 +82,18 @@ function MenuManage() {
       showAlert("메뉴 이름을 입력해줘.");
       return;
     }
+
+    if (editMenu.order < 2) {
+      showAlert("순서는 2 이상이어야 해.");
+      return;
+    }
+
+    const isDuplicateOrder = categories.some((cat) => cat.seq !== editingSeq && cat.order === editMenu.order);
+    if (isDuplicateOrder) {
+      showAlert("이미 사용 중인 순서야. 다른 숫자를 지정해줘.");
+      return;
+    }
+
     const { error } = await supabase.from("category").update({ name: editMenu.name, description: editMenu.description, order: editMenu.order, show_yn: editMenu.show_yn }).eq("seq", editingSeq);
     if (error) {
       showAlert("수정 실패: " + error.message);
@@ -127,7 +158,15 @@ function MenuManage() {
             className="input-field"
             style={{ flex: 2, minWidth: "200px" }}
           />
-          <input type="number" placeholder="순서" value={newMenu.order} onChange={(e) => setNewMenu({ ...newMenu, order: Number(e.target.value) })} className="input-field" style={{ width: "80px" }} />
+          <input
+            type="number"
+            placeholder="순서"
+            value={newMenu.order}
+            onChange={(e) => setNewMenu({ ...newMenu, order: Number(e.target.value) })}
+            className="input-field"
+            style={{ width: "80px" }}
+            min={2}
+          />
           <select value={newMenu.show_yn} onChange={(e) => setNewMenu({ ...newMenu, show_yn: e.target.value })} className="select-field" style={{ width: "100px" }}>
             <option value="Y">공개</option>
             <option value="N">비공개</option>

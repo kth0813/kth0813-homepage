@@ -14,6 +14,7 @@ function BoardDetail() {
   const navigate = useNavigate();
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
+  const [attachedFiles, setAttachedFiles] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [categoryName, setCategoryName] = useState("전체 게시판");
 
@@ -31,6 +32,10 @@ function BoardDetail() {
         const { data: catData } = await supabase.from("category").select("name").eq("seq", data.category_seq).single();
         if (catData) setCategoryName(catData.name);
       }
+
+      // 첨부파일 가져오기
+      const { data: filesData } = await supabase.from("board_file").select("*").eq("board_seq", seq).order("cre_date", { ascending: true });
+      if (filesData) setAttachedFiles(filesData);
     }
   }, [seq, navigate]);
 
@@ -62,6 +67,24 @@ function BoardDetail() {
 
     if (!error) {
       navigate("/board");
+    }
+  };
+
+  const handleDownload = async (fileUrl, fileName) => {
+    try {
+      const response = await fetch(fileUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("파일 다운로드 실패:", error);
+      showAlert("파일을 다운로드하는 중 오류가 발생했어.");
     }
   };
 
@@ -141,6 +164,31 @@ function BoardDetail() {
           }}
         />
       </div>
+
+      {attachedFiles.length > 0 && (
+        <div style={{ marginTop: "24px", padding: "16px", background: "var(--bg-color)", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
+          <h4 style={{ margin: "0 0 12px 0", fontSize: "15px", color: "var(--text-main)" }}>📎 첨부파일 ({attachedFiles.length})</h4>
+          <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "8px" }}>
+            {attachedFiles.map((file) => (
+              <li key={file.seq} style={{ fontSize: "14px" }}>
+                <a
+                  href="#!"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleDownload(file.file_url, file.file_name);
+                  }}
+                  className="text-link"
+                  style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+                >
+                  <span>💾</span>
+                  <span>{file.file_name}</span>
+                  <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>({(file.file_size / 1024 / 1024).toFixed(2)} MB)</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="action-bar">
         <button onClick={() => navigate(post.category_seq ? `/board?category=${post.category_seq}` : "/board")} className="btn-outline">

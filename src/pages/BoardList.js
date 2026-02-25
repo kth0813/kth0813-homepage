@@ -211,7 +211,7 @@ function BoardList() {
       </div>
 
       <div className="table-wrapper">
-        <table className="data-table">
+        <table className="data-table" style={{ width: "100%", tableLayout: "fixed" }}>
           <thead>
             <tr>
               {loginUser?.admin_yn === "Y" && (
@@ -264,12 +264,12 @@ function BoardList() {
                     </td>
                   )}
                   <td>{post.seq}</td>
-                  <td>
-                    <Link to={`/board/${post.seq}`} className="text-link">
+                  <td style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title={post.title}>
+                    <Link to={`/board/${post.seq}`} className="text-link" style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis" }}>
                       {Highlight(post.title, globalKeyword || activeSearchKeyword)}
                     </Link>
                   </td>
-                  <td style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <td style={{ display: "flex", alignItems: "center", gap: "8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={post.user?.name}>
                     {post.user?.profile_url ? <img src={post.user.profile_url} alt="프로필" className="comment-img" /> : <div className="comment-profile">👤</div>}
                     {post.user?.name}
                   </td>

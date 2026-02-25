@@ -7,6 +7,7 @@ import UserList from "./pages/UserList";
 import BoardList from "./pages/BoardList";
 import BoardDetail from "./pages/BoardDetail";
 import BoardWrite from "./pages/BoardWrite";
+import Main from "./pages/Main";
 import MyPage from "./pages/MyPage";
 import NotFound from "./pages/NotFound";
 import MenuManage from "./pages/MenuManage";
@@ -17,7 +18,7 @@ function App() {
     <Router>
       <Layout>
         <Routes>
-          <Route path="/" element={<DashBoard />} />
+          <Route path="/" element={<Main />} />
           <Route path="/login" element={<Login />} />
           <Route path="/join" element={<Join />} />
           <Route path="/users" element={<UserList />} />
@@ -27,6 +28,7 @@ function App() {
           <Route path="/board/write" element={<BoardWrite />} />
           <Route path="/board/edit/:seq" element={<BoardWrite />} />
           <Route path="/menus" element={<MenuManage />} />
+          <Route path="/dashboard" element={<DashBoard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>

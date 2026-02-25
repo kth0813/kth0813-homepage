@@ -29,7 +29,7 @@ function LeftMenu() {
   return (
     <nav className="app-nav">
       <Link to="/" className={`nav-link ${location.pathname === "/" ? "active" : ""}`}>
-        📊 대시보드
+        🏠 메인
       </Link>
       {categories.length > 0 ? (
         categories.map((cat) => (
@@ -45,6 +45,9 @@ function LeftMenu() {
       {loginUser?.admin_yn === "Y" && (
         <div className="nav-group">
           <div className="nav-group-title">🛡️ 관리자 메뉴</div>
+          <Link to="/dashboard" className={`nav-link sub-link ${location.pathname === "/dashboard" ? "active" : ""}`}>
+            📊 대시보드
+          </Link>
           <Link to="/users" className={`nav-link sub-link ${location.pathname === "/users" ? "active" : ""}`}>
             👥 사용자 목록
           </Link>
