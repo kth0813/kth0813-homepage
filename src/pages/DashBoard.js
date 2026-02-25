@@ -23,7 +23,7 @@ function DashBoard() {
 
     setStats({ userCount: uCount || 0, boardCount: bCount || 0 });
 
-    const { data: posts } = await supabase.from("board").select(`seq, title, cre_date, user:user_seq ( name )`).eq("del_yn", "N").order("seq", { ascending: false }).limit(5);
+    const { data: posts } = await supabase.from("board").select(`seq, title, cre_date, user:user_seq ( name, profile_url )`).eq("del_yn", "N").order("seq", { ascending: false }).limit(5);
 
     setRecentPosts(posts || []);
     setLoading(false);
@@ -94,7 +94,28 @@ function DashBoard() {
                           {post.title}
                         </Link>
                       </td>
-                      <td>{post.user?.name}</td>
+                      <td style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        {post.user?.profile_url ? (
+                          <img src={post.user?.profile_url} alt="프로필" className="comment-img" style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover" }} />
+                        ) : (
+                          <div
+                            className="comment-profile"
+                            style={{
+                              width: "24px",
+                              height: "24px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              backgroundColor: "#f0f0f0",
+                              borderRadius: "50%",
+                              fontSize: "12px"
+                            }}
+                          >
+                            👤
+                          </div>
+                        )}
+                        {post.user?.name}
+                      </td>
                       <td>{dayjs(post.cre_date).format("YYYY.MM.DD HH:mm")}</td>
                     </tr>
                   ))}
