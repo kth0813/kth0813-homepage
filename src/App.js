@@ -11,6 +11,7 @@ import Main from "./pages/Main";
 import MyPage from "./pages/MyPage";
 import NotFound from "./pages/NotFound";
 import MenuManage from "./pages/MenuManage";
+import Raffle from "./pages/Raffle";
 import "./css/App.css";
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
           <Route path="/board/edit/:seq" element={<BoardWrite />} />
           <Route path="/menus" element={<MenuManage />} />
           <Route path="/dashboard" element={<DashBoard />} />
+          <Route path="/raffle" element={<Raffle />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>

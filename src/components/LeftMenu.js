@@ -70,6 +70,9 @@ function LeftMenu() {
       <Link to="/" className={`nav-link ${location.pathname === "/" ? "active" : ""}`}>
         🏠 메인
       </Link>
+      <Link to="/raffle" className={`nav-link ${location.pathname === "/raffle" ? "active" : ""}`}>
+        🎲 럭키 드로우
+      </Link>
       {categories.length > 0 ? (
         categories.map((cat) => (
           <Link key={cat.seq} to={`/board?category=${cat.seq}`} className={`nav-link ${location.pathname === "/board" && currentCategory === String(cat.seq) ? "active" : ""}`}>
