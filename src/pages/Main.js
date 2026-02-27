@@ -4,9 +4,23 @@ import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 import { SkeletonLine } from "../components/Skeleton";
 
+function formatViewCount(count) {
+  if (!count) return "0";
+  const num = parseInt(count, 10);
+  if (num >= 10000) {
+    return (num / 10000).toFixed(1).replace(".0", "") + "만";
+  }
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1).replace(".0", "") + "천";
+  }
+  return num.toString();
+}
+
 function Main() {
   const [categories, setCategories] = useState([]);
   const [categoryPosts, setCategoryPosts] = useState({});
+  const [trendingVideos, setTrendingVideos] = useState([]);
+  const [trendingMusic, setTrendingMusic] = useState([]);
   const [loading, setLoading] = useState(true);
   const loginUser = JSON.parse(localStorage.getItem("loginUser"));
 
@@ -40,6 +54,81 @@ function Main() {
       });
 
       setCategoryPosts(postsMap);
+    }
+
+    const { data: trendingVideosData } = await supabase.from("youtube_trending").select("*").eq("type", "VIDEO").order("seq", { ascending: false }).limit(4);
+
+    const { data: trendingMusicData } = await supabase.from("youtube_trending").select("*").eq("type", "MUSIC").order("seq", { ascending: false }).limit(4);
+
+    let needsUpdate = false;
+    const today = dayjs().startOf("day");
+
+    if (!trendingVideosData || trendingVideosData.length === 0 || !trendingMusicData || trendingMusicData.length === 0) {
+      needsUpdate = true;
+    } else {
+      const latestVideoDate = dayjs(trendingVideosData[0].cre_date);
+      if (latestVideoDate.isBefore(today)) {
+        needsUpdate = true;
+      }
+    }
+    if (needsUpdate) {
+      try {
+        const YOUTUBE_API_KEY = process.env.REACT_APP_YOUTUBE_API_KEY;
+        if (YOUTUBE_API_KEY) {
+          const videoResponse = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&chart=mostPopular&regionCode=KR&maxResults=4&key=${YOUTUBE_API_KEY}`);
+          const videoData = await videoResponse.json();
+
+          const musicResponse = await fetch(
+            `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&chart=mostPopular&regionCode=KR&videoCategoryId=10&maxResults=4&key=${YOUTUBE_API_KEY}`
+          );
+          const musicData = await musicResponse.json();
+
+          if (videoData.items && musicData.items) {
+            await supabase.from("youtube_trending").delete().in("type", ["VIDEO", "MUSIC"]);
+
+            const insertData = [];
+
+            videoData.items.forEach((item) => {
+              insertData.push({
+                video_id: item.id,
+                title: item.snippet.title,
+                thumbnail_url: item.snippet.thumbnails.high ? item.snippet.thumbnails.high.url : item.snippet.thumbnails.default.url,
+                channel_title: item.snippet.channelTitle,
+                view_count: item.statistics.viewCount,
+                type: "VIDEO"
+              });
+            });
+
+            musicData.items.forEach((item) => {
+              insertData.push({
+                video_id: item.id,
+                title: item.snippet.title,
+                thumbnail_url: item.snippet.thumbnails.high ? item.snippet.thumbnails.high.url : item.snippet.thumbnails.default.url,
+                channel_title: item.snippet.channelTitle,
+                view_count: item.statistics.viewCount,
+                type: "MUSIC"
+              });
+            });
+
+            if (insertData.length > 0) {
+              await supabase.from("youtube_trending").insert(insertData);
+
+              const { data: newVideos } = await supabase.from("youtube_trending").select("*").eq("type", "VIDEO").order("seq", { ascending: false }).limit(4);
+              const { data: newMusic } = await supabase.from("youtube_trending").select("*").eq("type", "MUSIC").order("seq", { ascending: false }).limit(4);
+
+              if (newVideos) setTrendingVideos(newVideos);
+              if (newMusic) setTrendingMusic(newMusic);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching YouTube data:", error);
+        if (trendingVideosData) setTrendingVideos(trendingVideosData);
+        if (trendingMusicData) setTrendingMusic(trendingMusicData);
+      }
+    } else {
+      if (trendingVideosData) setTrendingVideos(trendingVideosData);
+      if (trendingMusicData) setTrendingMusic(trendingMusicData);
     }
 
     setLoading(false);
@@ -96,41 +185,127 @@ function Main() {
                     </colgroup>
                     <tbody>
                       {categoryPosts[cat.seq] && categoryPosts[cat.seq].length > 0 ? (
-                        categoryPosts[cat.seq].map((post) => (
-                          <tr key={post.seq}>
-                            <td style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", paddingRight: "8px" }} title={post.title}>
-                              <Link to={`/board/${post.seq}`} className="text-link" style={{ color: "var(--text-main)", display: "block", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                {post.title}
-                              </Link>
-                            </td>
-                            <td
-                              style={{ display: "flex", alignItems: "center", gap: "6px", justifyContent: "center", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
-                              title={post.user?.name}
-                            >
-                              {post.user?.profile_url ? (
-                                <img src={post.user?.profile_url} alt="프로필" style={{ width: "20px", height: "20px", borderRadius: "50%", objectFit: "cover" }} />
-                              ) : (
-                                <div className="mini-comment-profile" style={{ width: "20px", height: "20px" }}>
-                                  👤
-                                </div>
-                              )}
-                              <span style={{ color: "var(--text-muted)" }}>{post.user?.name}</span>
-                            </td>
-                            <td style={{ color: "var(--text-muted)", textAlign: "right", whiteSpace: "nowrap" }}>{dayjs(post.cre_date).format("YYYY.MM.DD HH:mm")}</td>
-                          </tr>
-                        ))
+                        <>
+                          {categoryPosts[cat.seq].map((post) => (
+                            <tr key={post.seq}>
+                              <td style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", paddingRight: "8px" }} title={post.title}>
+                                <Link to={`/board/${post.seq}`} className="text-link" style={{ color: "var(--text-main)", display: "block", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                  {post.title}
+                                </Link>
+                              </td>
+                              <td
+                                style={{ display: "flex", alignItems: "center", gap: "6px", justifyContent: "center", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+                                title={post.user?.name}
+                              >
+                                {post.user?.profile_url ? (
+                                  <img src={post.user?.profile_url} alt="프로필" style={{ width: "20px", height: "20px", borderRadius: "50%", objectFit: "cover" }} />
+                                ) : (
+                                  <div className="mini-comment-profile" style={{ width: "20px", height: "20px" }}>
+                                    👤
+                                  </div>
+                                )}
+                                <span style={{ color: "var(--text-muted)" }}>{post.user?.name}</span>
+                              </td>
+                              <td style={{ color: "var(--text-muted)", textAlign: "right", whiteSpace: "nowrap" }}>{dayjs(post.cre_date).format("YYYY.MM.DD HH:mm")}</td>
+                            </tr>
+                          ))}
+                          {Array.from({ length: Math.max(0, 5 - categoryPosts[cat.seq].length) }).map((_, idx) => (
+                            <tr key={`empty-${cat.seq}-${idx}`}>
+                              <td colSpan="3" style={{ padding: "16px", visibility: "hidden" }}>
+                                &nbsp;
+                              </td>
+                            </tr>
+                          ))}
+                        </>
                       ) : (
-                        <tr>
-                          <td colSpan="3" style={{ textAlign: "center", color: "var(--text-muted)", padding: "30px 0" }}>
-                            등록된 게시글이 없어.
-                          </td>
-                        </tr>
+                        <>
+                          <tr>
+                            <td colSpan="3" style={{ textAlign: "center", color: "var(--text-muted)", padding: "16px" }}>
+                              등록된 게시글이 없어.
+                            </td>
+                          </tr>
+                          {Array.from({ length: 4 }).map((_, idx) => (
+                            <tr key={`empty-no-data-${cat.seq}-${idx}`}>
+                              <td colSpan="3" style={{ padding: "16px", visibility: "hidden" }}>
+                                &nbsp;
+                              </td>
+                            </tr>
+                          ))}
+                        </>
                       )}
                     </tbody>
                   </table>
                 </div>
               </section>
             ))}
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(calc(50% - 12px), 1fr))", gap: "24px", marginTop: "32px", alignItems: "start" }}>
+        <section className="youtube-section">
+          <div className="youtube-section-header">
+            <h3 className="youtube-section-title">
+              <span style={{ fontSize: "24px" }}>🔥</span> 유튜브 인기 영상 ({dayjs().format("YYYY년 MM월 DD일")})
+            </h3>
+          </div>
+          <div className="youtube-grid-container">
+            {trendingVideos.map((video) => (
+              <a key={`video-${video.seq}`} href={`https://www.youtube.com/watch?v=${video.video_id}`} target="_blank" rel="noopener noreferrer" className="youtube-card">
+                <div className="youtube-thumbnail-wrapper">
+                  <img src={video.thumbnail_url} alt={video.title} className="youtube-thumbnail" />
+                </div>
+                <div className="youtube-info">
+                  <div className="youtube-title" title={video.title}>
+                    {video.title}
+                  </div>
+                  <div className="youtube-meta">
+                    <span className="youtube-channel" title={video.channel_title}>
+                      {video.channel_title}
+                    </span>
+                    {video.view_count && (
+                      <>
+                        <span>•</span>
+                        <span>조회수 {formatViewCount(video.view_count)}회</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+
+        <section className="youtube-section">
+          <div className="youtube-section-header">
+            <h3 className="youtube-section-title">
+              <span style={{ fontSize: "24px" }}>🎵</span> 유튜브 인기 음악 ({dayjs().format("YYYY년 MM월 DD일")})
+            </h3>
+          </div>
+          <div className="youtube-grid-container">
+            {trendingMusic.map((music) => (
+              <a key={`music-${music.seq}`} href={`https://www.youtube.com/watch?v=${music.video_id}`} target="_blank" rel="noopener noreferrer" className="youtube-card">
+                <div className="youtube-thumbnail-wrapper">
+                  <img src={music.thumbnail_url} alt={music.title} className="youtube-thumbnail" />
+                </div>
+                <div className="youtube-info">
+                  <div className="youtube-title" title={music.title}>
+                    {music.title}
+                  </div>
+                  <div className="youtube-meta">
+                    <span className="youtube-channel" title={music.channel_title}>
+                      {music.channel_title}
+                    </span>
+                    {music.view_count && (
+                      <>
+                        <span>•</span>
+                        <span>조회수 {formatViewCount(music.view_count)}회</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );

@@ -1,13 +1,18 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
 import { supabase } from "../supabaseClient";
 
 function LeftMenu() {
   const [categories, setCategories] = useState([]);
   const loginUser = JSON.parse(localStorage.getItem("loginUser"));
   const location = useLocation();
+  const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
   const currentCategory = searchParams.get("category");
+
+  const [globalSearchKeyword, setGlobalSearchKeyword] = useState("");
+  const [currentTime, setCurrentTime] = useState(dayjs());
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -26,8 +31,42 @@ function LeftMenu() {
     fetchCategories();
   }, [loginUser?.admin_yn]);
 
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(dayjs());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleGlobalSearch = (e) => {
+    e.preventDefault();
+    if (!globalSearchKeyword.trim()) return;
+    navigate(`/board?globalKeyword=${encodeURIComponent(globalSearchKeyword)}`);
+    setGlobalSearchKeyword("");
+  };
+
   return (
     <nav className="app-nav">
+      <div style={{ marginBottom: "16px", padding: "0 8px" }}>
+        <form onSubmit={handleGlobalSearch} style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "12px" }}>
+          <input
+            type="text"
+            placeholder="전체 게시글 검색..."
+            value={globalSearchKeyword}
+            onChange={(e) => setGlobalSearchKeyword(e.target.value)}
+            className="input-field"
+            style={{ width: "100%", padding: "8px 12px", borderRadius: "8px", fontSize: "14px" }}
+          />
+          <button type="submit" className="btn-secondary" style={{ width: "100%", padding: "8px", borderRadius: "8px", fontSize: "13px" }}>
+            검색
+          </button>
+        </form>
+        <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "600", color: "var(--primary-color)", background: "#f1f5f9", padding: "8px", borderRadius: "8px" }}>
+          🕒 {currentTime.format("YYYY-MM-DD HH:mm:ss")}
+        </div>
+      </div>
+
       <Link to="/" className={`nav-link ${location.pathname === "/" ? "active" : ""}`}>
         🏠 메인
       </Link>
