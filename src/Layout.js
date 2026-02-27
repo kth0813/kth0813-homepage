@@ -1,5 +1,6 @@
 import TopMenu from "./components/TopMenu";
 import LeftMenu from "./components/LeftMenu";
+import Footer from "./components/Footer";
 
 function Layout({ children }) {
   return (
@@ -7,7 +8,10 @@ function Layout({ children }) {
       <TopMenu />
       <div className="app-body">
         <LeftMenu />
-        <main className="app-main">{children}</main>
+        <main className="app-main">
+          {children}
+          <Footer />
+        </main>
       </div>
     </div>
   );

@@ -49,7 +49,10 @@ function LeftMenu() {
   return (
     <nav className="app-nav">
       <div style={{ marginBottom: "16px", padding: "0 8px" }}>
-        <form onSubmit={handleGlobalSearch} style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "12px" }}>
+        <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "600", color: "var(--primary-color)", background: "#f1f5f9", padding: "8px", borderRadius: "8px" }}>
+          🕒 {currentTime.format("YYYY-MM-DD HH:mm:ss")}
+        </div>
+        <form onSubmit={handleGlobalSearch} style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "12px" }}>
           <input
             type="text"
             placeholder="전체 게시글 검색..."
@@ -62,9 +65,6 @@ function LeftMenu() {
             검색
           </button>
         </form>
-        <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "600", color: "var(--primary-color)", background: "#f1f5f9", padding: "8px", borderRadius: "8px" }}>
-          🕒 {currentTime.format("YYYY-MM-DD HH:mm:ss")}
-        </div>
       </div>
 
       <Link to="/" className={`nav-link ${location.pathname === "/" ? "active" : ""}`}>
