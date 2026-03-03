@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "../css/App.css";
 
-function Raffle() {
+function LuckyDraw() {
   const [candidatesText, setCandidatesText] = useState("");
   const [winnerCount, setWinnerCount] = useState(1);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -145,51 +145,15 @@ function Raffle() {
           <p style={{ color: "var(--text-muted)", marginTop: "8px", marginBottom: 0 }}>후보를 쉼표(,)로 구분지어 입력하고 추첨을 진행하세요!</p>
         </div>
         <div style={{ textAlign: "right" }}>
-          <button
-            className="btn-secondary"
-            onClick={() => setIsFullScreen(!isFullScreen)}
-            style={{
-              padding: "12px 24px",
-              borderRadius: "12px",
-              fontSize: "16px",
-              fontWeight: "800",
-              background: "var(--primary-color)",
-              color: "white",
-              border: "none",
-              cursor: "pointer",
-              boxShadow: "var(--shadow-md)"
-            }}
-          >
+          <button className="btn-fullscreen" onClick={() => setIsFullScreen(!isFullScreen)}>
             {isFullScreen ? "↙️ 돌아가기" : "🔲 전체화면"}
           </button>
         </div>
       </div>
 
-      <div
-        style={{
-          background: "var(--card-bg)",
-          padding: "32px",
-          borderRadius: "var(--radius-lg)",
-          border: "1px solid var(--border-color)",
-          boxShadow: "var(--shadow-md)",
-          width: "100%",
-          boxSizing: "border-box"
-        }}
-      >
+      <div className="game-container">
         <div style={{ marginBottom: "20px" }}>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "12px",
-              marginBottom: "12px",
-              alignItems: "center",
-              background: "var(--bg-color)",
-              padding: "16px",
-              borderRadius: "12px",
-              border: "1px solid var(--border-color)"
-            }}
-          >
+          <div className="game-options-panel" style={{ marginBottom: "12px" }}>
             <span style={{ fontSize: "15px", fontWeight: "700", color: "var(--text-main)" }}>🔢 숫자 추가:</span>
             <input
               type="number"
@@ -395,4 +359,4 @@ function Raffle() {
   );
 }
 
-export default Raffle;
+export default LuckyDraw;

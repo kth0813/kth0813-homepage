@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { supabase } from "../supabaseClient";
+import { dbService } from "../services/DbService";
 import bcrypt from "bcryptjs";
 import { useNavigate } from "react-router-dom";
 import { showAlert } from "../utils/Alert";
@@ -11,16 +11,16 @@ function Login() {
 
   const handleLogin = async () => {
     try {
-      const { data: user, error } = await supabase.from("user").select("*").eq("id", userId).single();
+      const { data: user, error } = await dbService.getUserById(userId);
 
       if (error || !user) {
         if (error) showAlert(JSON.stringify(error));
-        else showAlert("아이디를 확인해줘.");
+        else showAlert("아이디를 확인해주세요.");
         return;
       }
 
       if (!user.pwd) {
-        showAlert("DB에 비밀번호 정보가 없어.");
+        showAlert("DB에 비밀번호 정보가 없습니다.");
         return;
       }
 
@@ -39,11 +39,11 @@ function Login() {
         navigate("/");
         window.location.reload();
       } else {
-        showAlert("비밀번호가 틀렸어.");
+        showAlert("비밀번호가 틀렸습니다.");
       }
     } catch (err) {
       console.error("로그인 로직 에러:", err);
-      showAlert("로그인 중 알 수 없는 에러가 발생했어.");
+      showAlert("로그인 중 알 수 없는 에러가 발생했습니다.");
     }
   };
 

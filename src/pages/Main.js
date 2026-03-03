@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../supabaseClient";
+import { dbService } from "../services/DbService";
 import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 import { SkeletonLine } from "../components/Skeleton";
@@ -31,20 +31,14 @@ function Main() {
   async function fetchDashboardData() {
     setLoading(true);
 
-    const { data: cats } = await supabase.from("category").select("*").eq("del_yn", "N").eq("show_yn", "Y").order("order", { ascending: true, nullsFirst: false }).order("seq", { ascending: true });
+    const { data: cats } = await dbService.getPublicCategories();
 
     if (cats) {
       setCategories(cats);
 
       const postsMap = {};
       const postPromises = cats.map(async (cat) => {
-        const { data: posts } = await supabase
-          .from("board")
-          .select(`seq, title, cre_date, user:user_seq ( name, profile_url )`)
-          .eq("category_seq", cat.seq)
-          .eq("del_yn", "N")
-          .order("seq", { ascending: false })
-          .limit(5);
+        const { data: posts } = await dbService.getRecentPostsByCategory(cat.seq, 5);
         return { catSeq: cat.seq, posts: posts || [] };
       });
 
@@ -56,9 +50,8 @@ function Main() {
       setCategoryPosts(postsMap);
     }
 
-    const { data: trendingVideosData } = await supabase.from("youtube_trending").select("*").eq("type", "VIDEO").order("seq", { ascending: false }).limit(4);
-
-    const { data: trendingMusicData } = await supabase.from("youtube_trending").select("*").eq("type", "MUSIC").order("seq", { ascending: false }).limit(4);
+    const { data: trendingVideosData } = await dbService.getYoutubeTrending("VIDEO", 4);
+    const { data: trendingMusicData } = await dbService.getYoutubeTrending("MUSIC", 4);
 
     let needsUpdate = false;
     const today = dayjs().startOf("day");
@@ -84,7 +77,7 @@ function Main() {
           const musicData = await musicResponse.json();
 
           if (videoData.items && musicData.items) {
-            await supabase.from("youtube_trending").delete().in("type", ["VIDEO", "MUSIC"]);
+            await dbService.deleteYoutubeTrending();
 
             const insertData = [];
 
@@ -111,10 +104,10 @@ function Main() {
             });
 
             if (insertData.length > 0) {
-              await supabase.from("youtube_trending").insert(insertData);
+              await dbService.insertYoutubeTrending(insertData);
 
-              const { data: newVideos } = await supabase.from("youtube_trending").select("*").eq("type", "VIDEO").order("seq", { ascending: false }).limit(4);
-              const { data: newMusic } = await supabase.from("youtube_trending").select("*").eq("type", "MUSIC").order("seq", { ascending: false }).limit(4);
+              const { data: newVideos } = await dbService.getYoutubeTrending("VIDEO", 4);
+              const { data: newMusic } = await dbService.getYoutubeTrending("MUSIC", 4);
 
               if (newVideos) setTrendingVideos(newVideos);
               if (newMusic) setTrendingMusic(newMusic);
@@ -141,14 +134,11 @@ function Main() {
         <p>오늘도 즐거운 하루 되세요.</p>
       </section>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(calc(50% - 12px), 1fr))", gap: "24px", marginTop: "32px", alignItems: "start" }}>
+      <div className="grid-cols-auto-fit gap24 mt32 items-start">
         {loading
           ? Array.from({ length: 4 }).map((_, index) => (
-              <section
-                key={`skeleton-section-${index}`}
-                style={{ background: "var(--card-bg)", padding: "24px", borderRadius: "12px", border: "1px solid var(--border-color)", boxShadow: "var(--shadow-sm)" }}
-              >
-                <div className="page-header" style={{ marginBottom: "16px" }}>
+              <section key={`skeleton-section-${index}`} className="bg-card p24 border-radius-lg border-default shadow-sm">
+                <div className="page-header mb16">
                   <SkeletonLine height="24px" width="150px" />
                 </div>
                 <div className="table-wrapper">
@@ -167,12 +157,10 @@ function Main() {
               </section>
             ))
           : categories.map((cat) => (
-              <section key={cat.seq} style={{ background: "var(--card-bg)", padding: "24px", borderRadius: "12px", border: "1px solid var(--border-color)", boxShadow: "var(--shadow-sm)" }}>
-                <div className="page-header" style={{ marginBottom: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <h3 className="page-title" style={{ fontSize: "18px", margin: 0 }}>
-                    {cat.name}
-                  </h3>
-                  <Link to={`/board?category=${cat.seq}`} className="text-link" style={{ fontSize: "14px", color: "var(--text-muted)" }}>
+              <section key={cat.seq} className="bg-card p24 border-radius-lg border-default shadow-sm">
+                <div className="page-header mb16 flex justify-between items-center">
+                  <h3 className="page-title text18 m-0">{cat.name}</h3>
+                  <Link to={`/board?category=${cat.seq}`} className="text-link text14 text-muted">
                     더보기
                   </Link>
                 </div>
@@ -188,15 +176,12 @@ function Main() {
                         <>
                           {categoryPosts[cat.seq].map((post) => (
                             <tr key={post.seq}>
-                              <td style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", paddingRight: "8px" }} title={post.title}>
-                                <Link to={`/board/${post.seq}`} className="text-link" style={{ color: "var(--text-main)", display: "block", overflow: "hidden", textOverflow: "ellipsis" }}>
+                              <td className="whitespace-nowrap overflow-hidden text-ellipsis pr-2" title={post.title}>
+                                <Link to={`/board/${post.seq}`} className="text-link block overflow-hidden text-ellipsis text-main">
                                   {post.title}
                                 </Link>
                               </td>
-                              <td
-                                style={{ display: "flex", alignItems: "center", gap: "6px", justifyContent: "center", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
-                                title={post.user?.name}
-                              >
+                              <td className="flex items-center gap4 justify-center whitespace-nowrap overflow-hidden text-ellipsis" title={post.user?.name}>
                                 {post.user?.profile_url ? (
                                   <img src={post.user?.profile_url} alt="프로필" style={{ width: "20px", height: "20px", borderRadius: "50%", objectFit: "cover" }} />
                                 ) : (
@@ -204,14 +189,14 @@ function Main() {
                                     👤
                                   </div>
                                 )}
-                                <span style={{ color: "var(--text-muted)" }}>{post.user?.name}</span>
+                                <span className="text-muted">{post.user?.name}</span>
                               </td>
-                              <td style={{ color: "var(--text-muted)", textAlign: "right", whiteSpace: "nowrap" }}>{dayjs(post.cre_date).format("YYYY.MM.DD HH:mm")}</td>
+                              <td className="text-muted text-right whitespace-nowrap">{dayjs(post.cre_date).format("YYYY.MM.DD HH:mm")}</td>
                             </tr>
                           ))}
                           {Array.from({ length: Math.max(0, 5 - categoryPosts[cat.seq].length) }).map((_, idx) => (
                             <tr key={`empty-${cat.seq}-${idx}`}>
-                              <td colSpan="3" style={{ padding: "16px", visibility: "hidden" }}>
+                              <td colSpan="3" className="p16 invisible">
                                 &nbsp;
                               </td>
                             </tr>
@@ -220,13 +205,13 @@ function Main() {
                       ) : (
                         <>
                           <tr>
-                            <td colSpan="3" style={{ textAlign: "center", color: "var(--text-muted)", padding: "16px" }}>
-                              등록된 게시글이 없어.
+                            <td colSpan="3" className="text-center text-muted p16">
+                              등록된 게시글이 없습니다.
                             </td>
                           </tr>
                           {Array.from({ length: 4 }).map((_, idx) => (
                             <tr key={`empty-no-data-${cat.seq}-${idx}`}>
-                              <td colSpan="3" style={{ padding: "16px", visibility: "hidden" }}>
+                              <td colSpan="3" className="p16 invisible">
                                 &nbsp;
                               </td>
                             </tr>
@@ -240,11 +225,11 @@ function Main() {
             ))}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(calc(50% - 12px), 1fr))", gap: "24px", marginTop: "32px", alignItems: "start" }}>
+      <div className="grid-cols-auto-fit gap24 mt32 items-start">
         <section className="youtube-section">
           <div className="youtube-section-header">
             <h3 className="youtube-section-title">
-              <span style={{ fontSize: "24px" }}>🔥</span> 유튜브 인기 영상 ({dayjs().format("YYYY년 MM월 DD일")})
+              <span className="text24">🔥</span> 유튜브 인기 영상 ({dayjs().format("YYYY년 MM월 DD일")})
             </h3>
           </div>
           <div className="youtube-grid-container">
@@ -277,7 +262,7 @@ function Main() {
         <section className="youtube-section">
           <div className="youtube-section-header">
             <h3 className="youtube-section-title">
-              <span style={{ fontSize: "24px" }}>🎵</span> 유튜브 인기 음악 ({dayjs().format("YYYY년 MM월 DD일")})
+              <span className="text24">🎵</span> 유튜브 인기 음악 ({dayjs().format("YYYY년 MM월 DD일")})
             </h3>
           </div>
           <div className="youtube-grid-container">

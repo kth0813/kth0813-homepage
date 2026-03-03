@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { supabase } from "../supabaseClient";
+import { dbService } from "../services/DbService";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 function UserChart() {
@@ -8,13 +8,13 @@ function UserChart() {
   const [yearList, setYearList] = useState([]);
 
   const fetchUserStats = useCallback(async () => {
-    const { data: yearData } = await supabase.from("monthly_user_counts").select("year");
+    const { data: yearData } = await dbService.getMonthlyUserYears();
     if (yearData) {
       const uniqueYears = [...new Set(yearData.map((item) => item.year))].sort().reverse();
       setYearList(uniqueYears);
     }
 
-    const { data: stats, error } = await supabase.from("monthly_user_counts").select("month, user_count").eq("year", selectedYear);
+    const { data: stats, error } = await dbService.getMonthlyUserCounts(selectedYear);
 
     if (!error) {
       const formattedData = Array.from({ length: 12 }, (_, i) => {

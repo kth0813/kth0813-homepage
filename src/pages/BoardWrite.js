@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { supabase } from "../supabaseClient";
+import { dbService } from "../services/DbService";
 import { useNavigate, useSearchParams, useParams } from "react-router-dom";
 import { showAlert } from "../utils/Alert";
 import "@toast-ui/editor/dist/toastui-editor.css";
@@ -24,11 +24,7 @@ function BoardWrite() {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      let query = supabase.from("category").select("*").order("seq", { ascending: true });
-      if (loginUser?.admin_yn !== "Y") {
-        query = query.eq("seq", 1);
-      }
-      const { data } = await query;
+      const { data } = await dbService.getCategoriesForWrite(loginUser?.admin_yn === "Y");
       if (data) {
         setCategories(data);
         if (!selectedCategory && data.length > 0) {
@@ -42,7 +38,7 @@ function BoardWrite() {
   useEffect(() => {
     if (seq) {
       const fetchPost = async () => {
-        const { data, error } = await supabase.from("board").select("*").eq("seq", seq).single();
+        const { data, error } = await dbService.getPostBySeq(seq);
         if (data && !error) {
           setTitle(data.title);
           setContents(data.contents);
@@ -51,10 +47,10 @@ function BoardWrite() {
           }
           if (data.category_seq) setSelectedCategory(data.category_seq);
 
-          const { data: filesData } = await supabase.from("board_file").select("*").eq("board_seq", seq).order("cre_date", { ascending: true });
+          const { data: filesData } = await dbService.getBoardFiles(seq);
           if (filesData) setExistingFiles(filesData);
         } else {
-          showAlert("게시글 정보를 불러올 수 없어.");
+          showAlert("게시글 정보를 불러올 수 없습니다.");
           navigate(-1);
         }
       };
@@ -72,7 +68,7 @@ function BoardWrite() {
     try {
       for (const file of files) {
         if (file.size > 10 * 1024 * 1024) {
-          showAlert(`"${file.name}" 파일은 10MB를 초과하여 업로드할 수 없어.`);
+          showAlert(`"${file.name}" 파일은 10MB를 초과하여 업로드할 수 없습니다.`);
           continue;
         }
 
@@ -80,11 +76,11 @@ function BoardWrite() {
         const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
         const filePath = `files/${fileName}`;
 
-        const { error: uploadError } = await supabase.storage.from("attachfile").upload(filePath, file);
+        const { error: uploadError } = await dbService.uploadFile("attachfile", filePath, file);
 
         if (uploadError) throw uploadError;
 
-        const { data: publicData } = supabase.storage.from("attachfile").getPublicUrl(filePath);
+        const { data: publicData } = dbService.getPublicUrl("attachfile", filePath);
 
         if (publicData) {
           newUploads.push({
@@ -98,7 +94,7 @@ function BoardWrite() {
 
       setUploadedFiles((prev) => [...prev, ...newUploads]);
     } catch (error) {
-      showAlert("파일 업로드에 실패했어: " + error.message);
+      showAlert("파일 업로드에 실패했습니다: " + error.message);
     } finally {
       setIsUploading(false);
       e.target.value = null; // 입력창 초기화
@@ -111,33 +107,29 @@ function BoardWrite() {
 
   const handleSave = async () => {
     if (!title.trim() || !contents.trim()) {
-      showAlert("제목과 내용을 입력해줘.");
+      showAlert("제목과 내용을 입력해주세요.");
       return;
     }
 
     if (seq) {
-      let query = supabase
-        .from("board")
-        .update({
+      const { error } = await dbService.updatePost(
+        seq,
+        {
           title,
           contents,
           category_seq: selectedCategory
-        })
-        .eq("seq", seq);
-
-      if (loginUser.admin_yn !== "Y") {
-        query = query.eq("user_seq", loginUser.seq);
-      }
-
-      const { error } = await query;
+        },
+        loginUser.seq,
+        loginUser.admin_yn === "Y"
+      );
 
       if (!error) {
         if (deletedFileSeqs.length > 0) {
-          await supabase.from("board_file").delete().in("seq", deletedFileSeqs);
+          await dbService.deleteBoardFiles(deletedFileSeqs);
         }
         if (uploadedFiles.length > 0) {
           const fileInserts = uploadedFiles.map((f) => ({ ...f, board_seq: seq }));
-          await supabase.from("board_file").insert(fileInserts);
+          await dbService.insertBoardFiles(fileInserts);
         }
         showAlert("수정 완료!");
         navigate(`/board/${seq}`);
@@ -147,13 +139,13 @@ function BoardWrite() {
     } else {
       const insertData = { title, contents, user_seq: loginUser.seq, del_yn: "N", category_seq: selectedCategory };
 
-      const { data, error } = await supabase.from("board").insert([insertData]).select();
+      const { data, error } = await dbService.insertPost(insertData);
 
       if (!error && data && data.length > 0) {
         const newSeq = data[0].seq;
         if (uploadedFiles.length > 0) {
           const fileInserts = uploadedFiles.map((f) => ({ ...f, board_seq: newSeq }));
-          await supabase.from("board_file").insert(fileInserts);
+          await dbService.insertBoardFiles(fileInserts);
         }
         showAlert("등록 완료!");
         navigate(selectedCategory ? `/board?category=${selectedCategory}` : "/board");
@@ -195,7 +187,7 @@ function BoardWrite() {
               // 10MB restriction
               const maxSize = 10 * 1024 * 1024;
               if (blob.size > maxSize) {
-                showAlert("파일 용량은 10MB를 초과할 수 없어.");
+                showAlert("파일 용량은 10MB를 초과할 수 없습니다.");
                 return false;
               }
 
@@ -205,13 +197,13 @@ function BoardWrite() {
                 const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
                 const filePath = `images/${fileName}`;
 
-                const { error: uploadError } = await supabase.storage.from("attachfile").upload(filePath, blob);
+                const { error: uploadError } = await dbService.uploadFile("attachfile", filePath, blob);
 
                 if (uploadError) {
                   throw uploadError;
                 }
 
-                const { data: publicData } = supabase.storage.from("attachfile").getPublicUrl(filePath);
+                const { data: publicData } = dbService.getPublicUrl("attachfile", filePath);
 
                 if (publicData) {
                   setUploadedFiles((prev) => [
@@ -226,7 +218,7 @@ function BoardWrite() {
                   callback(publicData.publicUrl, blob.name || "image");
                 }
               } catch (error) {
-                showAlert("이미지 업로드에 실패했어: " + error.message);
+                showAlert("이미지 업로드에 실패했습니다: " + error.message);
               } finally {
                 setIsUploading(false);
               }

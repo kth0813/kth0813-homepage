@@ -1,8 +1,51 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState, useCallback } from "react";
+import { dbService } from "../services/DbService";
+import { supabase } from "../supabaseClient";
+import { showToast } from "../utils/Alert";
 
 function TopMenu() {
   const navigate = useNavigate();
   const loginUser = JSON.parse(localStorage.getItem("loginUser"));
+  const [unreadMsgCount, setUnreadMsgCount] = useState(0);
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+
+  const fetchUnreadCounts = useCallback(async () => {
+    if (!loginUser?.seq) return;
+    const { count: msgCount } = await dbService.getUnreadMessageCount(loginUser.seq);
+    setUnreadMsgCount(msgCount || 0);
+
+    const { count: notifCount } = await dbService.getUnreadNotificationCount(loginUser.seq);
+    setUnreadNotifCount(notifCount || 0);
+  }, [loginUser?.seq]);
+
+  useEffect(() => {
+    if (!loginUser) return;
+
+    fetchUnreadCounts();
+
+    const channel = supabase
+      .channel("top-menu-realtime")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "message", filter: `receiver_seq=eq.${loginUser.seq}` }, (payload) => {
+        fetchUnreadCounts();
+        showToast("새로운 쪽지가 도착했습니다!");
+      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notification", filter: `user_seq=eq.${loginUser.seq}` }, (payload) => {
+        fetchUnreadCounts();
+        showToast("새로운 알림이 도착했습니다!");
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "message", filter: `receiver_seq=eq.${loginUser.seq}` }, () => {
+        fetchUnreadCounts();
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "notification", filter: `user_seq=eq.${loginUser.seq}` }, () => {
+        fetchUnreadCounts();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [loginUser?.seq, fetchUnreadCounts]);
 
   const handleLogout = () => {
     localStorage.removeItem("loginUser");
@@ -19,10 +62,34 @@ function TopMenu() {
       <div className="header-right">
         {loginUser ? (
           <>
-            <Link to="/mypage" className="header-link" style={{ fontWeight: "bold", marginRight: "5px", display: "flex", alignItems: "center", gap: "8px" }}>
-              {loginUser.profile_url ? <img src={loginUser.profile_url} alt="프로필" style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover" }} /> : <span>👤</span>}
-              {loginUser.name}님
+            <Link to="/mypage" className="header-link font-bold flex items-center gap8 mr-2">
+              {loginUser.profile_url ? <img src={loginUser.profile_url} alt="프로필" className="rounded-full object-cover" style={{ width: "24px", height: "24px" }} /> : <span>👤</span>}
+              <span className="whitespace-nowrap overflow-hidden text-ellipsis inline-block align-bottom" style={{ maxWidth: "100px" }}>
+                {loginUser.name}
+              </span>
+              님
             </Link>
+
+            <div className="flex items-center gap16 mr-4">
+              <div className="relative cursor-pointer text20" onClick={() => navigate("/messages")}>
+                ✉️
+                {unreadMsgCount > 0 && (
+                  <span className="absolute text12 font-bold text-center rounded-full" style={{ top: "-5px", right: "-10px", backgroundColor: "red", color: "white", padding: "2px 6px" }}>
+                    {unreadMsgCount}
+                  </span>
+                )}
+              </div>
+
+              <div className="relative cursor-pointer text20" onClick={() => navigate("/notifications")}>
+                🔔
+                {unreadNotifCount > 0 && (
+                  <span className="absolute text12 font-bold text-center rounded-full" style={{ top: "-5px", right: "-5px", backgroundColor: "red", color: "white", padding: "2px 6px" }}>
+                    {unreadNotifCount}
+                  </span>
+                )}
+              </div>
+            </div>
+
             <button onClick={handleLogout} className="header-btn">
               로그아웃
             </button>

@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "../supabaseClient";
+import { dbService } from "../services/DbService";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { showAlert } from "../utils/Alert";
 import dayjs from "dayjs";
 import { Highlight } from "../utils/Highlight";
-import { SkeletonLine } from "../components/Skeleton";
+import { SkeletonCircle, SkeletonLine } from "../components/Skeleton";
 
 function BoardList() {
   const [posts, setPosts] = useState([]);
@@ -32,10 +32,7 @@ function BoardList() {
     const from = (currentPage - 1) * pageSize;
     const to = from + pageSize - 1;
 
-    let query = supabase
-      .from("board")
-      .select(`seq, title, cre_date, hit, user_seq, category_seq, user:user_seq(name, profile_url), category:category_seq(show_yn)`, { count: "exact" })
-      .eq("del_yn", "N");
+    let query = dbService.getBoardQuery();
 
     // 일반 검색 조건 (현재 카테고리 내)
     if (category) {
@@ -79,10 +76,10 @@ function BoardList() {
   useEffect(() => {
     if (globalKeyword) {
       setCategoryName(`"${globalKeyword}" 검색 결과`);
-      setDescription("전체 게시판에서 검색된 결과야.");
+      setDescription("전체 게시판에서 검색된 결과입니다.");
     } else if (category) {
       const fetchCategoryName = async () => {
-        const { data, error } = await supabase.from("category").select("name, description").eq("seq", category).single();
+        const { data, error } = await dbService.getCategory(category);
         if (data && !error) {
           setCategoryName(data.name);
           setDescription(data.description);
@@ -99,7 +96,7 @@ function BoardList() {
 
   const handleWriteClick = () => {
     if (!loginUser) {
-      showAlert("로그인이 필요한 서비스야. 로그인 페이지로 이동할게!");
+      showAlert("로그인이 필요한 서비스입니다. 로그인 페이지로 이동합니다.");
       navigate("/login");
     } else {
       let writeUrl = "/board/write";
@@ -131,18 +128,18 @@ function BoardList() {
 
   const handleDeleteSelected = async () => {
     if (selectedPosts.length === 0) {
-      showAlert("삭제할 게시글을 선택해줘.");
+      showAlert("삭제할 게시글을 선택해주세요.");
       return;
     }
 
-    if (!window.confirm(`선택한 ${selectedPosts.length}개의 게시글을 정말 삭제할 거야?`)) return;
+    if (!window.confirm(`선택한 ${selectedPosts.length}개의 게시글을 정말 삭제하시겠습니까?`)) return;
 
-    const { error } = await supabase.from("board").update({ del_yn: "Y" }).in("seq", selectedPosts);
+    const { error } = await dbService.softDeletePosts(selectedPosts);
 
     if (error) {
-      showAlert("삭제 중 오류가 발생했어: " + error.message);
+      showAlert("삭제 중 오류가 발생했습니다: " + error.message);
     } else {
-      showAlert("선택한 게시글이 삭제되었어.");
+      showAlert("선택한 게시글이 삭제되었습니다.");
       setSelectedPosts([]);
       fetchPosts();
     }
@@ -157,14 +154,14 @@ function BoardList() {
           <h2 className="page-title">📋 {categoryName}</h2>
           {description && <p className="page-description">{description}</p>}
         </div>
-        <div style={{ display: "flex", gap: "10px" }}>
+        <div className="flex gap8">
           {loginUser?.admin_yn === "Y" && selectedPosts.length > 0 && (
-            <button onClick={handleDeleteSelected} className="btn-danger" style={{ width: "auto", padding: "10px 24px" }}>
+            <button onClick={handleDeleteSelected} className="btn-danger w-auto px24 py8">
               선택 삭제 ({selectedPosts.length})
             </button>
           )}
           {(!category || category === "1" || loginUser?.admin_yn === "Y") && (
-            <button onClick={handleWriteClick} className="btn-primary" style={{ width: "auto", padding: "10px 24px" }}>
+            <button onClick={handleWriteClick} className="btn-primary w-auto px24 py8">
               새 글 작성
             </button>
           )}
@@ -183,8 +180,7 @@ function BoardList() {
             placeholder="검색어 입력"
             value={searchKeyword}
             onChange={(e) => setSearchKeyword(e.target.value)}
-            className="input-field"
-            style={{ width: "220px" }}
+            className="input-field w-48"
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 handleSearch(e);
@@ -211,11 +207,11 @@ function BoardList() {
       </div>
 
       <div className="table-wrapper">
-        <table className="data-table" style={{ width: "100%", tableLayout: "fixed" }}>
+        <table className="data-table w-full" style={{ tableLayout: "fixed" }}>
           <thead>
             <tr>
               {loginUser?.admin_yn === "Y" && (
-                <th style={{ width: "5%", textAlign: "center" }}>
+                <th className="text-center" style={{ width: "5%" }}>
                   <input type="checkbox" onChange={handleSelectAll} checked={posts.length > 0 && selectedPosts.length === posts.length} />
                 </th>
               )}
@@ -231,7 +227,7 @@ function BoardList() {
               Array.from({ length: 5 }).map((_, index) => (
                 <tr key={`skeleton-${index}`}>
                   {loginUser?.admin_yn === "Y" && (
-                    <td style={{ textAlign: "center" }}>
+                    <td className="text-center">
                       <input type="checkbox" disabled />
                     </td>
                   )}
@@ -242,8 +238,8 @@ function BoardList() {
                     <SkeletonLine height="20px" width="80%" />
                   </td>
                   <td>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <div className="skeleton skeleton-circle" style={{ width: "28px", height: "28px" }}></div>
+                    <div className="flex items-center gap8">
+                      <SkeletonCircle size="28px" />
                       <SkeletonLine height="20px" width="60px" />
                     </div>
                   </td>
@@ -259,28 +255,28 @@ function BoardList() {
               posts.map((post) => (
                 <tr key={post.seq}>
                   {loginUser?.admin_yn === "Y" && (
-                    <td style={{ textAlign: "center" }}>
+                    <td className="text-center">
                       <input type="checkbox" checked={selectedPosts.includes(post.seq)} onChange={() => handleSelect(post.seq)} />
                     </td>
                   )}
                   <td>{post.seq}</td>
-                  <td style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title={post.title}>
-                    <Link to={`/board/${post.seq}`} className="text-link" style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  <td className="whitespace-nowrap overflow-hidden text-ellipsis" title={post.title}>
+                    <Link to={`/board/${post.seq}`} className="text-link block overflow-hidden text-ellipsis">
                       {Highlight(post.title, globalKeyword || activeSearchKeyword)}
                     </Link>
                   </td>
-                  <td style={{ display: "flex", alignItems: "center", gap: "8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={post.user?.name}>
+                  <td className="flex items-center gap8 overflow-hidden text-ellipsis whitespace-nowrap" title={post.user?.name}>
                     {post.user?.profile_url ? <img src={post.user.profile_url} alt="프로필" className="comment-img" /> : <div className="comment-profile">👤</div>}
                     {post.user?.name}
                   </td>
-                  <td style={{ color: "var(--text-muted)" }}>{post.hit || 0}</td>
-                  <td style={{ color: "var(--text-muted)", fontSize: "14px" }}>{dayjs(post.cre_date).format("YYYY.MM.DD HH:mm")}</td>
+                  <td className="text-muted">{post.hit || 0}</td>
+                  <td className="text-muted text14">{dayjs(post.cre_date).format("YYYY.MM.DD HH:mm")}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={loginUser?.admin_yn === "Y" ? "6" : "5"} style={{ textAlign: "center", padding: "40px", color: "var(--text-muted)" }}>
-                  게시글이 없어.
+                <td colSpan={loginUser?.admin_yn === "Y" ? "6" : "5"} className="text-center text-muted p32">
+                  게시글이 없습니다.
                 </td>
               </tr>
             )}

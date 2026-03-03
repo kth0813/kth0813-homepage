@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { supabase } from "../supabaseClient";
+import { dbService } from "../services/DbService";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 function PostChart() {
@@ -8,13 +8,13 @@ function PostChart() {
   const [yearList, setYearList] = useState([]);
 
   const fetchStats = useCallback(async () => {
-    const { data: yearData } = await supabase.from("monthly_post_counts").select("year");
+    const { data: yearData } = await dbService.getMonthlyPostYears();
     if (yearData) {
       const uniqueYears = [...new Set(yearData.map((item) => item.year))].sort().reverse();
       setYearList(uniqueYears);
     }
 
-    const { data: stats, error } = await supabase.from("monthly_post_counts").select("month, post_count").eq("year", selectedYear);
+    const { data: stats, error } = await dbService.getMonthlyPostCounts(selectedYear);
 
     if (!error) {
       const formattedData = Array.from({ length: 12 }, (_, i) => {

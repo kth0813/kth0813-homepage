@@ -11,8 +11,11 @@ import Main from "./pages/Main";
 import MyPage from "./pages/MyPage";
 import NotFound from "./pages/NotFound";
 import MenuManage from "./pages/MenuManage";
-import Raffle from "./pages/Raffle";
+import LuckyDraw from "./pages/LuckyDraw";
+import Ladder from "./pages/Ladder";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import NotificationList from "./pages/NotificationList";
+import MessageList from "./pages/MessageList";
 import "./css/App.css";
 
 function App() {
@@ -31,8 +34,11 @@ function App() {
           <Route path="/board/edit/:seq" element={<BoardWrite />} />
           <Route path="/menus" element={<MenuManage />} />
           <Route path="/dashboard" element={<DashBoard />} />
-          <Route path="/raffle" element={<Raffle />} />
+          <Route path="/luckydraw" element={<LuckyDraw />} />
+          <Route path="/ladder" element={<Ladder />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/notifications" element={<NotificationList />} />
+          <Route path="/messages" element={<MessageList />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>

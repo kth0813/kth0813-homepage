@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
-import { supabase } from "../supabaseClient";
+import { dbService } from "../services/DbService";
 import dayjs from "dayjs";
 import { Highlight } from "../utils/Highlight";
 import { useNavigate } from "react-router-dom";
@@ -26,7 +26,7 @@ function UserList() {
     const from = (currentPage - 1) * pageSize;
     const to = from + pageSize - 1;
 
-    let query = supabase.from("user").select("seq, id, name, profile_url, cre_date", { count: "exact" }).eq("del_yn", "N").order("seq", { ascending: false }).range(from, to);
+    let query = dbService.getUsersQuery().order("seq", { ascending: false }).range(from, to);
 
     if (activeSearchKeyword.trim()) {
       query = query.ilike(activeSearchType, `%${activeSearchKeyword}%`);
@@ -43,7 +43,7 @@ function UserList() {
 
   useEffect(() => {
     if (!loginUser || loginUser.admin_yn !== "Y") {
-      showAlert("관리자만 접근할 수 있는 페이지야.");
+      showAlert("관리자만 접근할 수 있는 페이지입니다.");
       navigate("/");
       return;
     }
@@ -150,7 +150,7 @@ function UserList() {
             ) : (
               <tr>
                 <td colSpan="4" style={{ textAlign: "center", padding: "40px", color: "var(--text-muted)" }}>
-                  해당하는 유저가 없어.
+                  해당하는 유저가 없습니다.
                 </td>
               </tr>
             )}

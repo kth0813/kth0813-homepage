@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
-import { supabase } from "../supabaseClient";
+import { dbService } from "../services/DbService";
+import { showAlert } from "../utils/Alert";
 
 function LeftMenu() {
   const [categories, setCategories] = useState([]);
@@ -16,11 +17,16 @@ function LeftMenu() {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      let query = supabase.from("category").select("seq, name, show_yn").eq("del_yn", "N");
-      if (loginUser?.admin_yn !== "Y") {
-        query = query.eq("show_yn", "Y");
+      let data, error;
+      if (loginUser?.admin_yn === "Y") {
+        const res = await dbService.getCategories();
+        data = res.data;
+        error = res.error;
+      } else {
+        const res = await dbService.getPublicCategories();
+        data = res.data;
+        error = res.error;
       }
-      const { data, error } = await query.order("order", { ascending: true, nullsFirst: false }).order("seq", { ascending: true });
 
       if (!error) {
         setCategories(data);
@@ -41,27 +47,29 @@ function LeftMenu() {
 
   const handleGlobalSearch = (e) => {
     e.preventDefault();
-    if (!globalSearchKeyword.trim()) return;
+    if (!globalSearchKeyword.trim()) {
+      showAlert("검색어를 입력해주세요.");
+      return;
+    }
     navigate(`/board?globalKeyword=${encodeURIComponent(globalSearchKeyword)}`);
     setGlobalSearchKeyword("");
   };
 
   return (
     <nav className="app-nav">
-      <div style={{ marginBottom: "16px", padding: "0 8px" }}>
-        <div style={{ textAlign: "center", fontSize: "14px", fontWeight: "600", color: "var(--primary-color)", background: "#f1f5f9", padding: "8px", borderRadius: "8px" }}>
+      <div className="mb16 px12">
+        <div className="text-center text14 font-semibold p8 rounded-md" style={{ color: "var(--primary-color)", background: "#f1f5f9" }}>
           🕒 {currentTime.format("YYYY-MM-DD HH:mm:ss")}
         </div>
-        <form onSubmit={handleGlobalSearch} style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "12px" }}>
+        <form onSubmit={handleGlobalSearch} className="flex flex-col gap8 mt16">
           <input
             type="text"
             placeholder="전체 게시글 검색..."
             value={globalSearchKeyword}
             onChange={(e) => setGlobalSearchKeyword(e.target.value)}
-            className="input-field"
-            style={{ width: "100%", padding: "8px 12px", borderRadius: "8px", fontSize: "14px" }}
+            className="input-field w-full px16 rounded-md text14"
           />
-          <button type="submit" className="btn-secondary" style={{ width: "100%", padding: "8px", borderRadius: "8px", fontSize: "13px" }}>
+          <button type="submit" className="btn-secondary w-full py8 rounded-md text12">
             검색
           </button>
         </form>
@@ -70,9 +78,15 @@ function LeftMenu() {
       <Link to="/" className={`nav-link ${location.pathname === "/" ? "active" : ""}`}>
         🏠 메인
       </Link>
-      <Link to="/raffle" className={`nav-link ${location.pathname === "/raffle" ? "active" : ""}`}>
-        🎲 럭키 드로우
-      </Link>
+      <div className="nav-group mb16">
+        <div className="nav-group-title">🎁 추첨하기</div>
+        <Link to="/luckydraw" className={`nav-link sub-link ${location.pathname === "/luckydraw" ? "active" : ""}`}>
+          🎲 럭키 드로우
+        </Link>
+        <Link to="/ladder" className={`nav-link sub-link ${location.pathname === "/ladder" ? "active" : ""}`}>
+          🔀 사다리 타기
+        </Link>
+      </div>
       {categories.length > 0 ? (
         categories.map((cat) => (
           <Link key={cat.seq} to={`/board?category=${cat.seq}`} className={`nav-link ${location.pathname === "/board" && currentCategory === String(cat.seq) ? "active" : ""}`}>
@@ -80,9 +94,7 @@ function LeftMenu() {
           </Link>
         ))
       ) : (
-        <div className="nav-link" style={{ fontSize: "12px", color: "#999" }}>
-          등록된 게시판이 없어.
-        </div>
+        <div className="nav-link text12 text-muted">등록된 게시판이 없습니다.</div>
       )}
       {loginUser?.admin_yn === "Y" && (
         <div className="nav-group">

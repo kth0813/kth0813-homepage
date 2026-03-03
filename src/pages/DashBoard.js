@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../supabaseClient";
+import { dbService } from "../services/DbService";
 import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 import PostChart from "../components/PostChart";
@@ -18,12 +18,12 @@ function DashBoard() {
 
   async function fetchDashboardData() {
     setLoading(true);
-    const { count: uCount } = await supabase.from("user").select("*", { count: "exact", head: true }).eq("del_yn", "N");
-    const { count: bCount } = await supabase.from("board").select("*", { count: "exact", head: true }).eq("del_yn", "N");
+    const { count: uCount } = await dbService.getUserCount();
+    const { count: bCount } = await dbService.getBoardCount();
 
     setStats({ userCount: uCount || 0, boardCount: bCount || 0 });
 
-    const { data: posts } = await supabase.from("board").select(`seq, title, cre_date, user:user_seq ( name, profile_url )`).eq("del_yn", "N").order("seq", { ascending: false }).limit(5);
+    const { data: posts } = await dbService.getRecentPosts(5);
 
     setRecentPosts(posts || []);
     setLoading(false);
@@ -39,27 +39,25 @@ function DashBoard() {
       <div className="stat-cards">
         <div className="stat-card">
           <h4>총 회원 수</h4>
-          {loading ? <SkeletonLine width="60px" height="38px" style={{ marginTop: "4px" }} /> : <p className="stat-value">{stats.userCount} 명</p>}
+          {loading ? <SkeletonLine width="60px" height="38px" className="mt4" /> : <p className="stat-value">{stats.userCount} 명</p>}
         </div>
         <div className="stat-card">
           <h4>전체 게시글</h4>
-          {loading ? <SkeletonLine width="60px" height="38px" style={{ marginTop: "4px" }} /> : <p className="stat-value">{stats.boardCount} 개</p>}
+          {loading ? <SkeletonLine width="60px" height="38px" className="mt4" /> : <p className="stat-value">{stats.boardCount} 개</p>}
         </div>
       </div>
-      <div style={{ display: "flex", gap: "24px", marginBottom: "32px" }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
+      <div className="flex gap24 mb32">
+        <div className="flex-1" style={{ minWidth: 0 }}>
           <UserChart />
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="flex-1" style={{ minWidth: 0 }}>
           <PostChart />
         </div>
       </div>
-      <section style={{ marginTop: "32px" }}>
-        <div className="page-header" style={{ marginBottom: "16px" }}>
-          <h3 className="page-title" style={{ fontSize: "20px" }}>
-            최근 올라온 글
-          </h3>
-          <Link to="/board" className="text-link" style={{ fontSize: "14px" }}>
+      <section className="mt32">
+        <div className="page-header mb16">
+          <h3 className="page-title text20">최근 올라온 글</h3>
+          <Link to="/board" className="text-link text14">
             더보기
           </Link>
         </div>
@@ -90,11 +88,11 @@ function DashBoard() {
                 : recentPosts.map((post) => (
                     <tr key={post.seq}>
                       <td>
-                        <Link to={`/board/${post.seq}`} className="text-link" style={{ color: "var(--text-main)" }}>
+                        <Link to={`/board/${post.seq}`} className="text-link text-main">
                           {post.title}
                         </Link>
                       </td>
-                      <td style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <td className="flex items-center gap8">
                         {post.user?.profile_url ? (
                           <img src={post.user?.profile_url} alt="프로필" className="comment-img" style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover" }} />
                         ) : (

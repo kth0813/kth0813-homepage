@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
-import { supabase } from "../supabaseClient";
+import { dbService } from "../services/DbService";
 import { useNavigate } from "react-router-dom";
 import { showAlert } from "../utils/Alert";
 import { SkeletonLine } from "../components/Skeleton";
@@ -16,7 +16,7 @@ function MenuManage() {
 
   const fetchCategories = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from("category").select("*").eq("del_yn", "N").order("order", { ascending: true, nullsFirst: false }).order("seq", { ascending: true });
+    const { data, error } = await dbService.getCategories();
 
     if (!error) {
       setCategories(data);
@@ -26,7 +26,7 @@ function MenuManage() {
 
   useEffect(() => {
     if (!loginUser || loginUser.admin_yn !== "Y") {
-      showAlert("관리자만 접근할 수 있는 페이지야.");
+      showAlert("관리자만 접근할 수 있는 페이지입니다.");
       navigate("/");
       return;
     }
@@ -42,28 +42,28 @@ function MenuManage() {
 
   const handleAdd = async () => {
     if (!newMenu.name.trim()) {
-      showAlert("메뉴 이름을 입력해줘.");
+      showAlert("메뉴 이름을 입력해주세요.");
       return;
     }
 
     if (newMenu.order < 2) {
-      showAlert("순서는 2 이상이어야 해.");
+      showAlert("순서는 2 이상이어야 합니다.");
       return;
     }
 
     const isDuplicateOrder = categories.some((cat) => cat.order === newMenu.order);
     if (isDuplicateOrder) {
-      showAlert("이미 사용 중인 순서야. 다른 숫자를 지정해줘.");
+      showAlert("이미 사용 중인 순서입니다. 다른 숫자를 지정해주세요.");
       return;
     }
 
-    const { error } = await supabase.from("category").insert([{ name: newMenu.name, description: newMenu.description, order: newMenu.order, show_yn: newMenu.show_yn, del_yn: "N" }]);
+    const { error } = await dbService.insertCategory({ name: newMenu.name, description: newMenu.description, order: newMenu.order, show_yn: newMenu.show_yn, del_yn: "N" });
     if (error) {
       showAlert("메뉴 생성 실패: " + error.message);
     } else {
       setNewMenu((prev) => ({ name: "", description: "", order: prev.order + 1, show_yn: "Y" }));
       fetchCategories();
-      showAlert("메뉴가 생성되었어!");
+      showAlert("메뉴가 생성되었습니다!");
     }
   };
 
@@ -79,57 +79,57 @@ function MenuManage() {
 
   const handleUpdate = async () => {
     if (!editMenu.name.trim()) {
-      showAlert("메뉴 이름을 입력해줘.");
+      showAlert("메뉴 이름을 입력해주세요.");
       return;
     }
 
     if (editMenu.order < 2) {
-      showAlert("순서는 2 이상이어야 해.");
+      showAlert("순서는 2 이상이어야 합니다.");
       return;
     }
 
     const isDuplicateOrder = categories.some((cat) => cat.seq !== editingSeq && cat.order === editMenu.order);
     if (isDuplicateOrder) {
-      showAlert("이미 사용 중인 순서야. 다른 숫자를 지정해줘.");
+      showAlert("이미 사용 중인 순서입니다. 다른 숫자를 지정해주세요.");
       return;
     }
 
-    const { error } = await supabase.from("category").update({ name: editMenu.name, description: editMenu.description, order: editMenu.order, show_yn: editMenu.show_yn }).eq("seq", editingSeq);
+    const { error } = await dbService.updateCategory(editingSeq, { name: editMenu.name, description: editMenu.description, order: editMenu.order, show_yn: editMenu.show_yn });
     if (error) {
       showAlert("수정 실패: " + error.message);
     } else {
       cancelEdit();
       fetchCategories();
-      showAlert("메뉴가 수정되었어!");
+      showAlert("메뉴가 수정되었습니다!");
     }
   };
 
   const handleDelete = async (seq) => {
     if (seq === 1) {
-      showAlert("자유 게시판은 삭제할 수 없어.");
+      showAlert("자유 게시판은 삭제할 수 없습니다.");
       return;
     }
 
-    const { count, error: countError } = await supabase.from("board").select("*", { count: "exact", head: true }).eq("category_seq", seq).eq("del_yn", "N");
+    const { count, error: countError } = await dbService.getPostCountByCategory(seq);
 
     if (countError) {
-      showAlert("게시글 확인 중 오류가 발생했어.");
+      showAlert("게시글 확인 중 오류가 발생했습니다.");
       return;
     }
 
     if (count > 0) {
-      showAlert(`현재 해당 메뉴에 ${count}개의 게시글이 존재해서 삭제할 수 없어. 게시글을 먼저 삭제해줘.`);
+      showAlert(`현재 해당 메뉴에 ${count}개의 게시글이 존재하여 삭제할 수 없습니다. 게시글을 먼저 삭제해주세요.`);
       return;
     }
 
-    if (!window.confirm("정말 이 메뉴를 삭제할 거야? 복구할 수 없어.")) return;
+    if (!window.confirm("정말 이 메뉴를 삭제하시겠습니까? 복구할 수 없습니다.")) return;
 
-    const { error } = await supabase.from("category").update({ del_yn: "Y" }).eq("seq", seq);
+    const { error } = await dbService.updateCategory(seq, { del_yn: "Y" });
     if (error) {
       showAlert("삭제 실패: " + error.message);
     } else {
       fetchCategories();
-      showAlert("메뉴가 삭제되었어.");
+      showAlert("메뉴가 삭제되었습니다.");
     }
   };
 
@@ -287,7 +287,7 @@ function MenuManage() {
             ) : (
               <tr>
                 <td colSpan="5" style={{ textAlign: "center", padding: "40px", color: "var(--text-muted)" }}>
-                  메뉴가 없어.
+                  메뉴가 없습니다.
                 </td>
               </tr>
             )}

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { supabase } from "../supabaseClient";
+import { dbService } from "../services/DbService";
 import dayjs from "dayjs";
 
 import ReactMarkdown from "react-markdown";
@@ -21,33 +21,32 @@ function BoardDetail() {
   const loginUser = JSON.parse(localStorage.getItem("loginUser"));
 
   const fetchPostDetail = useCallback(async () => {
-    const { data, error } = await supabase.from("board").select(`*, user:user_seq ( name, profile_url )`).eq("seq", seq).eq("del_yn", "N").single();
+    const { data, error } = await dbService.getPostBySeq(seq);
 
     if (error) {
-      showAlert("존재하지 않거나 삭제된 게시글이야.");
+      showAlert("존재하지 않거나 삭제된 게시글입니다.");
       navigate("/board");
     } else {
       setPost(data);
       if (data.category_seq) {
-        const { data: catData } = await supabase.from("category").select("name").eq("seq", data.category_seq).single();
+        const { data: catData } = await dbService.getCategory(data.category_seq);
         if (catData) setCategoryName(catData.name);
       }
 
-      // 첨부파일 가져오기
-      const { data: filesData } = await supabase.from("board_file").select("*").eq("board_seq", seq).order("cre_date", { ascending: true });
+      const { data: filesData } = await dbService.getBoardFiles(seq);
       if (filesData) setAttachedFiles(filesData);
     }
   }, [seq, navigate]);
 
   const fetchComments = useCallback(async () => {
-    const { data, error } = await supabase.from("board_comment").select(`*, user:user_seq ( name, profile_url )`).eq("board_seq", seq).order("seq", { ascending: true });
+    const { data, error } = await dbService.getCommentsByBoardSeq(seq);
 
     if (!error) setComments(data);
   }, [seq]);
 
   useEffect(() => {
     const loadData = async () => {
-      const { error: rpcError } = await supabase.rpc("increment_hit", { row_id: seq });
+      const { error: rpcError } = await dbService.incrementPostHit(seq);
       if (rpcError) console.error("조회수 증가 실패:", rpcError.message);
 
       fetchPostDetail();
@@ -57,13 +56,9 @@ function BoardDetail() {
   }, [seq, fetchPostDetail, fetchComments]);
 
   const handlePostDelete = async () => {
-    if (!window.confirm("정말 이 게시글을 삭제할 거야?")) return;
+    if (!window.confirm("정말 이 게시글을 삭제하시겠습니까?")) return;
 
-    let query = supabase.from("board").update({ del_yn: "Y" }).eq("seq", seq);
-    if (loginUser.admin_yn !== "Y") {
-      query = query.eq("user_seq", loginUser.seq);
-    }
-    const { error } = await query;
+    const { error } = await dbService.softDeletePost(seq, loginUser.seq, loginUser.admin_yn === "Y");
 
     if (!error) {
       navigate("/board");
@@ -84,34 +79,37 @@ function BoardDetail() {
       document.body.removeChild(link);
     } catch (error) {
       console.error("파일 다운로드 실패:", error);
-      showAlert("파일을 다운로드하는 중 오류가 발생했어.");
+      showAlert("파일을 다운로드하는 중 오류가 발생했습니다.");
     }
   };
 
   async function handleCommentSave() {
     if (!newComment.trim()) return;
-    const { error } = await supabase.from("board_comment").insert([
-      {
-        board_seq: seq,
-        user_seq: loginUser.seq,
-        contents: newComment
-      }
-    ]);
+    const { error } = await dbService.insertComment({
+      board_seq: seq,
+      user_seq: loginUser.seq,
+      contents: newComment
+    });
 
     if (!error) {
       setNewComment("");
       fetchComments();
+
+      if (post && post.user_seq !== loginUser.seq) {
+        await dbService.insertNotification({
+          user_seq: post.user_seq,
+          type: "COMMENT",
+          target_seq: seq,
+          message: `${loginUser.name}님이 회원님의 게시글에 댓글을 남겼습니다.`
+        });
+      }
     }
   }
 
   async function handleCommentDelete(cSeq) {
-    if (!window.confirm("댓글을 삭제할래?")) return;
+    if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
 
-    let query = supabase.from("board_comment").update({ del_yn: "Y" }).eq("seq", cSeq);
-    if (loginUser.admin_yn !== "Y") {
-      query = query.eq("user_seq", loginUser.seq);
-    }
-    const { error } = await query;
+    const { error } = await dbService.softDeleteComment(cSeq, loginUser.seq, loginUser.admin_yn === "Y");
 
     if (!error) fetchComments();
   }
@@ -251,7 +249,7 @@ function BoardDetail() {
             </button>
           </div>
         ) : (
-          <p style={{ textAlign: "center", color: "var(--text-muted)", marginTop: "20px" }}>로그인 후 댓글을 남길 수 있어.</p>
+          <p style={{ textAlign: "center", color: "var(--text-muted)", marginTop: "20px" }}>로그인 후 댓글을 남길 수 있습니다.</p>
         )}
       </section>
     </div>

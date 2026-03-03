@@ -999,3 +999,272 @@ ul {
 .policy-content p {
   margin-bottom: 16px;
 }
+
+.mt16 {
+  margin-top: 16px;
+}
+.mt20 {
+  margin-top: 20px;
+}
+.mt32 {
+  margin-top: 32px;
+}
+.mb8 {
+  margin-bottom: 8px;
+}
+.mb16 {
+  margin-bottom: 16px;
+}
+.mb20 {
+  margin-bottom: 20px;
+}
+.mb32 {
+  margin-bottom: 32px;
+}
+
+.pt24 {
+  padding-top: 24px;
+}
+.pb12 {
+  padding-bottom: 12px;
+}
+.p16 {
+  padding: 16px;
+}
+.p20 {
+  padding: 20px;
+}
+.p24 {
+  padding: 24px;
+}
+.px12 {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+.px16 {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+.py8 {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.flex {
+  display: flex;
+}
+.flex-1 {
+  flex: 1;
+}
+.flex-col {
+  flex-direction: column;
+}
+.items-center {
+  align-items: center;
+}
+.items-start {
+  align-items: flex-start;
+}
+.justify-between {
+  justify-content: space-between;
+}
+.justify-center {
+  justify-content: center;
+}
+.justify-end {
+  justify-content: flex-end;
+}
+.gap8 {
+  gap: 8px;
+}
+.gap12 {
+  gap: 12px;
+}
+.gap16 {
+  gap: 16px;
+}
+.gap24 {
+  gap: 24px;
+}
+
+.text14 {
+  font-size: 14px;
+}
+.text12 {
+  font-size: 12px;
+}
+.text18 {
+  font-size: 18px;
+}
+.text20 {
+  font-size: 20px;
+}
+.text24 {
+  font-size: 24px;
+}
+.font-bold {
+  font-weight: bold;
+}
+.font-semibold {
+  font-weight: 600;
+}
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+
+.w-auto {
+  width: auto;
+}
+.w-full {
+  width: 100%;
+}
+
+.grid-cols-auto-fit {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(calc(50% - 12px), 1fr));
+}
+
+.grid-cols-4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 1024px) {
+  .grid-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .grid-cols-4 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.invisible {
+  visibility: hidden;
+}
+.whitespace-nowrap {
+  white-space: nowrap;
+}
+.overflow-hidden {
+  overflow: hidden;
+}
+.text-ellipsis {
+  text-overflow: ellipsis;
+}
+.block {
+  display: block;
+}
+.border-b {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.chart-wrapper {
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  margin-bottom: 30px;
+  height: 100%;
+}
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.chart-container {
+  width: 100%;
+  height: 300px;
+}
+.chart-select {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.mypage-profile-container {
+  text-align: center;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.mypage-profile-img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-color);
+  padding: 2px;
+}
+.mypage-file-input {
+  font-size: 12px;
+  width: 100%;
+  max-width: 200px;
+}
+
+.no-spinners::-webkit-outer-spin-button,
+.no-spinners::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+
+  margin: 0 !important;
+}
+
+.no-spinners[type="number"] {
+  -moz-appearance: textfield !important;
+  appearance: textfield !important;
+}
+
+.btn-fullscreen {
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 800;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition);
+}
+
+.btn-fullscreen:hover {
+  background: var(--primary-color-dark, #2563eb);
+  transform: translateY(-2px);
+}
+
+.game-container {
+  background: var(--card-bg);
+  padding: 32px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.game-options-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  background: var(--bg-color);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.game-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
