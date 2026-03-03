@@ -45,7 +45,7 @@ function TopMenu() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [loginUser?.seq, fetchUnreadCounts]);
+  }, [loginUser?.seq, loginUser, fetchUnreadCounts]);
 
   const handleLogout = () => {
     localStorage.removeItem("loginUser");
