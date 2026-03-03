@@ -251,6 +251,33 @@ class DatabaseService {
   }
 
   // ==========================================
+  // Roulette Game
+  // ==========================================
+  async getRouletteCandidates() {
+    return supabase.from("roulette_list").select("*").eq("win_yn", "N").order("seq", { ascending: true });
+  }
+
+  async updateRouletteWinner(seq) {
+    return supabase.from("roulette_list").update({ win_yn: "Y" }).eq("seq", seq);
+  }
+
+  async getAllRouletteParticipants() {
+    return supabase.from("roulette_list").select("*").order("seq", { ascending: false });
+  }
+
+  async insertRouletteParticipant(data) {
+    return supabase.from("roulette_list").insert([data]);
+  }
+
+  async updateRouletteParticipant(seq, updateData) {
+    return supabase.from("roulette_list").update(updateData).eq("seq", seq);
+  }
+
+  async deleteRouletteParticipant(seq) {
+    return supabase.from("roulette_list").delete().eq("seq", seq);
+  }
+
+  // ==========================================
   // Charts
   // ==========================================
   async getMonthlyUserYears() {

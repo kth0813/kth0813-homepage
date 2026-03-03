@@ -86,6 +86,9 @@ function LeftMenu() {
         <Link to="/ladder" className={`nav-link sub-link ${location.pathname === "/ladder" ? "active" : ""}`}>
           🔀 사다리 타기
         </Link>
+        <Link to="/roulette" className={`nav-link sub-link ${location.pathname === "/roulette" ? "active" : ""}`}>
+          🎡 룰렛 돌리기
+        </Link>
       </div>
       {categories.length > 0 ? (
         categories.map((cat) => (
@@ -107,6 +110,9 @@ function LeftMenu() {
           </Link>
           <Link to="/menus" className={`nav-link sub-link ${location.pathname === "/menus" ? "active" : ""}`}>
             ⚙️ 메뉴 관리
+          </Link>
+          <Link to="/roulette-manage" className={`nav-link sub-link ${location.pathname === "/roulette-manage" ? "active" : ""}`}>
+            🎡 룰렛 참가자 관리
           </Link>
         </div>
       )}
