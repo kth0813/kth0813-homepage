@@ -92,11 +92,8 @@ const Ladder = () => {
     for (let r = 0; r < ladderData.rows; r++) {
       path.push({ col: currentCol, row: r });
 
-      const findRight = (line) => line.row === r && line.col === currentCol;
-      const findLeft = (line) => line.row === r && line.col === currentCol - 1;
-
-      const goingRight = ladderData.horizontalLines.find(findRight);
-      const goingLeft = ladderData.horizontalLines.find(findLeft);
+      const goingRight = ladderData.horizontalLines.find((line) => line.row === r && line.col === path[path.length - 1].col);
+      const goingLeft = ladderData.horizontalLines.find((line) => line.row === r && line.col === path[path.length - 1].col - 1);
 
       if (goingRight) {
         currentCol++;
@@ -133,11 +130,8 @@ const Ladder = () => {
     for (let r = ladderData.rows - 1; r >= 0; r--) {
       path.push({ col: currentCol, row: r });
 
-      const findRight = (line) => line.row === r && line.col === currentCol;
-      const findLeft = (line) => line.row === r && line.col === currentCol - 1;
-
-      const goingRight = ladderData.horizontalLines.find(findRight);
-      const goingLeft = ladderData.horizontalLines.find(findLeft);
+      const goingRight = ladderData.horizontalLines.find((line) => line.row === r && line.col === path[path.length - 1].col);
+      const goingLeft = ladderData.horizontalLines.find((line) => line.row === r && line.col === path[path.length - 1].col - 1);
 
       if (goingRight) {
         currentCol++;
