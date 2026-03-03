@@ -52,8 +52,8 @@ const Roulette = () => {
   };
 
   const getSegmentColor = useCallback((index, total) => {
-    // Pastel color palette
-    const colors = ["#fca5a5", "#fdba74", "#fcd34d", "#86efac", "#93c5fd", "#a5b4fc", "#c4b5fd", "#f9a8d4"];
+    // Lighter Pastel color palette
+    const colors = ["#ffcaca", "#ffe0b2", "#fff59d", "#c8e6c9", "#b3e5fc", "#d1c4e9", "#f8bbd0"];
     return colors[index % colors.length];
   }, []);
 
@@ -133,7 +133,7 @@ const Roulette = () => {
     const finalRotation = spins - Math.PI / 2 - (winnerIdx + 0.5) * arc;
 
     let startTimestamp = null;
-    const duration = 5000; // 5 seconds
+    const duration = 6000; // 6 seconds
     const startRotation = rotation % (Math.PI * 2);
 
     const animate = (timestamp) => {
@@ -141,8 +141,9 @@ const Roulette = () => {
       const progress = timestamp - startTimestamp;
 
       if (progress < duration) {
-        // easeOutCirc for smooth decel
-        const easeOut = Math.sqrt(1 - Math.pow(progress / duration - 1, 2));
+        // easeOutCubic eliminates the excessively long dead tail frame while still slowing smoothly
+        const t = progress / duration;
+        const easeOut = 1 - Math.pow(1 - t, 3);
         const currentR = startRotation + (finalRotation - startRotation) * easeOut;
         setRotation(currentR);
         requestAnimationFrame(animate);
