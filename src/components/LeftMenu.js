@@ -58,7 +58,7 @@ function LeftMenu() {
   return (
     <nav className="app-nav">
       <div className="mb16 px12">
-        <div className="text-center text14 font-semibold p8 rounded-md" style={{ color: "var(--primary-color)", background: "#f1f5f9" }}>
+        <div className="text-center text14 font-semibold p8 rounded-md left-menu-clock" style={{ whiteSpace: "nowrap" }}>
           🕒 {currentTime.format("YYYY-MM-DD HH:mm:ss")}
         </div>
         <form onSubmit={handleGlobalSearch} className="flex flex-col gap8 mt16">
@@ -78,6 +78,9 @@ function LeftMenu() {
       <Link to="/" className={`nav-link ${location.pathname === "/" ? "active" : ""}`}>
         🏠 메인
       </Link>
+      <Link to="/schedule" className={`nav-link ${location.pathname === "/schedule" ? "active" : ""}`}>
+        📅 일정관리
+      </Link>
       <div className="nav-group mb16">
         <div className="nav-group-title">🎁 추첨하기</div>
         <Link to="/luckydraw" className={`nav-link sub-link ${location.pathname === "/luckydraw" ? "active" : ""}`}>
@@ -90,15 +93,18 @@ function LeftMenu() {
           🎡 룰렛 돌리기
         </Link>
       </div>
-      {categories.length > 0 ? (
-        categories.map((cat) => (
-          <Link key={cat.seq} to={`/board?category=${cat.seq}`} className={`nav-link ${location.pathname === "/board" && currentCategory === String(cat.seq) ? "active" : ""}`}>
-            📝 {cat.show_yn === "N" ? `[비공개] ${cat.name}` : cat.name}
-          </Link>
-        ))
-      ) : (
-        <div className="nav-link text12 text-muted">등록된 게시판이 없습니다.</div>
-      )}
+      <div className="nav-group mb16">
+        <div className="nav-group-title">📋 게시판</div>
+        {categories.length > 0 ? (
+          categories.map((cat) => (
+            <Link key={cat.seq} to={`/board?category=${cat.seq}`} className={`nav-link sub-link ${location.pathname === "/board" && currentCategory === String(cat.seq) ? "active" : ""}`}>
+              📝 {cat.show_yn === "N" ? `[비공개] ${cat.name}` : cat.name}
+            </Link>
+          ))
+        ) : (
+          <div className="nav-link sub-link text12 text-muted">등록된 게시판이 없습니다.</div>
+        )}
+      </div>
       {loginUser?.admin_yn === "Y" && (
         <div className="nav-group">
           <div className="nav-group-title">🛡️ 관리자 메뉴</div>

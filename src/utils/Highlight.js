@@ -11,7 +11,7 @@ export const Highlight = (text, keyword) => {
     <span>
       {parts.map((part, i) =>
         part.toLowerCase() === keyword.toLowerCase() ? (
-          <mark key={i} style={{ backgroundColor: "#fff3bf", color: "#000", padding: "0 2px" }}>
+          <mark key={i} className="highlight-mark">
             {part}
           </mark>
         ) : (

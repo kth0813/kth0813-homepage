@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./Layout";
+import CategoryManage from "./pages/CategoryManage";
 import DashBoard from "./pages/DashBoard";
 import Login from "./pages/Login";
 import Join from "./pages/Join";
@@ -18,6 +19,7 @@ import Roulette from "./pages/Roulette";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import NotificationList from "./pages/NotificationList";
 import MessageList from "./pages/MessageList";
+import Schedule from "./pages/Schedule";
 import "./css/App.css";
 
 function App() {
@@ -35,6 +37,8 @@ function App() {
           <Route path="/board/write" element={<BoardWrite />} />
           <Route path="/board/edit/:seq" element={<BoardWrite />} />
           <Route path="/menus" element={<MenuManage />} />
+          <Route path="/schedule" element={<Schedule />} />
+          <Route path="/category-manage" element={<CategoryManage />} />
           <Route path="/dashboard" element={<DashBoard />} />
           <Route path="/roulette-manage" element={<RouletteManage />} />
           <Route path="/users" element={<UserList />} />

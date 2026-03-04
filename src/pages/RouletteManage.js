@@ -88,20 +88,24 @@ const RouletteManage = () => {
 
       <div className="game-container mb32" style={{ padding: "24px" }}>
         <h3 className="text16 font-bold mb16">신규 참가자 추가</h3>
-        <form onSubmit={handleAddSubmit} className="flex gap16 items-end" style={{ flexWrap: "wrap" }}>
-          <div style={{ flex: 1, minWidth: "200px" }}>
-            <label className="text14 font-bold block mb8">이름</label>
-            <input type="text" className="input-field w-full" placeholder="참가자 이름" value={newName} onChange={(e) => setNewName(e.target.value)} />
+        <form onSubmit={handleAddSubmit} style={{ display: "flex", gap: "16px", alignItems: "center", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", flex: 1, minWidth: "200px" }}>
+            <label className="text14 font-bold" style={{ whiteSpace: "nowrap", margin: 0 }}>
+              이름
+            </label>
+            <input type="text" className="input-field w-full" placeholder="참가자 이름" value={newName} onChange={(e) => setNewName(e.target.value)} style={{ margin: 0 }} />
           </div>
-          <div style={{ width: "120px" }}>
-            <label className="text14 font-bold block mb8">성별</label>
-            <select className="input-field w-full" value={newGender} onChange={(e) => setNewGender(e.target.value)}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", width: "180px" }}>
+            <label className="text14 font-bold" style={{ whiteSpace: "nowrap", margin: 0 }}>
+              성별
+            </label>
+            <select className="input-field w-full" value={newGender} onChange={(e) => setNewGender(e.target.value)} style={{ margin: 0 }}>
               <option value="N">선택안함</option>
-              <option value="M">남 (M)</option>
-              <option value="F">여 (F)</option>
+              <option value="M">남</option>
+              <option value="F">여</option>
             </select>
           </div>
-          <button type="submit" className="btn-primary" style={{ padding: "0 24px", height: "42px", whiteSpace: "nowrap" }}>
+          <button type="submit" className="btn-primary" style={{ padding: "0 24px", height: "42px", whiteSpace: "nowrap", width: "auto" }}>
             추가
           </button>
         </form>
@@ -126,7 +130,7 @@ const RouletteManage = () => {
             <table className="w-full" style={{ borderCollapse: "collapse", textAlign: "left" }}>
               <thead>
                 <tr style={{ background: "var(--bg-color)", borderBottom: "1px solid var(--border-color)" }}>
-                  <th className="p12 font-bold text14">번호 (Seq)</th>
+                  <th className="p12 font-bold text14">번호</th>
                   <th className="p12 font-bold text14">이름</th>
                   <th className="p12 font-bold text14">성별</th>
                   <th className="p12 font-bold text14">당첨 여부</th>

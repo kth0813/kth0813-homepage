@@ -55,7 +55,7 @@ function TopMenu() {
 
   return (
     <header className="app-header">
-      <h2 onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
+      <h2 onClick={() => navigate("/")} className="app-logo">
         KTH homepage
       </h2>
 
@@ -63,30 +63,19 @@ function TopMenu() {
         {loginUser ? (
           <>
             <Link to="/mypage" className="header-link font-bold flex items-center gap8 mr-2">
-              {loginUser.profile_url ? <img src={loginUser.profile_url} alt="프로필" className="rounded-full object-cover" style={{ width: "24px", height: "24px" }} /> : <span>👤</span>}
-              <span className="whitespace-nowrap overflow-hidden text-ellipsis inline-block align-bottom" style={{ maxWidth: "100px" }}>
-                {loginUser.name}
-              </span>
-              님
+              {loginUser.profile_url ? <img src={loginUser.profile_url} alt="프로필" className="rounded-full object-cover profile-img-small" /> : <span>👤</span>}
+              <span className="whitespace-nowrap overflow-hidden text-ellipsis inline-block align-bottom profile-name-small">{loginUser.name}</span>님
             </Link>
 
             <div className="flex items-center gap16 mr-4">
               <div className="relative cursor-pointer text20" onClick={() => navigate("/messages")}>
                 ✉️
-                {unreadMsgCount > 0 && (
-                  <span className="absolute text12 font-bold text-center rounded-full" style={{ top: "-5px", right: "-10px", backgroundColor: "red", color: "white", padding: "2px 6px" }}>
-                    {unreadMsgCount}
-                  </span>
-                )}
+                {unreadMsgCount > 0 && <span className="absolute text12 font-bold text-center rounded-full unread-badge msg-badge">{unreadMsgCount}</span>}
               </div>
 
               <div className="relative cursor-pointer text20" onClick={() => navigate("/notifications")}>
                 🔔
-                {unreadNotifCount > 0 && (
-                  <span className="absolute text12 font-bold text-center rounded-full" style={{ top: "-5px", right: "-5px", backgroundColor: "red", color: "white", padding: "2px 6px" }}>
-                    {unreadNotifCount}
-                  </span>
-                )}
+                {unreadNotifCount > 0 && <span className="absolute text12 font-bold text-center rounded-full unread-badge notif-badge">{unreadNotifCount}</span>}
               </div>
             </div>
 

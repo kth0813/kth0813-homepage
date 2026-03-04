@@ -52,8 +52,8 @@ const Roulette = () => {
   };
 
   const getSegmentColor = useCallback((index, total) => {
-    // Lighter Pastel color palette
-    const colors = ["#ffcaca", "#ffe0b2", "#fff59d", "#c8e6c9", "#b3e5fc", "#d1c4e9", "#f8bbd0"];
+    // Black & Blue color palette
+    const colors = ["#3b82f6", "#334155", "#2563eb", "#38bdf8"];
     return colors[index % colors.length];
   }, []);
 
@@ -86,13 +86,12 @@ const Roulette = () => {
         ctx.fill();
         ctx.save();
 
-        // Draw text
-        const textRadius = radius * 0.75; // Push text further out
+        const textRadius = radius * 0.75;
         ctx.translate(centerX + Math.cos(angle + arc / 2) * textRadius, centerY + Math.sin(angle + arc / 2) * textRadius);
         ctx.rotate(angle + arc / 2);
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillStyle = "#334155"; // Darker text for visibility on pastel backgrounds
+        ctx.fillStyle = "#ffffff";
         ctx.font = `bold ${18 * currentScale}px Pretendard, sans-serif`;
         ctx.fillText(candidate.user_name, 0, 0);
         ctx.restore();
@@ -104,7 +103,6 @@ const Roulette = () => {
   useEffect(() => {
     if (canvasRef.current) {
       const ctx = canvasRef.current.getContext("2d");
-      // Scale for high DPI
       const size = wheelSize;
       const dpr = window.devicePixelRatio || 1;
       canvasRef.current.width = size * dpr;
@@ -127,13 +125,11 @@ const Roulette = () => {
     const selectedWinner = candidates[winnerIdx];
 
     const arc = (Math.PI * 2) / candidates.length;
-    const spins = Math.PI * 2 * 4; // 4 full spins (slower rotation over 5 seconds)
-
-    // We want the winning segment's center to align with the top pointer (-PI/2)
+    const spins = Math.PI * 2 * 4;
     const finalRotation = spins - Math.PI / 2 - (winnerIdx + 0.5) * arc;
 
     let startTimestamp = null;
-    const duration = 6000; // 6 seconds
+    const duration = 6000;
     const startRotation = rotation % (Math.PI * 2);
 
     const animate = (timestamp) => {
@@ -141,7 +137,6 @@ const Roulette = () => {
       const progress = timestamp - startTimestamp;
 
       if (progress < duration) {
-        // easeOutCubic eliminates the excessively long dead tail frame while still slowing smoothly
         const t = progress / duration;
         const easeOut = 1 - Math.pow(1 - t, 3);
         const currentR = startRotation + (finalRotation - startRotation) * easeOut;
@@ -157,33 +152,14 @@ const Roulette = () => {
     requestAnimationFrame(animate);
   };
 
-  const fullScreenStyle = isFullScreen
-    ? {
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        zIndex: 9999,
-        background: "var(--bg-color)",
-        overflowY: "auto",
-        padding: "40px",
-        boxSizing: "border-box",
-        display: "flex",
-        flexDirection: "column",
-        maxWidth: "100%",
-        margin: 0
-      }
-    : {};
-
   return (
-    <div className="page-container" style={fullScreenStyle}>
-      <div className="page-header" style={{ marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-        <div style={{ textAlign: "left", flex: 1 }}>
+    <div className={isFullScreen ? "fullscreen-mode page-container" : "page-container"}>
+      <div className="header-full-width mb24">
+        <div className="text-left flex-1">
           <h2 className="page-title">🎡 룰렛 돌리기</h2>
-          <p style={{ color: "var(--text-muted)", marginTop: "8px", marginBottom: 0 }}>데이터베이스에 등록된 참여자로 룰렛을 돌려보세요!</p>
+          <p className="page-description mt8 mb0">데이터베이스에 등록된 참여자로 룰렛을 돌려보세요!</p>
         </div>
-        <div style={{ textAlign: "right" }}>
+        <div className="text-right">
           <button className="btn-fullscreen" onClick={() => setIsFullScreen(!isFullScreen)}>
             {isFullScreen ? "↙️ 돌아가기" : "🔲 전체화면"}
           </button>
@@ -191,9 +167,8 @@ const Roulette = () => {
       </div>
 
       <div className="game-container">
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "32px", marginBottom: "32px" }}>
-          <div style={{ position: "relative", width: `${wheelSize}px`, height: `${wheelSize}px`, margin: "0 auto", marginTop: "20px" }}>
-            {/* Pointer Pin */}
+        <div className="roulette-main-box">
+          <div className="roulette-wheel-wrapper relative mx-auto mt20" style={{ width: `${wheelSize}px`, height: `${wheelSize}px` }}>
             <div
               style={{
                 position: "absolute",
@@ -204,14 +179,13 @@ const Roulette = () => {
                 height: "0",
                 borderLeft: `${24 * scale}px solid transparent`,
                 borderRight: `${24 * scale}px solid transparent`,
-                borderTop: `${48 * scale}px solid var(--danger-color)`,
+                borderTop: `${48 * scale}px solid var(--header-bg)`,
                 zIndex: 10,
                 dropShadow: "0 4px 6px rgba(0,0,0,0.3)"
               }}
             ></div>
             <canvas ref={canvasRef} style={{ borderRadius: "50%", boxShadow: "var(--shadow-md)" }} />
 
-            {/* Center START Button */}
             <button
               className="btn-primary"
               onClick={handleSpin}
@@ -235,10 +209,9 @@ const Roulette = () => {
                 border: `${4 * scale}px solid white`
               }}
             >
-              {isSpinning ? "추첨" : "START"}
+              {isSpinning ? "추첨중" : "START"}
             </button>
 
-            {/* Winner Popup Overlay */}
             {winner && (
               <div
                 style={{
@@ -256,7 +229,7 @@ const Roulette = () => {
                   justifyContent: "center",
                   zIndex: 30,
                   animation: "fadeIn 0.5s ease-out",
-                  border: `${8 * scale}px solid #22c55e`
+                  border: `${8 * scale}px solid var(--primary-color)`
                 }}
               >
                 <button
@@ -269,10 +242,10 @@ const Roulette = () => {
                     width: `${60 * scale}px`,
                     height: `${60 * scale}px`,
                     borderRadius: "50%",
-                    background: "#f1f5f9",
-                    border: `${2 * scale}px solid #cbd5e1`,
+                    background: "var(--bg-color)",
+                    border: `${2 * scale}px solid var(--border-color)`,
                     fontSize: `${36 * scale}px`,
-                    color: "#475569",
+                    color: "var(--text-muted)",
                     cursor: "pointer",
                     display: "flex",
                     alignItems: "center",
@@ -281,17 +254,17 @@ const Roulette = () => {
                     transition: "all 0.2s ease"
                   }}
                   onMouseOver={(e) => {
-                    e.currentTarget.style.background = "#e2e8f0";
+                    e.currentTarget.style.background = "var(--border-color)";
                   }}
                   onMouseOut={(e) => {
-                    e.currentTarget.style.background = "#f1f5f9";
+                    e.currentTarget.style.background = "var(--bg-color)";
                   }}
                   title="닫기"
                 >
                   &times;
                 </button>
-                <h3 style={{ color: "#166534", fontSize: `${36 * scale}px`, margin: `0 0 ${16 * scale}px 0`, textShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>🎉 축하합니다! 🎉</h3>
-                <div style={{ fontSize: `${96 * scale}px`, fontWeight: "bold", color: "#15803d", textShadow: "0 4px 8px rgba(0,0,0,0.15)", marginTop: `${10 * scale}px` }}>
+                <h3 style={{ color: "var(--primary-color)", fontSize: `${36 * scale}px`, margin: `0 0 ${16 * scale}px 0`, textShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>🎉 축하합니다! 🎉</h3>
+                <div style={{ fontSize: `${96 * scale}px`, fontWeight: "bold", color: "var(--header-bg)", textShadow: "0 4px 8px rgba(0,0,0,0.15)", marginTop: `${10 * scale}px` }}>
                   {winner.user_name}
                   {winner.gender === "M" ? " 형제" : winner.gender === "F" ? " 자매" : ""}
                 </div>
@@ -301,21 +274,14 @@ const Roulette = () => {
         </div>
 
         <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-            <h4 style={{ fontSize: "16px", margin: 0 }}>참가자 대기 명단 ({candidates.length}명)</h4>
+          <div className="flex items-center justify-between mb16">
+            <h4 className="text-16 m0">참가자 대기 명단 ({candidates.length}명)</h4>
             <button className="btn-secondary" onClick={fetchCandidates} disabled={isSpinning}>
               DB에서 다시 불러오기
             </button>
           </div>
           <div className="game-options-panel">
-            <textarea
-              className="input-field"
-              value={candidatesText}
-              onChange={handleTextChange}
-              disabled={isSpinning}
-              placeholder="참가자를 쉼표(,)로 구분하여 입력하세요."
-              style={{ width: "100%", padding: "16px", resize: "vertical", minHeight: "120px", fontSize: "16px", lineHeight: "1.6", borderRadius: "12px", boxSizing: "border-box" }}
-            />
+            <textarea className="input-field lucky-textarea" value={candidatesText} onChange={handleTextChange} disabled={isSpinning} placeholder="참가자를 쉼표(,)로 구분하여 입력하세요." />
           </div>
         </div>
       </div>

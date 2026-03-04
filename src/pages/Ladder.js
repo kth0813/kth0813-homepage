@@ -2,8 +2,8 @@ import React, { useState } from "react";
 
 const Ladder = () => {
   const [participantCount, setParticipantCount] = useState(4);
-  const [participants, setParticipants] = useState(["참가자1", "참가자2", "참가자3", "참가자4"]);
-  const [results, setResults] = useState(["꽝", "당첨", "꽝", "꽝"]);
+  const [participants, setParticipants] = useState(["", "", "", ""]);
+  const [results, setResults] = useState(["", "", "", ""]);
 
   const [ladderData, setLadderData] = useState(null);
   const [activePath, setActivePath] = useState(null);
@@ -23,10 +23,10 @@ const Ladder = () => {
     const newP = [...participants];
     const newR = [...results];
 
-    while (newP.length < count) newP.push(`참가자${newP.length + 1}`);
+    while (newP.length < count) newP.push("");
     while (newP.length > count) newP.pop();
 
-    while (newR.length < count) newR.push("꽝");
+    while (newR.length < count) newR.push("");
     while (newR.length > count) newR.pop();
 
     setParticipants(newP);
@@ -42,6 +42,37 @@ const Ladder = () => {
   const handleResultChange = (idx, value) => {
     const newR = [...results];
     newR[idx] = value;
+    setResults(newR);
+  };
+
+  const fillNumbers = () => {
+    const existingNumbers = new Set();
+    results.forEach((r) => {
+      const num = parseInt(r, 10);
+      if (!isNaN(num)) existingNumbers.add(num);
+    });
+
+    let nextNum = 1;
+    const newR = [...results];
+    for (let i = 0; i < newR.length; i++) {
+      if (!newR[i].trim()) {
+        while (existingNumbers.has(nextNum)) {
+          nextNum++;
+        }
+        newR[i] = String(nextNum);
+        existingNumbers.add(nextNum);
+      }
+    }
+    setResults(newR);
+  };
+
+  const fillBlanks = () => {
+    const newR = [...results];
+    for (let i = 0; i < newR.length; i++) {
+      if (!newR[i].trim()) {
+        newR[i] = "꽝";
+      }
+    }
     setResults(newR);
   };
 
@@ -190,52 +221,64 @@ const Ladder = () => {
 
       <div className="game-container mb32">
         <div className="mb24 flex items-end justify-between gap16" style={{ width: "100%" }}>
-          <div style={{ flexShrink: 0 }}>
-            <label className="font-bold text14 block mb8">참가 인원 (2명 ~ 16명)</label>
+          <div className="flex items-center gap16 flex-shrink-0 flex-wrap">
             <div className="flex items-center gap16">
-              <button
-                onClick={() => handleCountChange(participantCount - 1)}
-                disabled={isAnimating || participantCount <= 2}
-                className="btn-secondary px12 py8 rounded-md"
-                style={{ fontWeight: "bold" }}
-              >
-                ➖
-              </button>
-              <input
-                type="number"
-                min="2"
-                max="16"
-                className="input-field text-center font-bold no-spinners"
-                value={participantCount}
-                onChange={(e) => handleCountChange(e.target.value)}
-                disabled={isAnimating}
-                style={{ width: "80px", fontSize: "16px", height: "42px", textAlign: "center" }}
-              />
-              <button
-                onClick={() => handleCountChange(participantCount + 1)}
-                disabled={isAnimating || participantCount >= 16}
-                className="btn-secondary px12 py8 rounded-md"
-                style={{ fontWeight: "bold" }}
-              >
-                ➕
-              </button>
+              <div className="flex items-center gap16">
+                <button
+                  onClick={() => handleCountChange(participantCount - 1)}
+                  disabled={isAnimating || participantCount <= 2}
+                  className="btn-secondary px12 py8 rounded-md"
+                  style={{ fontWeight: "bold" }}
+                >
+                  ➖
+                </button>
+                <input
+                  type="number"
+                  min="2"
+                  max="16"
+                  className="input-field text-center font-bold no-spinners"
+                  value={participantCount}
+                  onChange={(e) => handleCountChange(e.target.value)}
+                  disabled={isAnimating}
+                  style={{ width: "80px", fontSize: "16px", height: "42px", textAlign: "center" }}
+                />
+                <button
+                  onClick={() => handleCountChange(participantCount + 1)}
+                  disabled={isAnimating || participantCount >= 16}
+                  className="btn-secondary px12 py8 rounded-md"
+                  style={{ fontWeight: "bold" }}
+                >
+                  ➕
+                </button>
+                <label className="font-bold text14" style={{ whiteSpace: "nowrap" }}>
+                  16명까지 가능
+                </label>
+              </div>
             </div>
           </div>
-          <button onClick={generateLadder} className="btn-primary w-auto" style={{ height: "42px", padding: "0 24px", fontSize: "14px", whiteSpace: "nowrap", flexShrink: 0 }} disabled={isAnimating}>
-            사다리 생성
-          </button>
+          <div className="flex gap8 flex-wrap justify-end">
+            <button onClick={fillNumbers} className="btn-secondary" style={{ height: "42px", padding: "0 24px", fontSize: "14px", whiteSpace: "nowrap", flexShrink: 0 }} disabled={isAnimating}>
+              숫자 넣기
+            </button>
+            <button onClick={fillBlanks} className="btn-secondary" style={{ height: "42px", padding: "0 24px", fontSize: "14px", whiteSpace: "nowrap", flexShrink: 0 }} disabled={isAnimating}>
+              꽝 넣기
+            </button>
+            <button onClick={generateLadder} className="btn-primary w-auto" style={{ height: "42px", padding: "0 24px", fontSize: "14px", whiteSpace: "nowrap", flexShrink: 0 }} disabled={isAnimating}>
+              사다리 생성
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-col gap24 mb24">
           <div>
-            <label className="font-bold text14 block mb8">참가자명</label>
+            <label className="font-bold text14 block mb8 mt16">참가자명</label>
             <div className="grid-cols-4 gap16">
               {participants.map((_, i) => (
                 <div key={`p-input-${i}`} className="game-input-wrapper">
                   <div className="font-bold text12 text-muted w-6">#{i + 1}</div>
                   <input
                     type="text"
-                    placeholder="참가자명"
+                    placeholder="참가자를 입력하세요"
                     className="input-field w-full text14"
                     value={participants[i]}
                     onChange={(e) => handleParticipantChange(i, e.target.value)}
@@ -252,7 +295,14 @@ const Ladder = () => {
               {results.map((_, i) => (
                 <div key={`r-input-${i}`} className="game-input-wrapper">
                   <div className="font-bold text12 text-muted w-6">#{i + 1}</div>
-                  <input type="text" placeholder="결과" className="input-field w-full text14" value={results[i]} onChange={(e) => handleResultChange(i, e.target.value)} disabled={isAnimating} />
+                  <input
+                    type="text"
+                    placeholder="결과를 입력하세요"
+                    className="input-field w-full text14"
+                    value={results[i]}
+                    onChange={(e) => handleResultChange(i, e.target.value)}
+                    disabled={isAnimating}
+                  />
                 </div>
               ))}
             </div>

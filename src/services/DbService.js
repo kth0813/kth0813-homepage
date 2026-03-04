@@ -130,6 +130,10 @@ class DatabaseService {
     return supabase.from("board").select(`seq, title, cre_date, user:user_seq ( name, profile_url )`).eq("del_yn", "N").order("seq", { ascending: false }).limit(limit);
   }
 
+  async getBoardCount() {
+    return supabase.from("board").select("*", { count: "exact", head: true }).eq("del_yn", "N");
+  }
+
   getBoardQuery() {
     return supabase.from("board").select(`seq, title, cre_date, hit, user_seq, category_seq, user:user_seq(name, profile_url), category:category_seq(show_yn)`, { count: "exact" }).eq("del_yn", "N");
   }
@@ -262,7 +266,7 @@ class DatabaseService {
   }
 
   async getAllRouletteParticipants() {
-    return supabase.from("roulette_list").select("*").order("seq", { ascending: false });
+    return supabase.from("roulette_list").select("*").order("seq", { ascending: true });
   }
 
   async insertRouletteParticipant(data) {
@@ -320,6 +324,60 @@ class DatabaseService {
 
   getPublicUrl(bucket, filePath) {
     return supabase.storage.from(bucket).getPublicUrl(filePath);
+  }
+  // ==========================================
+  // Schedule & Calendar
+  // ==========================================
+  // Categories
+  async getScheduleCategories(userSeq) {
+    let query = supabase.from("schedule_category").select("*").eq("del_yn", "N");
+    if (userSeq) {
+      query = query.or(`seq.eq.1,user_seq.eq.${userSeq}`);
+    } else {
+      query = query.eq("seq", 1);
+    }
+    return query.order("seq", { ascending: true });
+  }
+
+  async insertScheduleCategory(categoryData) {
+    return supabase.from("schedule_category").insert([categoryData]).select();
+  }
+
+  async updateScheduleCategory(seq, updateData) {
+    return supabase.from("schedule_category").update(updateData).eq("seq", seq);
+  }
+
+  async deleteScheduleCategory(seq) {
+    return supabase.from("schedule_category").update({ del_yn: "Y" }).eq("seq", seq);
+  }
+
+  // Schedules
+  async getSchedulesByDateRange(startDate, endDate, userSeq) {
+    let query = supabase
+      .from("schedule_list")
+      .select(`*, repeat_yn, category:category_seq(category_name, default_color)`)
+      .eq("del_yn", "N")
+      .or(`and(end_datetime.gte.${startDate},start_datetime.lte.${endDate}),repeat_yn.eq.Y`);
+
+    if (userSeq) {
+      query = query.or(`category_seq.eq.1,user_seq.eq.${userSeq}`);
+    } else {
+      query = query.eq("category_seq", 1);
+    }
+
+    return query.order("start_datetime", { ascending: true });
+  }
+
+  async insertSchedule(scheduleData) {
+    return supabase.from("schedule_list").insert([scheduleData]).select();
+  }
+
+  async updateSchedule(seq, updateData) {
+    return supabase.from("schedule_list").update(updateData).eq("seq", seq);
+  }
+
+  async deleteSchedule(seq) {
+    return supabase.from("schedule_list").update({ del_yn: "Y" }).eq("seq", seq);
   }
 }
 

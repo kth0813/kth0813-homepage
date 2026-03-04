@@ -168,8 +168,8 @@ function BoardList() {
         </div>
       </div>
 
-      <div className="filter-bar">
-        <form onSubmit={handleSearch} className="filter-group">
+      <div className="filter-bar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "nowrap" }}>
+        <form onSubmit={handleSearch} className="filter-group" style={{ display: "flex", gap: "10px", alignItems: "center", flex: 1 }}>
           <select value={searchType} onChange={(e) => setSearchType(e.target.value)} className="select-field">
             <option value="title">제목</option>
             <option value="title_contents">제목+내용</option>
@@ -180,14 +180,15 @@ function BoardList() {
             placeholder="검색어 입력"
             value={searchKeyword}
             onChange={(e) => setSearchKeyword(e.target.value)}
-            className="input-field w-48"
+            className="input-field"
+            style={{ width: "250px" }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 handleSearch(e);
               }
             }}
           />
-          <button type="submit" className="btn-secondary">
+          <button type="submit" className="btn-secondary" style={{ padding: "10px 24px", height: "42px", display: "flex", alignItems: "center" }}>
             검색
           </button>
         </form>
@@ -199,6 +200,7 @@ function BoardList() {
             setCurrentPage(1);
           }}
           className="select-field"
+          style={{ height: "42px" }}
         >
           <option value={10}>10개씩 보기</option>
           <option value={25}>25개씩 보기</option>

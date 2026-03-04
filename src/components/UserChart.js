@@ -34,11 +34,11 @@ function UserChart() {
   }, [fetchUserStats]);
 
   return (
-    <div className="chart-container" style={{ padding: "20px", background: "#fff", borderRadius: "8px", border: "1px solid #eee", marginBottom: "30px", height: "100%" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-        <h3 style={{ margin: 0, fontSize: "18px" }}>👤 유저 가입 추이 (월별)</h3>
+    <div className="chart-wrapper">
+      <div className="chart-header">
+        <h3 className="chart-title">👤 유저 가입 추이 (월별)</h3>
 
-        <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} style={{ padding: "6px 12px", borderRadius: "6px", border: "1px solid #ddd" }}>
+        <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} className="chart-select">
           {yearList.length > 0 ? (
             yearList.map((year) => (
               <option key={year} value={year}>
@@ -51,7 +51,7 @@ function UserChart() {
         </select>
       </div>
 
-      <div style={{ width: "100%", height: 300 }}>
+      <div className="chart-container">
         <ResponsiveContainer>
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
