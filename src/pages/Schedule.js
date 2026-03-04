@@ -29,7 +29,7 @@ const Schedule = () => {
   const [location, setLocation] = useState("");
   const [repeatYn, setRepeatYn] = useState("N");
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const { data, error } = await dbService.getScheduleCategories(loginUser?.seq);
       if (error) throw error;
@@ -40,7 +40,7 @@ const Schedule = () => {
       console.error(err);
       showToast("카테고리를 불러오는데 실패했습니다.", "error");
     }
-  };
+  }, [loginUser?.seq]);
 
   const fetchSchedules = useCallback(async () => {
     try {
@@ -58,7 +58,7 @@ const Schedule = () => {
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [fetchCategories]);
 
   useEffect(() => {
     fetchSchedules();
