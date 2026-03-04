@@ -3,14 +3,12 @@ import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import { dbService } from "../services/DbService";
 import { showToast } from "../utils/Alert";
-import { useNavigate } from "react-router-dom";
 import CategoryManage from "./CategoryManage";
 import "../css/App.css";
 
 dayjs.extend(isBetween);
 
 const Schedule = () => {
-  const navigate = useNavigate();
   const loginUser = JSON.parse(localStorage.getItem("loginUser"));
   const [currentDate, setCurrentDate] = useState(dayjs());
   const [schedules, setSchedules] = useState([]);
