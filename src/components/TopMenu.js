@@ -4,7 +4,7 @@ import { dbService } from "../services/DbService";
 import { supabase } from "../supabaseClient";
 import { showToast } from "../utils/Alert";
 
-function TopMenu() {
+function TopMenu({ onMenuToggle }) {
   const navigate = useNavigate();
   const loginUser = JSON.parse(localStorage.getItem("loginUser"));
   const [unreadMsgCount, setUnreadMsgCount] = useState(0);
@@ -55,6 +55,9 @@ function TopMenu() {
 
   return (
     <header className="app-header">
+      <button className="menu-toggle-btn" onClick={onMenuToggle}>
+        ☰
+      </button>
       <h2 onClick={() => navigate("/")} className="app-logo">
         KTH homepage
       </h2>

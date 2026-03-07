@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import { dbService } from "../services/DbService";
 import { showAlert } from "../utils/Alert";
 
-function LeftMenu() {
+function LeftMenu({ isOpen, onClose }) {
   const [categories, setCategories] = useState([]);
   const loginUser = JSON.parse(localStorage.getItem("loginUser"));
   const location = useLocation();
@@ -56,9 +56,18 @@ function LeftMenu() {
   };
 
   return (
-    <nav className="app-nav">
-      <div className="mb16 px12">
-        <div className="text-center text14 font-semibold p8 rounded-md left-menu-clock" style={{ whiteSpace: "nowrap" }}>
+    <nav className={`app-nav ${isOpen ? "open" : ""}`}>
+      <div className="flex justify-end lg:hidden mb-2">
+        <button
+          className="mobile-close-btn"
+          onClick={onClose}
+          aria-label="닫기"
+        >
+          ✕
+        </button>
+      </div>
+      <div className="mb16 px12 relative">
+        <div className="text-center text14 font-semibold p8 rounded-md left-menu-clock mt4" style={{ whiteSpace: "nowrap" }}>
           🕒 {currentTime.format("YYYY-MM-DD HH:mm:ss")}
         </div>
         <form onSubmit={handleGlobalSearch} className="flex flex-col gap8 mt16">

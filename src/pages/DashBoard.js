@@ -73,36 +73,36 @@ function DashBoard() {
             <tbody>
               {loading
                 ? Array.from({ length: 5 }).map((_, index) => (
-                    <tr key={`skeleton-${index}`}>
-                      <td>
-                        <SkeletonLine height="20px" width="80%" />
-                      </td>
-                      <td>
-                        <SkeletonLine height="20px" width="60px" />
-                      </td>
-                      <td>
-                        <SkeletonLine height="20px" width="100px" />
-                      </td>
-                    </tr>
-                  ))
+                  <tr key={`skeleton-${index}`}>
+                    <td>
+                      <SkeletonLine height="20px" width="80%" />
+                    </td>
+                    <td>
+                      <SkeletonLine height="20px" width="60px" />
+                    </td>
+                    <td>
+                      <SkeletonLine height="20px" width="100px" />
+                    </td>
+                  </tr>
+                ))
                 : recentPosts.map((post) => (
-                    <tr key={post.seq}>
-                      <td>
-                        <Link to={`/board/${post.seq}`} className="text-link text-main">
-                          {post.title}
-                        </Link>
-                      </td>
-                      <td className="flex items-center gap8">
-                        {post.user?.profile_url ? (
-                          <img src={post.user?.profile_url} alt="프로필" className="comment-img" style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover" }} />
-                        ) : (
-                          <div className="mini-comment-profile">👤</div>
-                        )}
-                        {post.user?.name}
-                      </td>
-                      <td>{dayjs(post.cre_date).format("YYYY.MM.DD HH:mm")}</td>
-                    </tr>
-                  ))}
+                  <tr key={post.seq}>
+                    <td>
+                      <Link to={`/board/${post.seq}`} className="text-link text-main">
+                        {post.title}
+                      </Link>
+                    </td>
+                    <td className="flex items-center gap8">
+                      {post.user?.profile_url ? (
+                        <img src={post.user?.profile_url} alt="프로필" className="comment-img" style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover" }} />
+                      ) : (
+                        <div className="mini-comment-profile">👤</div>
+                      )}
+                      {post.user?.name}
+                    </td>
+                    <td>{dayjs(post.cre_date).format("YY.MM.DD HH:mm")}</td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>

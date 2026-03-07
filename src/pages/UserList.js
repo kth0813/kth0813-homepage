@@ -144,7 +144,7 @@ function UserList() {
                     )}
                     {Highlight(user.name, activeSearchKeyword)}
                   </td>
-                  <td style={{ color: "var(--text-muted)", fontSize: "14px" }}>{dayjs(user.cre_date).format("YYYY.MM.DD HH:mm")}</td>
+                  <td style={{ color: "var(--text-muted)", fontSize: "14px" }}>{dayjs(user.cre_date).format("YY.MM.DD HH:mm")}</td>
                 </tr>
               ))
             ) : (

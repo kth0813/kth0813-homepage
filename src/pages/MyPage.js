@@ -190,7 +190,7 @@ function MyPage() {
                           {post.title}
                         </Link>
                       </td>
-                      <td className="text-muted text14">{dayjs(post.cre_date).format("YYYY.MM.DD")}</td>
+                      <td className="text-muted text14">{dayjs(post.cre_date).format("YY.MM.DD")}</td>
                       <td className="text-muted">{post.hit || 0}</td>
                     </tr>
                   ))

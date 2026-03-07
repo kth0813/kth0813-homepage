@@ -137,92 +137,94 @@ function Main() {
       <div className="grid-cols-auto-fit gap24 mt32 items-start">
         {loading
           ? Array.from({ length: 4 }).map((_, index) => (
-              <section key={`skeleton-section-${index}`} className="bg-card p24 border-radius-lg border-default shadow-sm">
-                <div className="page-header mb16">
-                  <SkeletonLine height="24px" width="150px" />
-                </div>
-                <div className="table-wrapper">
-                  <table className="data-table">
-                    <tbody>
-                      {Array.from({ length: 5 }).map((_, idx) => (
-                        <tr key={`skeleton-${idx}`}>
-                          <td>
-                            <SkeletonLine height="20px" width="100%" />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-            ))
+            <section key={`skeleton-section-${index}`} className="bg-card border-radius-lg border-default shadow-sm">
+              <div className="page-header mb16">
+                <SkeletonLine height="24px" width="150px" />
+              </div>
+              <div className="table-wrapper">
+                <table className="data-table">
+                  <tbody>
+                    {Array.from({ length: 5 }).map((_, idx) => (
+                      <tr key={`skeleton-${idx}`}>
+                        <td>
+                          <SkeletonLine height="20px" width="100%" />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          ))
           : categories.map((cat) => (
-              <section key={cat.seq} className="bg-card p24 border-radius-lg border-default shadow-sm">
-                <div className="page-header mb16 flex justify-between items-center">
-                  <h3 className="page-title text18 m-0">{cat.name}</h3>
-                  <Link to={`/board?category=${cat.seq}`} className="text-link text14 text-muted">
-                    더보기
-                  </Link>
-                </div>
-                <div className="table-wrapper">
-                  <table className="data-table" style={{ fontSize: "14px", width: "100%", tableLayout: "fixed" }}>
-                    <colgroup>
-                      <col style={{ width: "calc(100% - 250px)" }} />
-                      <col style={{ width: "80px" }} />
-                      <col style={{ width: "150px" }} />
-                    </colgroup>
-                    <tbody>
-                      {categoryPosts[cat.seq] && categoryPosts[cat.seq].length > 0 ? (
-                        <>
-                          {categoryPosts[cat.seq].map((post) => (
-                            <tr key={post.seq}>
-                              <td className="whitespace-nowrap overflow-hidden text-ellipsis pr-2" title={post.title}>
-                                <Link to={`/board/${post.seq}`} className="text-link block overflow-hidden text-ellipsis text-main">
-                                  {post.title}
-                                </Link>
-                              </td>
-                              <td className="flex items-center gap4 justify-center whitespace-nowrap overflow-hidden text-ellipsis" title={post.user?.name}>
+            <section key={cat.seq} className="bg-card border-radius-lg border-default shadow-sm">
+              <div className="page-header mb16 flex justify-between items-center">
+                <h3 className="page-title text18 m-0">{cat.name}</h3>
+                <Link to={`/board?category=${cat.seq}`} className="text-link text14 text-muted">
+                  더보기
+                </Link>
+              </div>
+              <div className="table-wrapper">
+                <table className="data-table" style={{ fontSize: "14px", width: "100%", tableLayout: "fixed" }}>
+                  <colgroup>
+                    <col style={{ width: "calc(100% - 240px)" }} />
+                    <col style={{ width: "110px" }} />
+                    <col style={{ width: "130px" }} />
+                  </colgroup>
+                  <tbody>
+                    {categoryPosts[cat.seq] && categoryPosts[cat.seq].length > 0 ? (
+                      <>
+                        {categoryPosts[cat.seq].map((post) => (
+                          <tr key={post.seq}>
+                            <td className="whitespace-nowrap overflow-hidden text-ellipsis pr-2" title={post.title}>
+                              <Link to={`/board/${post.seq}`} className="text-link block overflow-hidden text-ellipsis text-main">
+                                {post.title}
+                              </Link>
+                            </td>
+                            <td title={post.user?.name}>
+                              <div className="flex items-center gap4 justify-center whitespace-nowrap overflow-hidden text-ellipsis">
                                 {post.user?.profile_url ? (
-                                  <img src={post.user?.profile_url} alt="프로필" style={{ width: "20px", height: "20px", borderRadius: "50%", objectFit: "cover" }} />
+                                  <img src={post.user?.profile_url} alt="프로필" style={{ width: "20px", height: "20px", minWidth: "20px", borderRadius: "50%", objectFit: "cover" }} />
                                 ) : (
-                                  <div className="mini-comment-profile" style={{ width: "20px", height: "20px" }}>
+                                  <div className="mini-comment-profile flex items-center justify-center p0" style={{ width: "20px", height: "20px", minWidth: "20px" }}>
                                     👤
                                   </div>
                                 )}
-                                <span className="text-muted">{post.user?.name}</span>
-                              </td>
-                              <td className="text-muted text-right whitespace-nowrap">{dayjs(post.cre_date).format("YYYY.MM.DD HH:mm")}</td>
-                            </tr>
-                          ))}
-                          {Array.from({ length: Math.max(0, 5 - categoryPosts[cat.seq].length) }).map((_, idx) => (
-                            <tr key={`empty-${cat.seq}-${idx}`}>
-                              <td colSpan="3" className="p16 invisible">
-                                &nbsp;
-                              </td>
-                            </tr>
-                          ))}
-                        </>
-                      ) : (
-                        <>
-                          <tr>
-                            <td colSpan="3" className="text-center text-muted p16">
-                              등록된 게시글이 없습니다.
+                                <span className="text-muted block overflow-hidden text-ellipsis whitespace-nowrap">{post.user?.name}</span>
+                              </div>
+                            </td>
+                            <td className="text-muted text-right whitespace-nowrap">{dayjs(post.cre_date).format("YY.MM.DD HH:mm")}</td>
+                          </tr>
+                        ))}
+                        {Array.from({ length: Math.max(0, 5 - categoryPosts[cat.seq].length) }).map((_, idx) => (
+                          <tr key={`empty-${cat.seq}-${idx}`}>
+                            <td colSpan="3" className="p16 invisible">
+                              &nbsp;
                             </td>
                           </tr>
-                          {Array.from({ length: 4 }).map((_, idx) => (
-                            <tr key={`empty-no-data-${cat.seq}-${idx}`}>
-                              <td colSpan="3" className="p16 invisible">
-                                &nbsp;
-                              </td>
-                            </tr>
-                          ))}
-                        </>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-            ))}
+                        ))}
+                      </>
+                    ) : (
+                      <>
+                        <tr>
+                          <td colSpan="3" className="text-center text-muted p16">
+                            등록된 게시글이 없습니다.
+                          </td>
+                        </tr>
+                        {Array.from({ length: 4 }).map((_, idx) => (
+                          <tr key={`empty-no-data-${cat.seq}-${idx}`}>
+                            <td colSpan="3" className="p16 invisible">
+                              &nbsp;
+                            </td>
+                          </tr>
+                        ))}
+                      </>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          ))}
       </div>
 
       <div className="grid-cols-auto-fit gap24 mt32 items-start">

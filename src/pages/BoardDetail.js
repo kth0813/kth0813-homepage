@@ -150,7 +150,7 @@ function BoardDetail() {
               )}
               <strong>{post.user?.name}</strong>
             </span>{" "}
-            | 작성일: {dayjs(post.cre_date).format("YYYY.MM.DD HH:mm")}
+            | 작성일: {dayjs(post.cre_date).format("YY.MM.DD HH:mm")}
           </span>
           <span>👁️ {post.hit}</span>
         </div>
@@ -227,7 +227,7 @@ function BoardDetail() {
                   <div className="comment-meta">
                     {c.user?.profile_url ? <img src={c.user.profile_url} alt="프로필" className="comment-img" /> : <div className="comment-profile">👤</div>}
                     <strong className="comment-author">{c.user?.name}</strong>
-                    <span className="comment-date">{dayjs(c.cre_date).format("YYYY.MM.DD HH:mm")}</span>
+                    <span className="comment-date">{dayjs(c.cre_date).format("YY.MM.DD HH:mm")}</span>
                   </div>
                   <p className="comment-content">{c.contents}</p>
                   {loginUser && (loginUser.seq === c.user_seq || loginUser.admin_yn === "Y") && (
