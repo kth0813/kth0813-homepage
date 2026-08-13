@@ -1,4 +1,11 @@
 import { sql } from "../neonClient";
+import {
+  uploadFile as r2UploadFile,
+  getPublicUrl as r2GetPublicUrl,
+  deleteFile as r2DeleteFile,
+  downloadFile as r2DownloadFile,
+  listFiles as r2ListFiles
+} from "../r2Client";
 
 class DatabaseService {
   constructor() {
@@ -592,6 +599,15 @@ class DatabaseService {
   async deleteBoardFiles(seqs) {
     try {
       if (!seqs || seqs.length === 0) return { data: [], error: null };
+      const filesToDel = await sql`SELECT * FROM board_file WHERE seq = ANY(${seqs})`;
+      for (const file of filesToDel) {
+        if (file.file_url) {
+          const parts = file.file_url.split("/");
+          const kthIdx = parts.indexOf("kth0813");
+          const r2Key = kthIdx !== -1 ? parts.slice(kthIdx + 1).join("/") : file.file_name;
+          await r2DeleteFile("attachfile", r2Key);
+        }
+      }
       const rows = await sql`DELETE FROM board_file WHERE seq = ANY(${seqs}) RETURNING *`;
       return { data: rows, error: null };
     } catch (error) {
@@ -1045,31 +1061,26 @@ class DatabaseService {
   }
 
   // ==========================================
-  // Storage (Base64 Data URL)
+  // Storage (Cloudflare R2 CRUD)
   // ==========================================
   async uploadFile(bucket, filePath, file) {
-    return new Promise((resolve) => {
-      if (typeof file === "string") {
-        this.fileCache[filePath] = file;
-        resolve({ data: { path: filePath, publicUrl: file }, error: null });
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const dataUrl = reader.result;
-        this.fileCache[filePath] = dataUrl;
-        resolve({ data: { path: filePath, publicUrl: dataUrl }, error: null });
-      };
-      reader.onerror = (error) => {
-        resolve({ data: null, error });
-      };
-      reader.readAsDataURL(file);
-    });
+    return await r2UploadFile(bucket, filePath, file);
   }
 
   getPublicUrl(bucket, filePath) {
-    const publicUrl = this.fileCache[filePath] || filePath;
-    return { data: { publicUrl } };
+    return r2GetPublicUrl(bucket, filePath);
+  }
+
+  async deleteFile(bucket, filePath) {
+    return await r2DeleteFile(bucket, filePath);
+  }
+
+  async downloadFile(bucket, filePath) {
+    return await r2DownloadFile(bucket, filePath);
+  }
+
+  async listFiles(bucket, prefix) {
+    return await r2ListFiles(bucket, prefix);
   }
 
   // ==========================================
