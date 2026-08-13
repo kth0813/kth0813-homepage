@@ -179,7 +179,7 @@ function Main() {
                   <span className="card-subtitle text13 text-muted">Full-Stack Technical Strengths & Tech Stack</span>
                 </div>
               </div>
-              <span className="badge-primary" style={{ fontSize: "12px", background: "#EFF6FF", color: "#2563EB", border: "1px solid #BFDBFE", padding: "4px 10px", borderRadius: "12px" }}>
+              <span className="badge-primary" style={{ fontSize: "12px", background: "#EFF6FF", color: "#2563EB", border: "1px solid #BFDBFE", padding: "4px 10px", borderRadius: "6px" }}>
                 Full-Stack
               </span>
             </div>
