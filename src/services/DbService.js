@@ -122,7 +122,10 @@ class DatabaseService {
         SELECT b.seq, b.title, b.cre_date, b.hit, u.name AS user_name, u.profile_url
         FROM board b
         LEFT JOIN "user" u ON b.user_seq = u.seq
+        LEFT JOIN category c ON b.category_seq = c.seq
         WHERE COALESCE(b.del_yn, 'N') = 'N'
+          AND (c.show_yn = 'Y' OR c.seq IS NULL)
+          AND COALESCE(c.del_yn, 'N') = 'N'
         ORDER BY b.seq DESC
         LIMIT ${limit}
       `;
