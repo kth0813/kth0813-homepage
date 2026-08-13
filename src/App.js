@@ -20,6 +20,8 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import NotificationList from "./pages/NotificationList";
 import MessageList from "./pages/MessageList";
 import Schedule from "./pages/Schedule";
+import AboutMe from "./pages/AboutMe";
+import Projects from "./pages/Projects";
 import "./css/App.css";
 
 function App() {
@@ -28,6 +30,8 @@ function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<Main />} />
+          <Route path="/about" element={<AboutMe />} />
+          <Route path="/projects" element={<Projects />} />
           <Route path="/login" element={<Login />} />
           <Route path="/join" element={<Join />} />
           <Route path="/users" element={<UserList />} />

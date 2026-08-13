@@ -8,6 +8,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { showAlert } from "../utils/Alert";
 import { SkeletonLine, SkeletonRect } from "../components/Skeleton";
+import { IconUser } from "../components/Icons";
 
 function BoardDetail() {
   const { seq } = useParams();
@@ -134,29 +135,31 @@ function BoardDetail() {
 
   return (
     <div className="detail-container">
-      <div className="detail-header">
-        <div style={{ color: "var(--primary-color)", fontSize: "14px", fontWeight: "bold", marginBottom: "8px" }}>[{categoryName}]</div>
-        <h2 className="detail-title">{post.title}</h2>
-        <div className="detail-meta">
-          <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            작성자:{" "}
-            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              {post.user?.profile_url ? (
-                <img src={post.user?.profile_url} alt="프로필" style={{ width: "20px", height: "20px", borderRadius: "50%", objectFit: "cover" }} />
-              ) : (
-                <div style={{ width: "20px", height: "20px", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#f0f0f0", borderRadius: "50%", fontSize: "10px" }}>
-                  👤
-                </div>
-              )}
-              <strong>{post.user?.name}</strong>
-            </span>{" "}
-            | 작성일: {dayjs(post.cre_date).format("YY.MM.DD HH:mm")}
-          </span>
-          <span>👁️ {post.hit}</span>
+      <div className="detail-header mb24">
+        <div style={{ color: "#2563EB", fontSize: "14px", fontWeight: "bold", marginBottom: "8px" }}>[{categoryName}]</div>
+        <h2 className="detail-title text24 font-bold" style={{ color: "#0F172A", marginBottom: "12px" }}>{post.title}</h2>
+        <div className="detail-meta flex items-center gap12 text13 text-muted" style={{ borderTop: "1px solid #E2E8F0", borderBottom: "1px solid #E2E8F0", padding: "12px 0" }}>
+          <div className="flex items-center gap6">
+            <span className="font-semibold" style={{ color: "#475569" }}>작성자:</span>
+            {post.user?.profile_url ? (
+              <img src={post.user?.profile_url} alt="프로필" style={{ width: "20px", height: "20px", borderRadius: "50%", objectFit: "cover" }} />
+            ) : (
+              <IconUser size={16} color="#64748B" />
+            )}
+            <strong style={{ color: "#1E293B" }}>{post.user?.name}</strong>
+          </div>
+          <span style={{ color: "#CBD5E1" }}>·</span>
+          <div>
+            <span className="font-semibold" style={{ color: "#475569" }}>작성일:</span> {dayjs(post.cre_date).format("YYYY.MM.DD HH:mm")}
+          </div>
+          <span style={{ color: "#CBD5E1" }}>·</span>
+          <div>
+            <span className="font-semibold" style={{ color: "#475569" }}>조회수:</span> {post.hit}
+          </div>
         </div>
       </div>
 
-      <div className="detail-body">
+      <div className="detail-body mb32" style={{ lineHeight: "1.7", color: "#334155" }}>
         <ReactMarkdown
           children={post.contents}
           components={{
@@ -175,23 +178,23 @@ function BoardDetail() {
       </div>
 
       {attachedFiles.length > 0 && (
-        <div style={{ marginTop: "24px", padding: "16px", background: "var(--bg-color)", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
-          <h4 style={{ margin: "0 0 12px 0", fontSize: "15px", color: "var(--text-main)" }}>📎 첨부파일 ({attachedFiles.length})</h4>
+        <div className="mb32 p16" style={{ background: "#F8FAFC", borderRadius: "12px", border: "1px solid #E2E8F0" }}>
+          <h4 style={{ margin: "0 0 12px 0", fontSize: "14px", fontWeight: "700", color: "#0F172A" }}>📎 첨부파일 ({attachedFiles.length})</h4>
           <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "8px" }}>
             {attachedFiles.map((file) => (
-              <li key={file.seq} style={{ fontSize: "14px" }}>
+              <li key={file.seq} style={{ fontSize: "13px" }}>
                 <a
                   href="#!"
                   onClick={(e) => {
                     e.preventDefault();
                     handleDownload(file.file_url, file.file_name);
                   }}
-                  className="text-link"
-                  style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+                  className="text-link flex items-center gap6"
+                  style={{ color: "#2563EB", fontWeight: "600" }}
                 >
                   <span>💾</span>
                   <span>{file.file_name}</span>
-                  <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>({(file.file_size / 1024 / 1024).toFixed(2)} MB)</span>
+                  <span style={{ color: "#94A3B8", fontSize: "12px" }}>({(file.file_size / 1024 / 1024).toFixed(2)} MB)</span>
                 </a>
               </li>
             ))}
@@ -199,42 +202,50 @@ function BoardDetail() {
         </div>
       )}
 
-      <div className="action-bar">
-        <button onClick={() => navigate(post.category_seq ? `/board?category=${post.category_seq}` : "/board")} className="btn-outline">
-          목록으로
+      <div className="action-bar flex justify-between items-center mb32" style={{ borderTop: "1px solid #E2E8F0", paddingTop: "20px" }}>
+        <button onClick={() => navigate(post.category_seq ? `/board?category=${post.category_seq}` : "/board")} className="btn-outline-sm font-semibold" style={{ height: "38px", padding: "0 16px", borderRadius: "8px" }}>
+          ← 목록으로
         </button>
         {loginUser && (String(loginUser.seq) === String(post.user_seq) || loginUser.admin_yn === "Y") && (
-          <div className="action-bar-right">
-            <button onClick={() => navigate(`/board/edit/${post.seq}`)} className="btn-outline">
+          <div className="action-bar-right flex gap8">
+            <button onClick={() => navigate(`/board/edit/${post.seq}`)} className="btn-outline-sm font-semibold" style={{ height: "38px", padding: "0 16px", borderRadius: "8px" }}>
               수정
             </button>
-            <button onClick={handlePostDelete} className="btn-danger">
+            <button onClick={handlePostDelete} className="btn-outline-sm font-semibold" style={{ height: "38px", padding: "0 16px", fontSize: "13px", color: "#EF4444", borderColor: "#FECDD3", borderRadius: "8px" }}>
               삭제
             </button>
           </div>
         )}
       </div>
 
-      <section className="comment-section">
-        <h4>💬 댓글 {comments.length}</h4>
-        <div className="comment-list">
+      <section className="comment-section" style={{ borderTop: "1px solid #E2E8F0", paddingTop: "24px" }}>
+        <h4 className="text16 font-bold mb16" style={{ color: "#0F172A" }}>💬 댓글 {comments.length}</h4>
+        <div className="comment-list flex flex-col gap12 mb24">
           {comments.map((c) => (
-            <div key={c.seq} className="comment-item">
+            <div key={c.seq} className="comment-item p16" style={{ background: "#F8FAFC", borderRadius: "10px", border: "1px solid #E2E8F0" }}>
               {c.del_yn === "Y" ? (
-                <p style={{ color: "#bbb", fontStyle: "italic", fontSize: "14px", margin: 0 }}>삭제된 댓글입니다.</p>
+                <p style={{ color: "#94A3B8", fontStyle: "italic", fontSize: "13px", margin: 0 }}>삭제된 댓글입니다.</p>
               ) : (
                 <>
-                  <div className="comment-meta">
-                    {c.user?.profile_url ? <img src={c.user.profile_url} alt="프로필" className="comment-img" /> : <div className="comment-profile">👤</div>}
-                    <strong className="comment-author">{c.user?.name}</strong>
-                    <span className="comment-date">{dayjs(c.cre_date).format("YY.MM.DD HH:mm")}</span>
+                  <div className="comment-meta flex justify-between items-center mb8">
+                    <div className="flex items-center gap8">
+                      {c.user?.profile_url ? <img src={c.user.profile_url} alt="프로필" className="comment-img" style={{ width: "20px", height: "20px", borderRadius: "50%", objectFit: "cover" }} /> : <IconUser size={16} color="#64748B" />}
+                      <strong className="comment-author text13" style={{ color: "#1E293B" }}>{c.user?.name}</strong>
+                      <span style={{ color: "#CBD5E1" }}>·</span>
+                      <span className="comment-date text12 text-muted">{dayjs(c.cre_date).format("YYYY.MM.DD HH:mm")}</span>
+                    </div>
+
+                    {loginUser && (String(loginUser.seq) === String(c.user_seq) || loginUser.admin_yn === "Y") && (
+                      <button
+                        onClick={() => handleCommentDelete(c.seq)}
+                        style={{ background: "none", border: "none", cursor: "pointer", fontSize: "12px", color: "#94A3B8", padding: 0 }}
+                        className="hover:text-red-600"
+                      >
+                        삭제
+                      </button>
+                    )}
                   </div>
-                  <p className="comment-content">{c.contents}</p>
-                  {loginUser && (String(loginUser.seq) === String(c.user_seq) || loginUser.admin_yn === "Y") && (
-                    <button onClick={() => handleCommentDelete(c.seq)} className="btn-text-danger">
-                      삭제
-                    </button>
-                  )}
+                  <p className="comment-content text14 m0" style={{ color: "#334155", lineHeight: "1.5" }}>{c.contents}</p>
                 </>
               )}
             </div>
@@ -242,14 +253,26 @@ function BoardDetail() {
         </div>
 
         {loginUser ? (
-          <div className="comment-input-area">
-            <textarea value={newComment} onChange={(e) => setNewComment(e.target.value)} className="comment-textarea" placeholder="댓글을 남겨주세요." />
-            <button onClick={handleCommentSave} className="btn-primary" style={{ width: "100px", padding: "16px" }}>
+          <div className="comment-input-area flex gap12 items-end mt16">
+            <textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              className="input-field"
+              placeholder="댓글을 남겨주세요."
+              style={{ flex: 1, padding: "12px", borderRadius: "8px", minHeight: "70px", fontSize: "13px", resize: "vertical", boxSizing: "border-box" }}
+            />
+            <button
+              onClick={handleCommentSave}
+              className="btn-primary font-bold flex items-center justify-center"
+              style={{ width: "90px", height: "70px", background: "#2563EB", color: "white", borderRadius: "8px", fontSize: "14px", flexShrink: 0 }}
+            >
               등록
             </button>
           </div>
         ) : (
-          <p style={{ textAlign: "center", color: "var(--text-muted)", marginTop: "20px" }}>로그인 후 댓글을 남길 수 있습니다.</p>
+          <div className="text-center p16 text-muted text13" style={{ background: "#F8FAFC", borderRadius: "8px" }}>
+            댓글을 작성하려면 로그인이 필요합니다.
+          </div>
         )}
       </section>
     </div>

@@ -4,6 +4,16 @@ import { showToast } from "../utils/Alert";
 import { SkeletonLine } from "../components/Skeleton";
 import "../css/App.css";
 
+const PRESET_COLORS = [
+  "#2563EB", // Blue
+  "#10B981", // Emerald / Green
+  "#F59E0B", // Amber / Yellow
+  "#8B5CF6", // Purple
+  "#EC4899", // Pink
+  "#EF4444", // Red
+  "#64748B"  // Slate / Gray
+];
+
 const CategoryManage = ({ onClose }) => {
   const loginUser = JSON.parse(localStorage.getItem("loginUser"));
 
@@ -11,13 +21,8 @@ const CategoryManage = ({ onClose }) => {
   const [loading, setLoading] = useState(true);
 
   // Add state
-  const getRandomColor = () =>
-    "#" +
-    Math.floor(Math.random() * 16777215)
-      .toString(16)
-      .padStart(6, "0");
   const [newCatName, setNewCatName] = useState("");
-  const [newCatColor, setNewCatColor] = useState(getRandomColor());
+  const [newCatColor, setNewCatColor] = useState(PRESET_COLORS[0]);
 
   // Edit state
   const [editingSeq, setEditingSeq] = useState(null);
@@ -66,7 +71,7 @@ const CategoryManage = ({ onClose }) => {
 
       showToast("새 카테고리가 추가되었습니다.", "success");
       setNewCatName("");
-      setNewCatColor(getRandomColor());
+      setNewCatColor(PRESET_COLORS[Math.floor(Math.random() * PRESET_COLORS.length)]);
       fetchCategories();
     } catch (err) {
       console.error(err);
@@ -77,7 +82,7 @@ const CategoryManage = ({ onClose }) => {
   const handleEditClick = (category) => {
     setEditingSeq(category.seq);
     setEditCatName(category.category_name);
-    setEditCatColor(category.default_color || "#3b82f6");
+    setEditCatColor(category.default_color || "#2563EB");
   };
 
   const handleUpdate = async () => {
@@ -123,7 +128,8 @@ const CategoryManage = ({ onClose }) => {
         left: 0,
         width: "100%",
         height: "100%",
-        background: "rgba(0,0,0,0.5)",
+        background: "rgba(15, 23, 42, 0.6)",
+        backdropFilter: "blur(4px)",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
@@ -132,58 +138,80 @@ const CategoryManage = ({ onClose }) => {
     >
       <div
         onClick={(e) => e.stopPropagation()}
+        className="dashboard-card p24"
         style={{
-          background: "var(--card-bg)",
-          padding: "24px",
+          background: "#FFFFFF",
           borderRadius: "12px",
-          width: "700px",
+          width: "680px",
           maxWidth: "90%",
           maxHeight: "90vh",
           overflowY: "auto",
           boxShadow: "0 10px 40px rgba(0,0,0,0.2)"
         }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", borderBottom: "2px solid var(--primary-color)", paddingBottom: "10px" }}>
-          <h2 style={{ margin: 0, color: "var(--header-bg)", fontSize: "20px" }}>🏷️ 카테고리 관리</h2>
-          <button className="btn-ghost" onClick={onClose} style={{ fontSize: "16px", padding: "4px 8px" }}>
+        <div className="flex justify-between items-center mb20 pb12" style={{ borderBottom: "1px solid #E2E8F0" }}>
+          <h2 className="text18 font-bold m0" style={{ color: "#0F172A" }}>🏷️ 카테고리 관리</h2>
+          <button className="candidate-chip-remove" onClick={onClose} style={{ width: "24px", height: "24px", fontSize: "12px" }}>
             ✕
           </button>
         </div>
 
-        <div className="filter-bar" style={{ marginBottom: "20px", padding: "12px", background: "var(--bg-color)", borderRadius: "8px" }}>
-          <h3 style={{ margin: "0 0 10px 0", fontSize: "14px", color: "var(--text-main)" }}>새 카테고리 추가</h3>
-          <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+        {/* Add Category Form Card */}
+        <div className="mb24 p16" style={{ background: "#F8FAFC", borderRadius: "10px", border: "1px solid #E2E8F0" }}>
+          <h3 className="text14 font-bold mb12" style={{ color: "#0F172A" }}>새 카테고리 추가</h3>
+          <div className="flex items-center gap12 flex-wrap">
             <input
               type="text"
-              placeholder="예: 회사 업무, 취미 생활"
+              placeholder="예: 회사 업무, 취미 생활, 생일"
               value={newCatName}
               onChange={(e) => setNewCatName(e.target.value)}
               className="input-field"
-              style={{ flex: 1, minWidth: "150px" }}
+              style={{ flex: 1, minWidth: "160px", height: "38px", fontSize: "13px", padding: "0 12px" }}
             />
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <span style={{ fontSize: "14px", color: "var(--text-muted)", fontWeight: "bold" }}>색상</span>
+
+            {/* Color Swatch Picker */}
+            <div className="flex items-center gap6">
+              {PRESET_COLORS.map((color) => (
+                <div
+                  key={color}
+                  onClick={() => setNewCatColor(color)}
+                  style={{
+                    width: "24px",
+                    height: "24px",
+                    borderRadius: "50%",
+                    background: color,
+                    cursor: "pointer",
+                    border: newCatColor.toLowerCase() === color.toLowerCase() ? "2px solid #0F172A" : "1px solid rgba(0,0,0,0.1)",
+                    transform: newCatColor.toLowerCase() === color.toLowerCase() ? "scale(1.15)" : "scale(1)",
+                    transition: "all 0.15s ease"
+                  }}
+                  title={color}
+                />
+              ))}
               <input
                 type="color"
                 value={newCatColor}
                 onChange={(e) => setNewCatColor(e.target.value)}
-                style={{ width: "40px", height: "40px", padding: "0", border: "1px solid var(--border-color)", borderRadius: "8px", cursor: "pointer" }}
+                style={{ width: "28px", height: "28px", padding: 0, border: "1px solid #CBD5E1", borderRadius: "50%", cursor: "pointer" }}
+                title="커스텀 색상 선택"
               />
             </div>
-            <button onClick={handleAdd} className="btn-primary" style={{ width: "auto", padding: "10px 24px" }}>
-              추가
+
+            <button onClick={handleAdd} className="btn-primary font-bold" style={{ height: "38px", padding: "0 20px", fontSize: "13px", background: "#2563EB", color: "white", borderRadius: "8px" }}>
+              + 추가
             </button>
           </div>
         </div>
 
+        {/* Categories Table */}
         <div className="table-wrapper" style={{ margin: 0 }}>
-          <table className="data-table">
+          <table className="data-table w-full" style={{ tableLayout: "fixed" }}>
             <thead>
               <tr>
-                <th style={{ width: "15%", textAlign: "center" }}>No.</th>
-                <th style={{ width: "45%" }}>카테고리 이름</th>
-                <th style={{ width: "15%", textAlign: "center" }}>색상</th>
-                <th style={{ width: "25%", textAlign: "center" }}>관리</th>
+                <th style={{ width: "12%", textAlign: "center" }}>No.</th>
+                <th style={{ width: "43%" }}>카테고리 이름</th>
+                <th style={{ width: "25%", textAlign: "center" }}>색상</th>
+                <th style={{ width: "20%", textAlign: "center" }}>관리</th>
               </tr>
             </thead>
             <tbody>
@@ -210,55 +238,72 @@ const CategoryManage = ({ onClose }) => {
               ) : categories.length > 0 ? (
                 categories.map((cat, idx) => (
                   <tr key={cat.seq}>
-                    <td style={{ textAlign: "center", color: "var(--text-muted)" }}>{idx + 1}</td>
+                    <td style={{ textAlign: "center", color: "#64748B" }}>{idx + 1}</td>
                     <td>
                       {editingSeq === cat.seq ? (
-                        <input type="text" value={editCatName} onChange={(e) => setEditCatName(e.target.value)} className="input-field" style={{ width: "100%", padding: "6px" }} />
+                        <input type="text" value={editCatName} onChange={(e) => setEditCatName(e.target.value)} className="input-field" style={{ width: "100%", height: "32px", padding: "0 8px", fontSize: "13px" }} />
                       ) : (
-                        <span style={{ fontWeight: cat.seq === 1 ? "bold" : "normal", color: cat.seq === 1 ? "var(--primary-color)" : "inherit" }}>{cat.category_name}</span>
+                        <span className="font-semibold" style={{ color: "#0F172A" }}>{cat.category_name}</span>
                       )}
                     </td>
                     <td style={{ textAlign: "center" }}>
-                      <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                      <div className="flex justify-center items-center gap6">
                         {editingSeq === cat.seq ? (
-                          <input
-                            type="color"
-                            value={editCatColor}
-                            onChange={(e) => setEditCatColor(e.target.value)}
-                            style={{ width: "30px", height: "30px", padding: "0", border: "1px solid var(--border-color)", borderRadius: "4px", cursor: "pointer" }}
-                          />
+                          <div className="flex items-center gap4">
+                            {PRESET_COLORS.map((c) => (
+                              <div
+                                key={c}
+                                onClick={() => setEditCatColor(c)}
+                                style={{
+                                  width: "18px",
+                                  height: "18px",
+                                  borderRadius: "50%",
+                                  background: c,
+                                  cursor: "pointer",
+                                  border: editCatColor.toLowerCase() === c.toLowerCase() ? "2px solid #0F172A" : "1px solid rgba(0,0,0,0.1)"
+                                }}
+                              />
+                            ))}
+                            <input
+                              type="color"
+                              value={editCatColor}
+                              onChange={(e) => setEditCatColor(e.target.value)}
+                              style={{ width: "22px", height: "22px", padding: 0, border: "1px solid #CBD5E1", borderRadius: "50%", cursor: "pointer" }}
+                            />
+                          </div>
                         ) : (
                           <div
                             style={{
-                              width: "24px",
-                              height: "24px",
+                              width: "20px",
+                              height: "20px",
                               borderRadius: "50%",
-                              background: cat.default_color || "#3b82f6",
-                              border: "1px solid rgba(0,0,0,0.1)"
+                              background: cat.default_color || "#2563EB",
+                              border: "1px solid rgba(0,0,0,0.15)",
+                              display: "inline-block"
                             }}
-                            title={cat.default_color || "#3b82f6"}
+                            title={cat.default_color || "#2563EB"}
                           />
                         )}
                       </div>
                     </td>
                     <td style={{ textAlign: "center" }}>
                       {cat.seq === 1 ? (
-                        <span style={{ color: "var(--text-muted)", fontSize: "13px" }}>공개 카테고리 (수정 불가)</span>
+                        <span style={{ color: "#94A3B8", fontSize: "12px" }}>기본 카테고리</span>
                       ) : editingSeq === cat.seq ? (
-                        <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
-                          <button onClick={handleUpdate} className="btn-secondary" style={{ padding: "6px 12px", fontSize: "13px" }}>
+                        <div className="flex gap6 justify-center">
+                          <button onClick={handleUpdate} className="btn-primary font-semibold" style={{ height: "30px", padding: "0 10px", fontSize: "12px", background: "#2563EB", color: "white", borderRadius: "6px" }}>
                             저장
                           </button>
-                          <button onClick={() => setEditingSeq(null)} className="btn-ghost" style={{ padding: "6px 12px", fontSize: "13px" }}>
+                          <button onClick={() => setEditingSeq(null)} className="btn-outline-sm font-semibold" style={{ height: "30px", padding: "0 10px", fontSize: "12px", borderRadius: "6px" }}>
                             취소
                           </button>
                         </div>
                       ) : (
-                        <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
-                          <button onClick={() => handleEditClick(cat)} className="btn-secondary" style={{ padding: "6px 12px", fontSize: "13px" }}>
+                        <div className="flex gap6 justify-center">
+                          <button onClick={() => handleEditClick(cat)} className="btn-outline-sm font-semibold" style={{ height: "30px", padding: "0 10px", fontSize: "12px", color: "#334155", borderColor: "#CBD5E1", borderRadius: "6px" }}>
                             수정
                           </button>
-                          <button onClick={() => handleDelete(cat.seq)} className="btn-ghost" style={{ padding: "6px 12px", fontSize: "13px", color: "var(--danger-color)" }}>
+                          <button onClick={() => handleDelete(cat.seq)} className="btn-outline-sm font-semibold" style={{ height: "30px", padding: "0 10px", fontSize: "12px", color: "#EF4444", borderColor: "#FECDD3", borderRadius: "6px" }}>
                             삭제
                           </button>
                         </div>
@@ -277,8 +322,9 @@ const CategoryManage = ({ onClose }) => {
           </table>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
-          <button className="btn-primary" onClick={onClose} style={{ padding: "8px 24px" }}>
+        {/* Modal Bottom Close Action */}
+        <div className="flex justify-end mt24 pt16" style={{ borderTop: "1px solid #E2E8F0" }}>
+          <button className="btn-outline-sm font-semibold" onClick={onClose} style={{ height: "36px", padding: "0 20px", fontSize: "13px", color: "#334155", background: "#F1F5F9", borderRadius: "8px" }}>
             닫기
           </button>
         </div>

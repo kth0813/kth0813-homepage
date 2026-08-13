@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { dbService } from "../services/DbService";
 import { showToast, showConfirm } from "../utils/Alert";
+import { IconRoulette } from "../components/Icons";
+import PageHeader from "../components/PageHeader";
 
 const RouletteManage = () => {
   const [participants, setParticipants] = useState([]);
@@ -84,90 +86,120 @@ const RouletteManage = () => {
 
   return (
     <div className="page-container">
-      <div className="page-header" style={{ marginBottom: "24px" }}>
-        <h2 className="page-title">🎡 룰렛 참가자 관리</h2>
-        <p style={{ color: "var(--text-muted)", marginTop: "8px" }}>룰렛 게임에 사용할 기초 데이터베이스 참가자 명단을 관리합니다.</p>
-      </div>
+      {/* Standardized Header Banner */}
+      <PageHeader
+        icon={IconRoulette}
+        title="룰렛 참가자 관리 (Roulette Candidates)"
+        description="룰렛 돌리기 게임에 사용할 참가자 명단을 등록하고 관리합니다."
+      />
 
-      <div className="game-container mb32" style={{ padding: "24px" }}>
-        <h3 className="text16 font-bold mb16">신규 참가자 추가</h3>
-        <form onSubmit={handleAddSubmit} style={{ display: "flex", gap: "16px", alignItems: "center", flexWrap: "wrap" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", flex: 1, minWidth: "200px" }}>
-            <label className="text14 font-bold" style={{ whiteSpace: "nowrap", margin: 0 }}>
+      {/* Add New Candidate Card */}
+      <div className="dashboard-card mb32 p24" style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "12px" }}>
+        <h3 className="text16 font-bold mb16" style={{ color: "#0F172A" }}>신규 참가자 추가</h3>
+        <form onSubmit={handleAddSubmit} className="flex items-center gap16 flex-wrap">
+          <div className="flex items-center gap8 flex-1" style={{ minWidth: "200px" }}>
+            <label className="text13 font-bold text-muted whitespace-nowrap m0">
               이름
             </label>
-            <input type="text" className="input-field w-full" placeholder="참가자 이름" value={newName} onChange={(e) => setNewName(e.target.value)} style={{ margin: 0 }} />
+            <input
+              type="text"
+              className="input-field w-full"
+              placeholder="참가자 이름 입력"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              style={{ height: "38px", fontSize: "13px", padding: "0 12px", margin: 0 }}
+            />
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", width: "180px" }}>
-            <label className="text14 font-bold" style={{ whiteSpace: "nowrap", margin: 0 }}>
+          <div className="flex items-center gap8" style={{ width: "160px" }}>
+            <label className="text13 font-bold text-muted whitespace-nowrap m0">
               성별
             </label>
-            <select className="input-field w-full" value={newGender} onChange={(e) => setNewGender(e.target.value)} style={{ margin: 0 }}>
+            <select
+              className="select-field w-full"
+              value={newGender}
+              onChange={(e) => setNewGender(e.target.value)}
+              style={{ height: "38px", fontSize: "13px", padding: "0 8px", margin: 0 }}
+            >
               <option value="N">선택안함</option>
               <option value="M">남</option>
               <option value="F">여</option>
             </select>
           </div>
-          <button type="submit" className="btn-primary" style={{ padding: "0 24px", height: "42px", whiteSpace: "nowrap", width: "auto" }}>
-            추가
+          <button
+            type="submit"
+            className="btn-primary font-bold flex items-center justify-center"
+            style={{ width: "auto", height: "38px", padding: "0 24px", fontSize: "13px", background: "#2563EB", color: "white", borderRadius: "8px" }}
+          >
+            + 추가
           </button>
         </form>
       </div>
 
-      <div className="game-container" style={{ padding: "24px" }}>
+      {/* Candidates Table List */}
+      <div className="dashboard-card p24" style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "12px" }}>
         <div className="flex justify-between items-center mb16">
-          <h3 className="text16 font-bold">참가자 목록 (총 {participants.length}명)</h3>
-          <button className="btn-secondary" onClick={fetchParticipants}>
-            새로고침
+          <h3 className="text16 font-bold m0" style={{ color: "#0F172A" }}>
+            참가자 목록 <span className="text13 text-muted font-normal">(총 {participants.length}명)</span>
+          </h3>
+          <button className="btn-outline-sm font-semibold text12" onClick={fetchParticipants} style={{ height: "32px", padding: "0 12px", borderRadius: "6px" }}>
+            🔄 새로고침
           </button>
         </div>
 
         {isLoading ? (
           <div className="text-center py32 text-muted">로딩 중...</div>
         ) : participants.length === 0 ? (
-          <div className="text-center py32 text-muted border-default rounded-md" style={{ background: "var(--bg-color)" }}>
+          <div className="text-center py32 text-muted border-default rounded-md" style={{ background: "#F8FAFC" }}>
             등록된 참가자가 없습니다.
           </div>
         ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table className="w-full" style={{ borderCollapse: "collapse", textAlign: "left" }}>
+          <div style={{ maxHeight: "550px", overflowY: "auto", border: "1px solid #E2E8F0", borderRadius: "8px" }}>
+            <table className="data-table w-full" style={{ tableLayout: "fixed" }}>
               <thead>
-                <tr style={{ background: "var(--bg-color)", borderBottom: "1px solid var(--border-color)" }}>
-                  <th className="p12 font-bold text14">번호</th>
-                  <th className="p12 font-bold text14">이름</th>
-                  <th className="p12 font-bold text14">성별</th>
-                  <th className="p12 font-bold text14">당첨 여부</th>
-                  <th className="p12 font-bold text14 text-center">관리</th>
+                <tr>
+                  <th style={{ width: "10%", textAlign: "center" }}>번호</th>
+                  <th style={{ width: "35%" }}>이름</th>
+                  <th style={{ width: "15%", textAlign: "center" }}>성별</th>
+                  <th style={{ width: "20%", textAlign: "center" }}>당첨 여부</th>
+                  <th style={{ width: "20%", textAlign: "center" }}>관리</th>
                 </tr>
               </thead>
               <tbody>
                 {participants.map((p, index) => (
-                  <tr key={p.seq} style={{ borderBottom: "1px solid var(--border-color)" }}>
-                    <td className="p12 text14 text-muted">{index + 1}</td>
-                    <td className="p12 text14 font-semibold">{p.user_name || p.name}</td>
-                    <td className="p12 text14">{p.gender === "M" ? "남" : p.gender === "F" ? "여" : "선택안함"}</td>
-                    <td className="p12 text14">
-                      <span
-                        style={{
-                          display: "inline-block",
-                          padding: "4px 8px",
-                          borderRadius: "4px",
-                          fontSize: "12px",
-                          fontWeight: "bold",
-                          background: p.win_yn === "Y" ? "#dcfce7" : "#f1f5f9",
-                          color: p.win_yn === "Y" ? "#166534" : "var(--text-muted)"
-                        }}
-                      >
-                        {p.win_yn === "Y" ? "당첨 (Y)" : "대기 (N)"}
-                      </span>
+                  <tr key={p.seq}>
+                    <td style={{ textAlign: "center" }}>{index + 1}</td>
+                    <td className="font-semibold" style={{ color: "#0F172A" }}>{p.user_name || p.name}</td>
+                    <td style={{ textAlign: "center" }} className="text-muted text13">
+                      {p.gender === "M" ? "남" : p.gender === "F" ? "여" : "-"}
                     </td>
-                    <td className="p12 text-center" style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
-                      <button className="btn-secondary" onClick={() => handleToggleWin(p.seq, p.win_yn)} style={{ padding: "6px 12px", fontSize: "12px" }}>
-                        상태 변경
-                      </button>
-                      <button className="btn-danger" onClick={() => handleDelete(p.seq, p.user_name || p.name)} style={{ padding: "6px 12px", fontSize: "12px" }}>
-                        삭제
-                      </button>
+                    <td style={{ textAlign: "center" }}>
+                      {p.win_yn === "Y" ? (
+                        <span className="badge-tech font-semibold" style={{ background: "#DCFCE7", color: "#166534", border: "1px solid #BBF7D0", padding: "3px 10px", borderRadius: "12px", fontSize: "12px" }}>
+                          당첨 (Y)
+                        </span>
+                      ) : (
+                        <span className="badge-tech font-semibold" style={{ background: "#F1F5F9", color: "#64748B", border: "1px solid #E2E8F0", padding: "3px 10px", borderRadius: "12px", fontSize: "12px" }}>
+                          대기 (N)
+                        </span>
+                      )}
+                    </td>
+                    <td style={{ textAlign: "center" }}>
+                      <div className="flex gap6 justify-center">
+                        <button
+                          className="btn-outline-sm font-semibold"
+                          onClick={() => handleToggleWin(p.seq, p.win_yn)}
+                          style={{ height: "30px", padding: "0 10px", fontSize: "12px", color: "#334155", borderRadius: "6px" }}
+                        >
+                          상태 변경
+                        </button>
+                        <button
+                          className="btn-outline-sm font-semibold"
+                          onClick={() => handleDelete(p.seq, p.user_name || p.name)}
+                          style={{ height: "30px", padding: "0 10px", fontSize: "12px", color: "#EF4444", borderColor: "#FECDD3", borderRadius: "6px" }}
+                        >
+                          삭제
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

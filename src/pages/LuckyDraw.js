@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import "../css/App.css";
+import { IconDice, IconFlame } from "../components/Icons";
+import PageHeader from "../components/PageHeader";
 
 function LuckyDraw() {
   const [candidatesText, setCandidatesText] = useState("");
@@ -7,6 +9,14 @@ function LuckyDraw() {
   const [isDrawing, setIsDrawing] = useState(false);
   const [winners, setWinners] = useState([]);
   const [errorMsg, setErrorMsg] = useState("");
+
+  const handleLoadSample = () => {
+    setCandidatesText("김태훈, 이서연, 박지훈, 최수아, 정민우, 강예은, 윤서준, 임아린");
+  };
+
+  const handleClearText = () => {
+    setCandidatesText("");
+  };
 
   const [minNumber, setMinNumber] = useState("");
   const [maxNumber, setMaxNumber] = useState("");
@@ -139,94 +149,134 @@ function LuckyDraw() {
 
   return (
     <div className="page-container" style={fullScreenStyle}>
-      <div className="page-header" style={{ marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-        <div style={{ textAlign: "left", flex: 1 }}>
-          <h2 className="page-title">🎲 럭키 드로우</h2>
-          <p style={{ color: "var(--text-muted)", marginTop: "8px", marginBottom: 0 }}>후보를 쉼표(,)로 구분지어 입력하고 추첨을 진행하세요!</p>
-        </div>
-        <div style={{ textAlign: "right" }}>
-          <button className="btn-fullscreen" onClick={() => setIsFullScreen(!isFullScreen)}>
-            {isFullScreen ? "↙️ 돌아가기" : "🔲 전체화면"}
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        icon={IconDice}
+        title="추첨하기 (Lucky Draw)"
+        description="후보를 쉼표(,)로 구분지어 입력하고 추첨을 진행하세요!"
+      >
+        <button className="btn-outline-sm font-semibold" onClick={() => setIsFullScreen(!isFullScreen)} style={{ height: "38px", padding: "0 16px", borderRadius: "8px" }}>
+          {isFullScreen ? "↙️ 돌아가기" : "🔲 전체화면"}
+        </button>
+      </PageHeader>
 
       <div className="game-container">
         <div style={{ marginBottom: "20px" }}>
-          <div className="game-options-panel" style={{ marginBottom: "12px" }}>
-            <span style={{ fontSize: "15px", fontWeight: "700", color: "var(--text-main)" }}>🔢 숫자 추가:</span>
-            <input
-              type="number"
-              className="input-field"
-              placeholder="시작"
-              value={minNumber}
-              onChange={(e) => setMinNumber(e.target.value)}
-              disabled={isDrawing}
-              style={{ width: "70px", padding: "8px", fontSize: "15px" }}
-            />
-            <span style={{ fontWeight: "bold" }}>~</span>
-            <input
-              type="number"
-              className="input-field"
-              placeholder="끝"
-              value={maxNumber}
-              onChange={(e) => setMaxNumber(e.target.value)}
-              disabled={isDrawing}
-              style={{ width: "70px", padding: "8px", fontSize: "15px" }}
-            />
-            <button className="btn-secondary" onClick={handleAddNumbers} disabled={isDrawing} style={{ padding: "8px 16px", borderRadius: "8px", fontSize: "14px", fontWeight: "700" }}>
-              추가하기
-            </button>
-            <button
-              className="btn-secondary"
-              onClick={handleRemoveDuplicates}
-              disabled={isDrawing || !candidatesText.trim()}
-              style={{ padding: "8px 16px", borderRadius: "8px", fontSize: "14px", fontWeight: "700", marginLeft: "4px" }}
-            >
-              중복제거
-            </button>
+          {/* Top Control Bar */}
+          <div className="dashboard-card mb16 p16 flex items-center justify-between flex-wrap gap16" style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: "12px" }}>
+            {/* Group 1: Number Generator */}
+            <div className="flex items-center gap10 flex-wrap">
+              <span style={{ fontSize: "14px", fontWeight: "700", color: "#334155" }}>🔢 숫자 범위 추가:</span>
+              <input
+                type="number"
+                className="input-field"
+                placeholder="시작"
+                value={minNumber}
+                onChange={(e) => setMinNumber(e.target.value)}
+                disabled={isDrawing}
+                style={{ width: "65px", height: "36px", padding: "0 8px", fontSize: "13px" }}
+              />
+              <span style={{ fontWeight: "bold", color: "#94A3B8" }}>~</span>
+              <input
+                type="number"
+                className="input-field"
+                placeholder="끝"
+                value={maxNumber}
+                onChange={(e) => setMaxNumber(e.target.value)}
+                disabled={isDrawing}
+                style={{ width: "65px", height: "36px", padding: "0 8px", fontSize: "13px" }}
+              />
+              <button className="btn-outline-sm font-semibold" onClick={handleAddNumbers} disabled={isDrawing} style={{ height: "36px", padding: "0 12px", fontSize: "13px" }}>
+                추가하기
+              </button>
+              <button
+                className="btn-outline-sm font-semibold"
+                onClick={handleRemoveDuplicates}
+                disabled={isDrawing || !candidatesText.trim()}
+                style={{ height: "36px", padding: "0 12px", fontSize: "13px" }}
+              >
+                중복제거
+              </button>
+            </div>
 
-            <div style={{ width: "1px", height: "24px", background: "var(--border-color)", margin: "0 4px" }}></div>
+            <div style={{ width: "1px", height: "24px", background: "#CBD5E1" }} className="hide-mobile" />
 
-            <span style={{ fontSize: "15px", fontWeight: "700", color: "var(--text-main)" }}>당첨자 수:</span>
-            <input
-              type="number"
-              className="input-field"
-              value={winnerCount}
-              onChange={(e) => setWinnerCount(parseInt(e.target.value, 10) || 1)}
-              min="1"
-              disabled={isDrawing}
-              style={{ width: "70px", padding: "8px", fontSize: "16px", fontWeight: "bold", textAlign: "center" }}
-            />
-            <span style={{ fontSize: "15px", fontWeight: "700", color: "var(--text-main)" }}>
-              /{" "}
-              {
-                candidatesText
-                  .split(",")
-                  .map((c) => c.trim())
-                  .filter((c) => c).length
-              }
-              명
-            </span>
+            {/* Group 2: Winner Count & Action Button */}
+            <div className="flex items-center gap12 flex-wrap">
+              <div className="flex items-center gap6">
+                <span style={{ fontSize: "14px", fontWeight: "700", color: "#334155" }}>🎯 당첨자 수:</span>
+                <input
+                  type="number"
+                  className="input-field font-bold text-center"
+                  value={winnerCount}
+                  onChange={(e) => setWinnerCount(parseInt(e.target.value, 10) || 1)}
+                  min="1"
+                  disabled={isDrawing}
+                  style={{ width: "60px", height: "36px", padding: "0 6px", fontSize: "14px" }}
+                />
+                <span className="text13 text-muted">
+                  /{" "}
+                  {
+                    candidatesText
+                      .split(",")
+                      .map((c) => c.trim())
+                      .filter((c) => c).length
+                  }
+                  명
+                </span>
+              </div>
 
-            <button
-              className="btn-primary"
-              onClick={handleDraw}
-              disabled={isDrawing}
-              style={{ padding: "10px 24px", fontSize: "16px", fontWeight: "800", borderRadius: "8px", marginLeft: "auto", boxShadow: "var(--shadow-sm)", flexGrow: 1, maxWidth: "200px" }}
-            >
-              {isDrawing ? `추첨 진행중...` : "🎉 추첨 시작!"}
-            </button>
+              <button
+                className="btn-primary font-bold flex items-center gap6"
+                onClick={handleDraw}
+                disabled={isDrawing}
+                style={{ width: "auto", display: "inline-flex", height: "38px", padding: "0 20px", fontSize: "14px", background: "#2563EB", color: "white", borderRadius: "8px" }}
+              >
+                {isDrawing ? (
+                  `추첨 진행중...`
+                ) : (
+                  <>
+                    <IconFlame size={16} color="white" /> 추첨 시작!
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
-          <textarea
-            className="input-field"
-            placeholder="참가자를 쉼표(,)로 구분지어 자유롭게 입력해 주세요. (예: 사과, 바나나, 포도, 딸기...)"
-            value={candidatesText}
-            onChange={(e) => setCandidatesText(e.target.value)}
-            disabled={isDrawing}
-            style={{ width: "100%", padding: "16px", resize: "vertical", minHeight: "120px", fontSize: "16px", lineHeight: "1.6", borderRadius: "12px", boxSizing: "border-box" }}
-          ></textarea>
+          {/* Candidate Textarea with Quick Actions */}
+          <div>
+            <div className="flex justify-between items-center mb8">
+              <span className="font-bold text14" style={{ color: "#334155" }}>참가자 명단 입력</span>
+              <div className="flex gap6">
+                <button
+                  type="button"
+                  className="btn-outline-sm font-semibold"
+                  onClick={handleLoadSample}
+                  disabled={isDrawing}
+                  style={{ height: "28px", padding: "0 10px", fontSize: "12px", borderRadius: "6px" }}
+                >
+                  예시 데이터
+                </button>
+                <button
+                  type="button"
+                  className="btn-outline-sm font-semibold"
+                  onClick={handleClearText}
+                  disabled={isDrawing || !candidatesText.trim()}
+                  style={{ height: "28px", padding: "0 10px", fontSize: "12px", borderRadius: "6px", color: "#EF4444", borderColor: "#FECDD3" }}
+                >
+                  초기화
+                </button>
+              </div>
+            </div>
+
+            <textarea
+              className="input-field"
+              placeholder="참가자를 쉼표(,)로 구분지어 자유롭게 입력해 주세요. (예: 사과, 바나나, 포도, 딸기...)"
+              value={candidatesText}
+              onChange={(e) => setCandidatesText(e.target.value)}
+              disabled={isDrawing}
+              style={{ width: "100%", padding: "16px", resize: "vertical", minHeight: "120px", fontSize: "15px", lineHeight: "1.6", borderRadius: "12px", boxSizing: "border-box" }}
+            ></textarea>
+          </div>
         </div>
 
         {errorMsg && (

@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { IconLadder } from "../components/Icons";
+import PageHeader from "../components/PageHeader";
 
 const Ladder = () => {
   const [participantCount, setParticipantCount] = useState(4);
@@ -207,28 +209,26 @@ const Ladder = () => {
 
   return (
     <div className="page-container" style={fullScreenStyle}>
-      <div className="page-header" style={{ marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-        <div style={{ textAlign: "left", flex: 1 }}>
-          <h2 className="page-title">🔀 사다리 타기</h2>
-          <p style={{ color: "var(--text-muted)", marginTop: "8px", marginBottom: 0 }}>참가자와 결과를 입력하고 사다리를 그려보세요!</p>
-        </div>
-        <div style={{ textAlign: "right" }}>
-          <button className="btn-fullscreen" onClick={() => setIsFullScreen(!isFullScreen)}>
-            {isFullScreen ? "↙️ 돌아가기" : "🔲 전체화면"}
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        icon={IconLadder}
+        title="사다리 타기 (Ladder)"
+        description="참가자와 결과를 입력하고 사다리를 그려보세요!"
+      >
+        <button className="btn-outline-sm font-semibold" onClick={() => setIsFullScreen(!isFullScreen)} style={{ height: "38px", padding: "0 16px", borderRadius: "8px" }}>
+          {isFullScreen ? "↙️ 돌아가기" : "🔲 전체화면"}
+        </button>
+      </PageHeader>
 
       <div className="game-container mb32">
-        <div className="mb24 flex items-end justify-between gap16" style={{ width: "100%" }}>
+        <div className="mb32 flex items-center justify-between gap16" style={{ width: "100%" }}>
           <div className="flex items-center gap16 flex-shrink-0 flex-wrap">
-            <div className="flex items-center gap16">
-              <div className="flex items-center gap16">
+            <div className="flex items-center gap10 flex-wrap">
+              <div className="flex items-center gap6">
                 <button
                   onClick={() => handleCountChange(participantCount - 1)}
                   disabled={isAnimating || participantCount <= 2}
-                  className="btn-secondary px12 py8 rounded-md"
-                  style={{ fontWeight: "bold" }}
+                  className="btn-outline-sm font-bold flex items-center justify-center"
+                  style={{ width: "38px", height: "38px", borderRadius: "8px" }}
                 >
                   ➖
                 </button>
@@ -240,30 +240,31 @@ const Ladder = () => {
                   value={participantCount}
                   onChange={(e) => handleCountChange(e.target.value)}
                   disabled={isAnimating}
-                  style={{ width: "80px", fontSize: "16px", height: "42px", textAlign: "center" }}
+                  style={{ width: "65px", fontSize: "15px", height: "38px", textAlign: "center", borderRadius: "8px" }}
                 />
                 <button
                   onClick={() => handleCountChange(participantCount + 1)}
                   disabled={isAnimating || participantCount >= 16}
-                  className="btn-secondary px12 py8 rounded-md"
-                  style={{ fontWeight: "bold" }}
+                  className="btn-outline-sm font-bold flex items-center justify-center"
+                  style={{ width: "38px", height: "38px", borderRadius: "8px" }}
                 >
                   ➕
                 </button>
-                <label className="font-bold text14" style={{ whiteSpace: "nowrap" }}>
-                  16명까지 가능
-                </label>
               </div>
+              <span className="badge-tech" style={{ fontSize: "11px", background: "#F1F5F9", color: "#64748B", border: "1px solid #E2E8F0", padding: "4px 10px", borderRadius: "6px", whiteSpace: "nowrap" }}>
+                16명까지 가능
+              </span>
             </div>
           </div>
-          <div className="flex gap8 flex-wrap justify-end">
-            <button onClick={fillNumbers} className="btn-secondary" style={{ height: "42px", padding: "0 24px", fontSize: "14px", whiteSpace: "nowrap", flexShrink: 0 }} disabled={isAnimating}>
+
+          <div className="flex gap8 flex-wrap justify-end items-center">
+            <button onClick={fillNumbers} className="btn-outline-sm font-semibold inline-flex items-center justify-center" style={{ height: "38px", padding: "0 16px", fontSize: "13px", whiteSpace: "nowrap", flexShrink: 0, borderRadius: "8px", lineHeight: 1 }} disabled={isAnimating}>
               숫자 넣기
             </button>
-            <button onClick={fillBlanks} className="btn-secondary" style={{ height: "42px", padding: "0 24px", fontSize: "14px", whiteSpace: "nowrap", flexShrink: 0 }} disabled={isAnimating}>
+            <button onClick={fillBlanks} className="btn-outline-sm font-semibold inline-flex items-center justify-center" style={{ height: "38px", padding: "0 16px", fontSize: "13px", whiteSpace: "nowrap", flexShrink: 0, borderRadius: "8px", lineHeight: 1 }} disabled={isAnimating}>
               꽝 넣기
             </button>
-            <button onClick={generateLadder} className="btn-primary w-auto" style={{ height: "42px", padding: "0 24px", fontSize: "14px", whiteSpace: "nowrap", flexShrink: 0 }} disabled={isAnimating}>
+            <button onClick={generateLadder} className="btn-primary font-bold inline-flex items-center justify-center" style={{ width: "auto", height: "38px", padding: "0 20px", fontSize: "13px", background: "#2563EB", color: "white", whiteSpace: "nowrap", flexShrink: 0, borderRadius: "8px", lineHeight: 1 }} disabled={isAnimating}>
               사다리 생성
             </button>
           </div>
@@ -271,7 +272,7 @@ const Ladder = () => {
 
         <div className="flex flex-col gap24 mb24">
           <div>
-            <label className="font-bold text14 block mb8 mt16">참가자명</label>
+            <label className="font-bold text14 block mb8 mt16" style={{ color: "#1E40AF" }}>👤 참가자명</label>
             <div className="grid-cols-4 gap16">
               {participants.map((_, i) => (
                 <div key={`p-input-${i}`} className="game-input-wrapper">
@@ -279,7 +280,8 @@ const Ladder = () => {
                   <input
                     type="text"
                     placeholder="참가자를 입력하세요"
-                    className="input-field w-full text14"
+                    className="input-field w-full text13 font-semibold"
+                    style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: "8px", color: "#1E3A8A" }}
                     value={participants[i]}
                     onChange={(e) => handleParticipantChange(i, e.target.value)}
                     disabled={isAnimating}
@@ -290,7 +292,7 @@ const Ladder = () => {
           </div>
 
           <div>
-            <label className="font-bold text14 block mb8">결과</label>
+            <label className="font-bold text14 block mb8" style={{ color: "#065F46" }}>🎁 결과</label>
             <div className="grid-cols-4 gap16">
               {results.map((_, i) => (
                 <div key={`r-input-${i}`} className="game-input-wrapper">
@@ -298,7 +300,8 @@ const Ladder = () => {
                   <input
                     type="text"
                     placeholder="결과를 입력하세요"
-                    className="input-field w-full text14"
+                    className="input-field w-full text13 font-semibold"
+                    style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", borderRadius: "8px", color: "#064E3B" }}
                     value={results[i]}
                     onChange={(e) => handleResultChange(i, e.target.value)}
                     disabled={isAnimating}

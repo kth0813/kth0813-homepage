@@ -6,6 +6,9 @@ import dayjs from "dayjs";
 import { Highlight } from "../utils/Highlight";
 import { SkeletonCircle, SkeletonLine } from "../components/Skeleton";
 
+import { IconBoard, IconUser } from "../components/Icons";
+import PageHeader from "../components/PageHeader";
+
 function BoardList() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -147,28 +150,26 @@ function BoardList() {
 
   return (
     <div className="page-container">
-      <div className="page-header">
-        <div className="page-title-group">
-          <h2 className="page-title">📋 {categoryName}</h2>
-          {description && <p className="page-description">{description}</p>}
-        </div>
-        <div className="flex gap8">
-          {loginUser?.admin_yn === "Y" && selectedPosts.length > 0 && (
-            <button onClick={handleDeleteSelected} className="btn-danger w-auto px24 py8">
-              선택 삭제 ({selectedPosts.length})
-            </button>
-          )}
-          {(!category || category === "1" || loginUser?.admin_yn === "Y") && (
-            <button onClick={handleWriteClick} className="btn-primary w-auto px24 py8">
-              새 글 작성
-            </button>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        icon={IconBoard}
+        title={categoryName || "전체 게시판"}
+        description={description || "게시글을 확인하고 소통해보세요."}
+      >
+        {loginUser?.admin_yn === "Y" && selectedPosts.length > 0 && (
+          <button onClick={handleDeleteSelected} className="btn-outline-sm font-semibold" style={{ width: "auto", display: "inline-flex", height: "38px", padding: "0 14px", fontSize: "13px", color: "#EF4444", borderColor: "#FECDD3", background: "#FFE4E6", whiteSpace: "nowrap", flexShrink: 0, borderRadius: "8px" }}>
+            선택 삭제 ({selectedPosts.length})
+          </button>
+        )}
+        {(!category || category === "1" || loginUser?.admin_yn === "Y") && (
+          <button onClick={handleWriteClick} className="btn-primary font-semibold flex items-center gap6" style={{ width: "auto", display: "inline-flex", height: "38px", padding: "0 16px", fontSize: "13px", background: "#2563EB", color: "white", whiteSpace: "nowrap", flexShrink: 0, borderRadius: "8px" }}>
+            + 새 글 작성
+          </button>
+        )}
+      </PageHeader>
 
-      <div className="filter-bar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "nowrap" }}>
+      <div className="filter-bar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "nowrap", marginBottom: "16px" }}>
         <form onSubmit={handleSearch} className="filter-group" style={{ display: "flex", gap: "10px", alignItems: "center", flex: 1 }}>
-          <select value={searchType} onChange={(e) => setSearchType(e.target.value)} className="select-field">
+          <select value={searchType} onChange={(e) => setSearchType(e.target.value)} className="select-field" style={{ height: "38px", fontSize: "13px", padding: "0 10px" }}>
             <option value="title">제목</option>
             <option value="title_contents">제목+내용</option>
             <option value="author">작성자</option>
@@ -179,14 +180,14 @@ function BoardList() {
             value={searchKeyword}
             onChange={(e) => setSearchKeyword(e.target.value)}
             className="input-field"
-            style={{ width: "250px" }}
+            style={{ width: "220px", height: "38px", fontSize: "13px", padding: "0 12px" }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 handleSearch(e);
               }
             }}
           />
-          <button type="submit" className="btn-secondary" style={{ padding: "10px 24px", height: "42px", display: "flex", alignItems: "center" }}>
+          <button type="submit" className="btn-secondary font-semibold" style={{ padding: "0 18px", height: "38px", fontSize: "13px", display: "flex", alignItems: "center", borderRadius: "8px" }}>
             검색
           </button>
         </form>
@@ -198,7 +199,7 @@ function BoardList() {
             setCurrentPage(1);
           }}
           className="select-field"
-          style={{ height: "42px" }}
+          style={{ height: "38px", fontSize: "13px", padding: "0 10px" }}
         >
           <option value={10}>10개씩 보기</option>
           <option value={25}>25개씩 보기</option>
@@ -218,8 +219,8 @@ function BoardList() {
               <th style={{ width: "10%" }}>번호</th>
               <th style={{ width: "40%" }}>제목</th>
               <th style={{ width: "15%" }}>작성자</th>
-              <th style={{ width: "15%" }}>조회수</th>
-              <th style={{ width: "15%" }}>작성일</th>
+              <th style={{ width: "12%" }}>조회수</th>
+              <th style={{ width: "18%" }}>작성일</th>
             </tr>
           </thead>
           <tbody>
@@ -266,11 +267,11 @@ function BoardList() {
                     </Link>
                   </td>
                   <td className="flex items-center gap8 overflow-hidden text-ellipsis whitespace-nowrap" title={post.user?.name}>
-                    {post.user?.profile_url ? <img src={post.user.profile_url} alt="프로필" className="comment-img" /> : <div className="comment-profile">👤</div>}
-                    {post.user?.name}
+                    {post.user?.profile_url ? <img src={post.user.profile_url} alt="프로필" className="comment-img" /> : <IconUser size={16} color="#64748B" />}
+                    <span>{post.user?.name}</span>
                   </td>
                   <td className="text-muted">{post.hit || 0}</td>
-                  <td className="text-muted text14">{dayjs(post.cre_date).format("YY.MM.DD HH:mm")}</td>
+                  <td className="text-muted text13">{dayjs(post.cre_date).format("YYYY.MM.DD HH:mm")}</td>
                 </tr>
               ))
             ) : (
@@ -285,12 +286,41 @@ function BoardList() {
       </div>
 
       {totalPages > 0 && (
-        <div className="pagination">
+        <div className="flex justify-center items-center gap6 mt24 mb16" style={{ paddingTop: "12px" }}>
+          <button
+            className="btn-outline-sm font-semibold"
+            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            style={{ height: "34px", padding: "0 10px", borderRadius: "6px" }}
+          >
+            ◀
+          </button>
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-            <button key={pageNum} onClick={() => setCurrentPage(pageNum)} className={`page-btn ${currentPage === pageNum ? "active" : ""}`}>
+            <button
+              key={pageNum}
+              onClick={() => setCurrentPage(pageNum)}
+              className={currentPage === pageNum ? "btn-primary font-bold" : "btn-outline-sm"}
+              style={{
+                height: "34px",
+                width: "34px",
+                padding: 0,
+                borderRadius: "6px",
+                fontSize: "13px",
+                background: currentPage === pageNum ? "#2563EB" : "#FFFFFF",
+                color: currentPage === pageNum ? "#FFFFFF" : "#1E293B"
+              }}
+            >
               {pageNum}
             </button>
           ))}
+          <button
+            className="btn-outline-sm font-semibold"
+            onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+            style={{ height: "34px", padding: "0 10px", borderRadius: "6px" }}
+          >
+            ▶
+          </button>
         </div>
       )}
     </div>

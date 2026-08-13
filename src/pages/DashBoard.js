@@ -5,12 +5,13 @@ import dayjs from "dayjs";
 import PostChart from "../components/PostChart";
 import UserChart from "../components/UserChart";
 import { SkeletonLine } from "../components/Skeleton";
+import { IconBarChart, IconUsers, IconBoard, IconUser } from "../components/Icons";
+import PageHeader from "../components/PageHeader";
 
 function DashBoard() {
   const [stats, setStats] = useState({ userCount: 0, boardCount: 0 });
   const [recentPosts, setRecentPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const loginUser = JSON.parse(localStorage.getItem("loginUser"));
 
   useEffect(() => {
     fetchDashboardData();
@@ -31,82 +32,115 @@ function DashBoard() {
 
   return (
     <div className="page-container">
-      <section className="dashboard-welcome">
-        <h2>{loginUser ? `${loginUser.name}님, 어서오세요!` : "방문해주셔서 감사합니다!"}</h2>
-        <p>오늘도 즐거운 하루 되세요.</p>
-      </section>
+      {/* Standardized Header Banner */}
+      <PageHeader
+        icon={IconBarChart}
+        title="통계 대시보드 (Admin Analytics)"
+        description="사이트 전체 회원 가입 현황 및 게시글 관련 통계를 한눈에 확인하세요."
+      />
 
-      <div className="stat-cards">
-        <div className="stat-card">
-          <h4>총 회원 수</h4>
-          {loading ? <SkeletonLine width="60px" height="38px" className="mt4" /> : <p className="stat-value">{stats.userCount} 명</p>}
+      {/* KPI Cards */}
+      <div className="grid-cols-2 gap24 mb32" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "24px" }}>
+        <div className="dashboard-card p20" style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "12px" }}>
+          <div className="flex justify-between items-center mb12">
+            <span className="text14 font-bold text-muted">총 회원 수</span>
+            <div style={{ padding: "8px", background: "#EFF6FF", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <IconUsers size={20} color="#2563EB" />
+            </div>
+          </div>
+          {loading ? (
+            <SkeletonLine width="80px" height="36px" />
+          ) : (
+            <h3 className="text30 font-bold m0" style={{ color: "#2563EB", letterSpacing: "-0.5px" }}>
+              {stats.userCount.toLocaleString()} <span className="text16 text-muted font-normal">명</span>
+            </h3>
+          )}
         </div>
-        <div className="stat-card">
-          <h4>전체 게시글</h4>
-          {loading ? <SkeletonLine width="60px" height="38px" className="mt4" /> : <p className="stat-value">{stats.boardCount} 개</p>}
+
+        <div className="dashboard-card p20" style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "12px" }}>
+          <div className="flex justify-between items-center mb12">
+            <span className="text14 font-bold text-muted">전체 게시글</span>
+            <div style={{ padding: "8px", background: "#EFF6FF", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <IconBoard size={20} color="#2563EB" />
+            </div>
+          </div>
+          {loading ? (
+            <SkeletonLine width="80px" height="36px" />
+          ) : (
+            <h3 className="text30 font-bold m0" style={{ color: "#2563EB", letterSpacing: "-0.5px" }}>
+              {stats.boardCount.toLocaleString()} <span className="text16 text-muted font-normal">개</span>
+            </h3>
+          )}
         </div>
       </div>
-      <div className="flex gap24 mb32">
-        <div className="flex-1" style={{ minWidth: 0 }}>
+
+      {/* Charts Section */}
+      <div className="grid-cols-2 gap24 mb32" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "24px" }}>
+        <div style={{ minWidth: 0 }}>
           <UserChart />
         </div>
-        <div className="flex-1" style={{ minWidth: 0 }}>
+        <div style={{ minWidth: 0 }}>
           <PostChart />
         </div>
       </div>
-      <section className="mt32">
-        <div className="page-header mb16">
-          <h3 className="page-title text20">최근 올라온 글</h3>
-          <Link to="/board" className="text-link text14">
-            더보기
+
+      {/* Recent Posts Section */}
+      <div className="dashboard-card p24" style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "12px" }}>
+        <div className="flex justify-between items-center mb16">
+          <h3 className="text18 font-bold m0" style={{ color: "#0F172A" }}>
+            최근 올라온 글
+          </h3>
+          <Link to="/board" className="btn-outline-sm font-semibold text12" style={{ padding: "4px 12px", borderRadius: "6px" }}>
+            전체보기 →
           </Link>
         </div>
+
         <div className="table-wrapper">
-          <table className="data-table">
+          <table className="data-table w-full" style={{ tableLayout: "fixed" }}>
             <thead>
               <tr>
-                <th style={{ width: "55%" }}>제목</th>
-                <th style={{ width: "30%" }}>작성자</th>
-                <th style={{ width: "15%" }}>작성일</th>
+                <th style={{ width: "50%" }}>제목</th>
+                <th style={{ width: "25%" }}>작성자</th>
+                <th style={{ width: "25%" }}>작성일</th>
               </tr>
             </thead>
             <tbody>
               {loading
                 ? Array.from({ length: 5 }).map((_, index) => (
-                  <tr key={`skeleton-${index}`}>
-                    <td>
-                      <SkeletonLine height="20px" width="80%" />
-                    </td>
-                    <td>
-                      <SkeletonLine height="20px" width="60px" />
-                    </td>
-                    <td>
-                      <SkeletonLine height="20px" width="100px" />
-                    </td>
-                  </tr>
-                ))
+                    <tr key={`skeleton-${index}`}>
+                      <td>
+                        <SkeletonLine height="20px" width="80%" />
+                      </td>
+                      <td>
+                        <SkeletonLine height="20px" width="60px" />
+                      </td>
+                      <td>
+                        <SkeletonLine height="20px" width="100px" />
+                      </td>
+                    </tr>
+                  ))
                 : recentPosts.map((post) => (
-                  <tr key={post.seq}>
-                    <td>
-                      <Link to={`/board/${post.seq}`} className="text-link text-main">
-                        {post.title}
-                      </Link>
-                    </td>
-                    <td className="flex items-center gap8">
-                      {post.user?.profile_url ? (
-                        <img src={post.user?.profile_url} alt="프로필" className="comment-img" style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover" }} />
-                      ) : (
-                        <div className="mini-comment-profile">👤</div>
-                      )}
-                      {post.user?.name}
-                    </td>
-                    <td>{dayjs(post.cre_date).format("YY.MM.DD HH:mm")}</td>
-                  </tr>
-                ))}
+                    <tr key={post.seq}>
+                      <td className="whitespace-nowrap overflow-hidden text-ellipsis" title={post.title}>
+                        <Link to={`/board/${post.seq}`} className="text-link font-semibold">
+                          {post.title}
+                        </Link>
+                      </td>
+                      <td className="flex items-center gap8 overflow-hidden text-ellipsis whitespace-nowrap" title={post.user?.name}>
+                        {post.user?.profile_url ? (
+                          <img src={post.user?.profile_url} alt="프로필" className="comment-img" style={{ width: "22px", height: "22px", borderRadius: "50%", objectFit: "cover" }} />
+                        ) : (
+                          <IconUser size={16} color="#64748B" />
+                        )}
+                        <span>{post.user?.name}</span>
+                      </td>
+                      <td className="text-muted text13">{dayjs(post.cre_date).format("YYYY.MM.DD HH:mm")}</td>
+                    </tr>
+                  ))}
             </tbody>
           </table>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

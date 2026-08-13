@@ -4,6 +4,8 @@ import { useNavigate, useSearchParams, useParams } from "react-router-dom";
 import { showAlert } from "../utils/Alert";
 import "@toast-ui/editor/dist/toastui-editor.css";
 import { Editor } from "@toast-ui/react-editor";
+import { IconBoard } from "../components/Icons";
+import PageHeader from "../components/PageHeader";
 
 function BoardWrite() {
   const navigate = useNavigate();
@@ -15,6 +17,7 @@ function BoardWrite() {
   const [isUploading, setIsUploading] = useState(false);
   const { seq } = useParams();
   const editorRef = useRef(null);
+  const fileInputRef = useRef(null);
   const [searchParams] = useSearchParams();
   const category_seq = searchParams.get("category");
 
@@ -157,13 +160,17 @@ function BoardWrite() {
 
   return (
     <div className="page-container" style={{ maxWidth: "1200px" }}>
-      <div className="editor-top-bar">
-        <h2 className="page-title">{seq ? "📝 게시글 수정" : "📝 새 글 작성"}</h2>
-      </div>
+      {/* Standardized Header Banner */}
+      <PageHeader
+        icon={IconBoard}
+        title={seq ? "게시글 수정 (Edit Post)" : "새 글 작성 (Write Post)"}
+        description={seq ? "작성했던 게시글의 내용 및 첨부파일을 수정합니다." : "자유롭게 의견과 정보를 공유할 새 글을 작성하세요."}
+      />
 
-      <div style={{ display: "flex", gap: "12px", marginBottom: "24px" }}>
+      {/* Category & Title Inputs */}
+      <div className="flex gap12 mb32 flex-wrap">
         {loginUser?.admin_yn === "Y" && (
-          <select className="select-field" value={selectedCategory} onChange={(e) => setSelectedCategory(Number(e.target.value))} style={{ width: "200px" }}>
+          <select className="select-field" value={selectedCategory} onChange={(e) => setSelectedCategory(Number(e.target.value))} style={{ width: "180px", height: "42px", fontSize: "14px" }}>
             {categories.map((cat) => (
               <option key={cat.seq} value={cat.seq}>
                 {cat.name}
@@ -171,10 +178,18 @@ function BoardWrite() {
             ))}
           </select>
         )}
-        <input type="text" placeholder="제목을 입력하세요" value={title} onChange={(e) => setTitle(e.target.value)} className="input-field" style={{ fontSize: "20px", padding: "16px", flex: 1 }} />
+        <input
+          type="text"
+          placeholder="제목을 입력하세요"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="input-field font-bold"
+          style={{ fontSize: "18px", padding: "0 16px", height: "42px", flex: 1 }}
+        />
       </div>
 
-      <div className="editor-container" style={{ display: "block", background: "white", padding: 0, border: "none" }}>
+      {/* Toast UI Editor */}
+      <div className="editor-container mb32" style={{ display: "block", background: "white", padding: 0, border: "1px solid #E2E8F0", borderRadius: "12px", overflow: "hidden" }}>
         <Editor
           ref={editorRef}
           initialValue={contents || " "}
@@ -184,7 +199,6 @@ function BoardWrite() {
           useCommandShortcut={true}
           hooks={{
             addImageBlobHook: async (blob, callback) => {
-              // 10MB restriction
               const maxSize = 10 * 1024 * 1024;
               if (blob.size > maxSize) {
                 showAlert("파일 용량은 10MB를 초과할 수 없습니다.");
@@ -232,24 +246,45 @@ function BoardWrite() {
         />
       </div>
 
-      <div style={{ marginTop: "16px", padding: "16px", background: "var(--bg-color)", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
-        <h4 style={{ margin: "0 0 12px 0", fontSize: "14px", color: "var(--text-main)" }}>📎 새 문서/첨부파일 추가</h4>
-        <input
-          type="file"
-          multiple
-          onChange={handleFileUpload}
-          disabled={isUploading}
-          style={{ marginBottom: "12px", fontSize: "14px", color: "var(--text-main)", cursor: isUploading ? "not-allowed" : "pointer" }}
-        />
+      {/* Custom File Upload Box Card */}
+      <div className="dashboard-card mb32 p24" style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "12px" }}>
+        <h4 className="text15 font-bold mb16" style={{ color: "#0F172A" }}>📎 첨부파일 추가</h4>
+        
+        <div
+          onClick={() => fileInputRef.current && fileInputRef.current.click()}
+          style={{
+            border: "2px dashed #CBD5E1",
+            borderRadius: "12px",
+            padding: "24px",
+            textAlign: "center",
+            background: "#F8FAFC",
+            cursor: isUploading ? "not-allowed" : "pointer",
+            transition: "all 0.15s ease",
+            marginBottom: uploadedFiles.length > 0 ? "16px" : "0"
+          }}
+          className="flex flex-col items-center justify-center gap6 hover:border-blue-400"
+        >
+          <input ref={fileInputRef} type="file" multiple onChange={handleFileUpload} disabled={isUploading} style={{ display: "none" }} />
+          <span className="text14 font-bold" style={{ color: "#334155" }}>
+            📎 클릭하여 첨부할 파일을 선택하세요 (최대 10MB)
+          </span>
+          <span className="text12 text-muted">문서, 이미지, 압축파일 등 다양한 파일 업로드 지원</span>
+        </div>
+
         {uploadedFiles.length > 0 && (
-          <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "8px" }}>
+          <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
             {uploadedFiles.map((file, idx) => (
-              <li key={`new-${idx}`} style={{ fontSize: "13px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <li key={`new-${idx}`} style={{ padding: "10px 14px", borderRadius: "8px", fontSize: "13px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "#F8FAFC", border: "1px solid #E2E8F0" }}>
                 <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
                   <span>💾 {file.file_name}</span>
-                  <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>({(file.file_size / 1024 / 1024).toFixed(2)} MB)</span>
+                  <span style={{ color: "#64748B", fontSize: "12px" }}>({(file.file_size / 1024 / 1024).toFixed(2)} MB)</span>
                 </span>
-                <button type="button" onClick={() => handleRemoveUpload(idx)} className="btn-danger" style={{ padding: "4px 8px", fontSize: "12px" }}>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveUpload(idx)}
+                  className="btn-outline-sm font-semibold"
+                  style={{ height: "26px", padding: "0 10px", fontSize: "12px", color: "#EF4444", borderColor: "#FECDD3", borderRadius: "6px" }}
+                >
                   삭제
                 </button>
               </li>
@@ -258,28 +293,37 @@ function BoardWrite() {
         )}
       </div>
 
+      {/* Existing Attachments Management Card */}
       {existingFiles.length > 0 && (
-        <div style={{ marginTop: "16px", padding: "16px", background: "var(--bg-color)", borderRadius: "8px", border: "1px solid var(--border-color)" }}>
-          <h4 style={{ margin: "0 0 12px 0", fontSize: "14px", color: "var(--text-main)" }}>📁 기존 첨부파일 관리</h4>
-          <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "8px" }}>
+        <div className="dashboard-card mb32 p24" style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "12px" }}>
+          <h4 className="text15 font-bold mb16" style={{ color: "#0F172A" }}>📁 기존 첨부파일 관리</h4>
+          <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
             {existingFiles.map((file) => (
-              <li key={file.seq} style={{ fontSize: "13px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <li key={file.seq} style={{ padding: "10px 14px", borderRadius: "8px", fontSize: "13px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "#F8FAFC", border: "1px solid #E2E8F0" }}>
                 <a
                   href={file.file_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-link"
-                  style={deletedFileSeqs.includes(file.seq) ? { textDecoration: "line-through", color: "var(--text-muted)" } : { display: "inline-flex", alignItems: "center", gap: "6px" }}
+                  style={deletedFileSeqs.includes(file.seq) ? { textDecoration: "line-through", color: "#94A3B8" } : { display: "inline-flex", alignItems: "center", gap: "6px" }}
                 >
                   <span>💾 {file.file_name}</span>
-                  {!deletedFileSeqs.includes(file.seq) && <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>({(file.file_size / 1024 / 1024).toFixed(2)} MB)</span>}
+                  {!deletedFileSeqs.includes(file.seq) && <span style={{ color: "#64748B", fontSize: "12px" }}>({(file.file_size / 1024 / 1024).toFixed(2)} MB)</span>}
                 </a>
                 <button
+                  type="button"
                   onClick={() => {
                     setDeletedFileSeqs((prev) => (prev.includes(file.seq) ? prev.filter((id) => id !== file.seq) : [...prev, file.seq]));
                   }}
-                  className={deletedFileSeqs.includes(file.seq) ? "btn-secondary" : "btn-danger"}
-                  style={{ padding: "4px 8px", fontSize: "12px" }}
+                  className="btn-outline-sm font-semibold"
+                  style={{
+                    height: "26px",
+                    padding: "0 10px",
+                    fontSize: "12px",
+                    color: deletedFileSeqs.includes(file.seq) ? "#334155" : "#EF4444",
+                    borderColor: deletedFileSeqs.includes(file.seq) ? "#CBD5E1" : "#FECDD3",
+                    borderRadius: "6px"
+                  }}
                 >
                   {deletedFileSeqs.includes(file.seq) ? "삭제 취소" : "삭제"}
                 </button>
@@ -289,11 +333,21 @@ function BoardWrite() {
         </div>
       )}
 
-      <div className="action-bar" style={{ justifyContent: "flex-end", marginTop: "24px" }}>
-        <button onClick={() => navigate(seq ? `/board/${seq}` : category_seq ? `/board?category=${category_seq}` : "/board")} className="btn-outline">
+      {/* Action Buttons Group */}
+      <div className="action-bar flex justify-end gap12 mt32">
+        <button
+          onClick={() => navigate(seq ? `/board/${seq}` : category_seq ? `/board?category=${category_seq}` : "/board")}
+          className="btn-outline-sm font-semibold"
+          style={{ height: "38px", padding: "0 22px", borderRadius: "8px" }}
+        >
           취소
         </button>
-        <button onClick={handleSave} className="btn-primary" style={{ width: "auto", padding: "10px 30px" }} disabled={isUploading}>
+        <button
+          onClick={handleSave}
+          className="btn-primary font-bold flex items-center justify-center"
+          style={{ width: "auto", height: "38px", padding: "0 28px", fontSize: "14px", background: "#2563EB", color: "white", borderRadius: "8px" }}
+          disabled={isUploading}
+        >
           {isUploading ? "업로드 중..." : seq ? "수정하기" : "등록하기"}
         </button>
       </div>

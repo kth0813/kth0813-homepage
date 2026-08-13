@@ -1,8 +1,25 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { dbService } from "../services/DbService";
 import { showAlert } from "../utils/Alert";
+import {
+  IconSearch,
+  IconHome,
+  IconUser,
+  IconProjects,
+  IconSchedule,
+  IconBoard,
+  IconFlame,
+  IconDice,
+  IconLadder,
+  IconRoulette,
+  IconBarChart,
+  IconUsers,
+  IconSettings
+} from "./Icons";
+
+const KOREAN_DAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
 function LeftMenu({ isOpen, onClose }) {
   const [categories, setCategories] = useState([]);
@@ -14,6 +31,7 @@ function LeftMenu({ isOpen, onClose }) {
 
   const [globalSearchKeyword, setGlobalSearchKeyword] = useState("");
   const [currentTime, setCurrentTime] = useState(dayjs());
+  const searchInputRef = useRef(null);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -45,6 +63,20 @@ function LeftMenu({ isOpen, onClose }) {
     return () => clearInterval(timer);
   }, []);
 
+  // Global shortcut Ctrl+K / Cmd+K to focus search input
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        if (searchInputRef.current) {
+          searchInputRef.current.focus();
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const handleGlobalSearch = (e) => {
     e.preventDefault();
     if (!globalSearchKeyword.trim()) {
@@ -66,68 +98,156 @@ function LeftMenu({ isOpen, onClose }) {
           ✕
         </button>
       </div>
-      <div className="mb16 px12 relative">
-        <div className="text-center text14 font-semibold p8 rounded-md left-menu-clock mt4" style={{ whiteSpace: "nowrap" }}>
-          🕒 {currentTime.format("YYYY-MM-DD HH:mm:ss")}
-        </div>
-        <form onSubmit={handleGlobalSearch} className="flex flex-col gap8 mt16">
-          <input
-            type="text"
-            placeholder="전체 게시글 검색..."
-            value={globalSearchKeyword}
-            onChange={(e) => setGlobalSearchKeyword(e.target.value)}
-            className="input-field w-full px16 rounded-md text14"
-          />
-          <button type="submit" className="btn-secondary w-full py8 rounded-md text12">
-            검색
-          </button>
-        </form>
+
+      {/* Live Clock Status Indicator Bar (No Outer Box) */}
+      <div className="sidebar-live-status flex items-center justify-center gap8 mb10 px4" title="실시간 시스템 상태">
+        <span
+          style={{
+            width: "7px",
+            height: "7px",
+            borderRadius: "50%",
+            background: "#10B981",
+            boxShadow: "0 0 6px rgba(16, 185, 129, 0.7)",
+            flexShrink: 0
+          }}
+          className="animate-pulse"
+        />
+        <span className="text12 font-medium text-slate-500 whitespace-nowrap" style={{ color: "#64748B", letterSpacing: "-0.2px" }}>
+          {currentTime.format("YYYY. MM. DD")} ({KOREAN_DAYS[currentTime.day()]}) {currentTime.format("HH:mm:ss")}
+        </span>
       </div>
 
-      <Link to="/" className={`nav-link ${location.pathname === "/" ? "active" : ""}`}>
-        🏠 메인
+      {/* Modern Search Input Container */}
+      <form onSubmit={handleGlobalSearch} className="sidebar-search-container mb24 relative flex items-center">
+        <span
+          className="sidebar-search-icon"
+          onClick={handleGlobalSearch}
+          style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", display: "flex", alignItems: "center", cursor: "pointer", zIndex: 1 }}
+        >
+          <IconSearch size={14} color="#94A3B8" />
+        </span>
+        <input
+          ref={searchInputRef}
+          type="text"
+          placeholder="전체 게시글 검색..."
+          value={globalSearchKeyword}
+          onChange={(e) => setGlobalSearchKeyword(e.target.value)}
+          className="sidebar-search-input"
+          style={{
+            width: "100%",
+            height: "36px",
+            paddingLeft: "32px",
+            paddingRight: "50px",
+            fontSize: "12px",
+            background: "#F8FAFC",
+            border: "1px solid #E2E8F0",
+            borderRadius: "8px",
+            color: "#1E293B",
+            outline: "none",
+            boxSizing: "border-box"
+          }}
+        />
+        <span
+          style={{
+            position: "absolute",
+            right: "8px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            fontSize: "10px",
+            fontWeight: "600",
+            background: "#FFFFFF",
+            border: "1px solid #E2E8F0",
+            color: "#94A3B8",
+            padding: "2px 6px",
+            borderRadius: "4px",
+            pointerEvents: "none"
+          }}
+        >
+          Ctrl K
+        </span>
+      </form>
+
+      <Link to="/" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/" ? "active" : ""}`}>
+        <IconHome size={16} color={location.pathname === "/" ? "#2563EB" : "#64748B"} />
+        <span>메인 (Home)</span>
       </Link>
-      <Link to="/schedule" className={`nav-link ${location.pathname === "/schedule" ? "active" : ""}`}>
-        📅 일정관리
-      </Link>
+
+      {/* 1. PORTFOLIO Section */}
       <div className="nav-group mb16">
-        <div className="nav-group-title">🎁 추첨하기</div>
-        <Link to="/luckydraw" className={`nav-link sub-link ${location.pathname === "/luckydraw" ? "active" : ""}`}>
-          🎲 럭키 드로우
+        <div className="nav-group-title">PORTFOLIO</div>
+        <Link to="/about" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/about" ? "active" : ""}`}>
+          <IconUser size={16} color={location.pathname === "/about" ? "#2563EB" : "#64748B"} />
+          <span>소개 (About Me)</span>
         </Link>
-        <Link to="/ladder" className={`nav-link sub-link ${location.pathname === "/ladder" ? "active" : ""}`}>
-          🔀 사다리 타기
-        </Link>
-        <Link to="/roulette" className={`nav-link sub-link ${location.pathname === "/roulette" ? "active" : ""}`}>
-          🎡 룰렛 돌리기
+        <Link to="/projects" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/projects" ? "active" : ""}`}>
+          <IconProjects size={16} color={location.pathname === "/projects" ? "#2563EB" : "#64748B"} />
+          <span>프로젝트 (Projects)</span>
         </Link>
       </div>
+
+      {/* 2. DASHBOARD Section */}
       <div className="nav-group mb16">
-        <div className="nav-group-title">📋 게시판</div>
-        {categories.length > 0 ? (
-          categories.map((cat) => (
-            <Link key={cat.seq} to={`/board?category=${cat.seq}`} className={`nav-link sub-link ${location.pathname === "/board" && currentCategory === String(cat.seq) ? "active" : ""}`}>
-              📝 {cat.show_yn === "N" ? `[비공개] ${cat.name}` : cat.name}
-            </Link>
-          ))
-        ) : (
-          <div className="nav-link sub-link text12 text-muted">등록된 게시판이 없습니다.</div>
+        <div className="nav-group-title">DASHBOARD</div>
+        <Link to="/schedule" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/schedule" ? "active" : ""}`}>
+          <IconSchedule size={16} color={location.pathname === "/schedule" ? "#2563EB" : "#64748B"} />
+          <span>일정관리 (Schedule)</span>
+        </Link>
+        <Link to="/board" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/board" && !currentCategory ? "active" : ""}`}>
+          <IconBoard size={16} color={location.pathname === "/board" && !currentCategory ? "#2563EB" : "#64748B"} />
+          <span>전체 게시판 (Board)</span>
+        </Link>
+        {categories.length > 0 && (
+          <div className="flex flex-col gap2 mt2">
+            {categories.map((cat) => (
+              <Link key={cat.seq} to={`/board?category=${cat.seq}`} className={`nav-link sub-link text13 flex items-center gap8 ${location.pathname === "/board" && currentCategory === String(cat.seq) ? "active" : ""}`}>
+                <IconBoard size={14} color={location.pathname === "/board" && currentCategory === String(cat.seq) ? "#2563EB" : "#94A3B8"} />
+                <span>{cat.show_yn === "N" ? `[비공개] ${cat.name}` : cat.name}</span>
+              </Link>
+            ))}
+          </div>
         )}
       </div>
+
+      {/* 3. UTILS Section */}
+      <div className="nav-group mb16">
+        <div className="nav-group-title">UTILS</div>
+        <Link to="/luckydraw" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/luckydraw" ? "active" : ""}`}>
+          <IconFlame size={16} color={location.pathname === "/luckydraw" ? "#2563EB" : "#64748B"} />
+          <span>추첨하기 (Lucky Draw)</span>
+        </Link>
+        <Link to="/dice" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/dice" ? "active" : ""}`}>
+          <IconDice size={16} color={location.pathname === "/dice" ? "#2563EB" : "#64748B"} />
+          <span>주사위 던지기 (Dice)</span>
+        </Link>
+        <Link to="/ladder" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/ladder" ? "active" : ""}`}>
+          <IconLadder size={16} color={location.pathname === "/ladder" ? "#2563EB" : "#64748B"} />
+          <span>사다리타기 (Ladder)</span>
+        </Link>
+        <Link to="/roulette" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/roulette" ? "active" : ""}`}>
+          <IconRoulette size={16} color={location.pathname === "/roulette" ? "#2563EB" : "#64748B"} />
+          <span>룰렛돌리기 (Roulette)</span>
+        </Link>
+      </div>
+
+      {/* 4. ADMIN Section */}
       {loginUser?.admin_yn === "Y" && (
-        <div className="nav-group">
-          <div className="nav-group-title">🛡️ 관리자 메뉴</div>
-          <Link to="/dashboard" className={`nav-link sub-link ${location.pathname === "/dashboard" ? "active" : ""}`}>
-            📊 대시보드
+        <div className="nav-group mb16">
+          <div className="nav-group-title text-blue-600">ADMIN</div>
+          <Link to="/admin" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/admin" ? "active" : ""}`}>
+            <IconBarChart size={16} color={location.pathname === "/admin" ? "#2563EB" : "#64748B"} />
+            <span>통계 대시보드</span>
           </Link>
-          <Link to="/users" className={`nav-link sub-link ${location.pathname === "/users" ? "active" : ""}`}>
-            👥 사용자 목록
+          <Link to="/user/list" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/user/list" ? "active" : ""}`}>
+            <IconUsers size={16} color={location.pathname === "/user/list" ? "#2563EB" : "#64748B"} />
+            <span>사용자 목록</span>
           </Link>
-          <Link to="/menus" className={`nav-link sub-link ${location.pathname === "/menus" ? "active" : ""}`}>
-            ⚙️ 메뉴 관리
+          <Link to="/menu/manage" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/menu/manage" ? "active" : ""}`}>
+            <IconSettings size={16} color={location.pathname === "/menu/manage" ? "#2563EB" : "#64748B"} />
+            <span>메뉴 관리</span>
           </Link>
-          <Link to="/roulette-manage" className={`nav-link sub-link ${location.pathname === "/roulette-manage" ? "active" : ""}`}>
-            🎡 룰렛 참가자 관리
+          <Link to="/roulette/manage" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/roulette/manage" ? "active" : ""}`}>
+            <IconRoulette size={16} color={location.pathname === "/roulette/manage" ? "#2563EB" : "#64748B"} />
+            <span>룰렛 참가자 관리</span>
           </Link>
         </div>
       )}

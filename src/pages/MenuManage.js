@@ -3,6 +3,8 @@ import { dbService } from "../services/DbService";
 import { useNavigate } from "react-router-dom";
 import { showAlert } from "../utils/Alert";
 import { SkeletonLine } from "../components/Skeleton";
+import { IconSettings } from "../components/Icons";
+import PageHeader from "../components/PageHeader";
 
 function MenuManage() {
   const navigate = useNavigate();
@@ -135,20 +137,23 @@ function MenuManage() {
 
   return (
     <div className="page-container">
-      <div className="page-header">
-        <h2 className="page-title">⚙️ 메뉴 관리</h2>
-      </div>
+      {/* Standardized Header Banner */}
+      <PageHeader
+        icon={IconSettings}
+        title="메뉴 관리 (Menu Management)"
+        description="사이트 전체 카테고리 메뉴 구조와 정렬 순서를 설정합니다."
+      />
 
-      <div style={{ background: "var(--card-bg)", padding: "24px", borderRadius: "12px", border: "1px solid var(--border-color)", marginBottom: "32px", boxShadow: "var(--shadow-sm)" }}>
-        <h3 style={{ fontSize: "18px", marginBottom: "16px", color: "var(--header-bg)" }}>새 메뉴 추가</h3>
-        <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
+      <div className="dashboard-card mb32 p24" style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "12px" }}>
+        <h3 className="text16 font-bold mb16" style={{ color: "#0F172A" }}>새 메뉴 추가</h3>
+        <div className="flex items-center gap12 flex-wrap">
           <input
             type="text"
             placeholder="메뉴 이름"
             value={newMenu.name}
             onChange={(e) => setNewMenu({ ...newMenu, name: e.target.value })}
             className="input-field"
-            style={{ flex: 1, minWidth: "150px" }}
+            style={{ flex: 1, minWidth: "150px", height: "38px", fontSize: "13px", padding: "0 12px" }}
           />
           <input
             type="text"
@@ -156,36 +161,39 @@ function MenuManage() {
             value={newMenu.description}
             onChange={(e) => setNewMenu({ ...newMenu, description: e.target.value })}
             className="input-field"
-            style={{ flex: 2, minWidth: "200px" }}
+            style={{ flex: 2, minWidth: "200px", height: "38px", fontSize: "13px", padding: "0 12px" }}
           />
-          <input
-            type="number"
-            placeholder="순서"
-            value={newMenu.order}
-            onChange={(e) => setNewMenu({ ...newMenu, order: Number(e.target.value) })}
-            className="input-field"
-            style={{ width: "80px" }}
-            min={2}
-          />
-          <select value={newMenu.show_yn} onChange={(e) => setNewMenu({ ...newMenu, show_yn: e.target.value })} className="select-field" style={{ width: "100px" }}>
+          <div className="flex items-center gap6">
+            <span className="text13 font-semibold text-muted">순서:</span>
+            <input
+              type="number"
+              placeholder="순서"
+              value={newMenu.order}
+              onChange={(e) => setNewMenu({ ...newMenu, order: Number(e.target.value) })}
+              className="input-field font-semibold text-center"
+              style={{ width: "70px", height: "38px", fontSize: "13px", padding: "0 8px" }}
+              min={2}
+            />
+          </div>
+          <select value={newMenu.show_yn} onChange={(e) => setNewMenu({ ...newMenu, show_yn: e.target.value })} className="select-field" style={{ width: "90px", height: "38px", fontSize: "13px", padding: "0 8px" }}>
             <option value="Y">공개</option>
             <option value="N">비공개</option>
           </select>
-          <button onClick={handleAdd} className="btn-primary" style={{ width: "auto", padding: "10px 24px" }}>
-            추가
+          <button onClick={handleAdd} className="btn-primary font-semibold flex items-center justify-center" style={{ width: "auto", height: "38px", padding: "0 20px", fontSize: "13px", background: "#2563EB", color: "white", borderRadius: "8px" }}>
+            + 추가
           </button>
         </div>
       </div>
 
       <div className="table-wrapper">
-        <table className="data-table">
+        <table className="data-table w-full" style={{ tableLayout: "fixed" }}>
           <thead>
             <tr>
               <th style={{ width: "10%", textAlign: "center" }}>순서</th>
-              <th style={{ width: "20%" }}>이름</th>
+              <th style={{ width: "25%" }}>이름</th>
               <th style={{ width: "35%" }}>설명</th>
               <th style={{ width: "15%", textAlign: "center" }}>공개 여부</th>
-              <th style={{ width: "20%", textAlign: "center" }}>관리</th>
+              <th style={{ width: "15%", textAlign: "center" }}>관리</th>
             </tr>
           </thead>
           <tbody>
@@ -221,17 +229,17 @@ function MenuManage() {
                         type="number"
                         value={editMenu.order}
                         onChange={(e) => setEditMenu({ ...editMenu, order: Number(e.target.value) })}
-                        className="input-field"
-                        style={{ width: "60px", padding: "6px" }}
+                        className="input-field font-semibold text-center"
+                        style={{ width: "60px", height: "30px", padding: "0 4px", fontSize: "13px" }}
                         min={2}
                       />
                     ) : (
-                      cat.order || cat.seq
+                      <span className="font-semibold text-slate-700">{cat.order || cat.seq}</span>
                     )}
                   </td>
-                  <td>
+                  <td className="font-semibold" style={{ color: "#0F172A" }}>
                     {editingSeq === cat.seq ? (
-                      <input type="text" value={editMenu.name} onChange={(e) => setEditMenu({ ...editMenu, name: e.target.value })} className="input-field" style={{ width: "100%", padding: "6px" }} />
+                      <input type="text" value={editMenu.name} onChange={(e) => setEditMenu({ ...editMenu, name: e.target.value })} className="input-field" style={{ width: "100%", height: "30px", padding: "0 8px", fontSize: "13px" }} />
                     ) : (
                       cat.name
                     )}
@@ -243,40 +251,46 @@ function MenuManage() {
                         value={editMenu.description}
                         onChange={(e) => setEditMenu({ ...editMenu, description: e.target.value })}
                         className="input-field"
-                        style={{ width: "100%", padding: "6px" }}
+                        style={{ width: "100%", height: "30px", padding: "0 8px", fontSize: "13px" }}
                       />
                     ) : (
-                      <span style={{ color: "var(--text-muted)", fontSize: "14px" }}>{cat.description}</span>
+                      <span style={{ color: "var(--text-muted)", fontSize: "13px" }}>{cat.description}</span>
                     )}
                   </td>
                   <td style={{ textAlign: "center" }}>
                     {editingSeq === cat.seq ? (
-                      <select value={editMenu.show_yn} onChange={(e) => setEditMenu({ ...editMenu, show_yn: e.target.value })} className="select-field" style={{ width: "100%", padding: "6px" }}>
+                      <select value={editMenu.show_yn} onChange={(e) => setEditMenu({ ...editMenu, show_yn: e.target.value })} className="select-field" style={{ width: "90px", height: "30px", padding: "0 4px", fontSize: "12px" }}>
                         <option value="Y">공개</option>
                         <option value="N">비공개</option>
                       </select>
+                    ) : cat.show_yn === "Y" ? (
+                      <span className="badge-tech font-semibold" style={{ background: "#EFF6FF", color: "#2563EB", border: "1px solid #BFDBFE", padding: "3px 10px", borderRadius: "12px", fontSize: "12px" }}>
+                        공개
+                      </span>
                     ) : (
-                      <span style={{ color: cat.show_yn === "Y" ? "var(--primary-color)" : "var(--text-muted)", fontWeight: "bold", fontSize: "14px" }}>{cat.show_yn === "Y" ? "공개" : "비공개"}</span>
+                      <span className="badge-tech font-semibold" style={{ background: "#F1F5F9", color: "#64748B", border: "1px solid #E2E8F0", padding: "3px 10px", borderRadius: "12px", fontSize: "12px" }}>
+                        비공개
+                      </span>
                     )}
                   </td>
                   <td style={{ textAlign: "center" }}>
                     {cat.seq === 1 ? (
-                      <span style={{ color: "var(--text-muted)", fontSize: "13px" }}>기본 메뉴</span>
+                      <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>기본 메뉴</span>
                     ) : editingSeq === cat.seq ? (
-                      <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
-                        <button onClick={handleUpdate} className="btn-secondary" style={{ padding: "6px 12px", fontSize: "13px" }}>
+                      <div className="flex gap6 justify-center">
+                        <button onClick={handleUpdate} className="btn-primary font-semibold" style={{ height: "30px", padding: "0 12px", fontSize: "12px", background: "#2563EB", color: "white", borderRadius: "6px" }}>
                           저장
                         </button>
-                        <button onClick={cancelEdit} className="btn-outline" style={{ padding: "6px 12px", fontSize: "13px" }}>
+                        <button onClick={cancelEdit} className="btn-outline-sm font-semibold" style={{ height: "30px", padding: "0 10px", fontSize: "12px", borderRadius: "6px" }}>
                           취소
                         </button>
                       </div>
                     ) : (
-                      <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
-                        <button onClick={() => startEdit(cat)} className="btn-outline" style={{ padding: "6px 12px", fontSize: "13px" }}>
+                      <div className="flex gap6 justify-center">
+                        <button onClick={() => startEdit(cat)} className="btn-outline-sm font-semibold" style={{ height: "30px", padding: "0 10px", fontSize: "12px", borderRadius: "6px" }}>
                           수정
                         </button>
-                        <button onClick={() => handleDelete(cat.seq)} className="btn-danger" style={{ padding: "6px 12px", fontSize: "13px" }}>
+                        <button onClick={() => handleDelete(cat.seq)} className="btn-outline-sm font-semibold" style={{ height: "30px", padding: "0 10px", fontSize: "12px", color: "#EF4444", borderColor: "#FECDD3", borderRadius: "6px" }}>
                           삭제
                         </button>
                       </div>

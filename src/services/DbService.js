@@ -98,10 +98,129 @@ class DatabaseService {
 
   async getUserCount() {
     try {
-      const rows = await sql`SELECT COUNT(*) FROM "user" WHERE del_yn = 'N'`;
+      const rows = await sql`SELECT COUNT(*) FROM "user" WHERE COALESCE(del_yn, 'N') = 'N'`;
       return { count: parseInt(rows[0]?.count || "0", 10), error: null };
     } catch (error) {
+      console.error("getUserCount error:", error);
       return { count: 0, error };
+    }
+  }
+
+  async getBoardCount() {
+    try {
+      const rows = await sql`SELECT COUNT(*) FROM board WHERE COALESCE(del_yn, 'N') = 'N'`;
+      return { count: parseInt(rows[0]?.count || "0", 10), error: null };
+    } catch (error) {
+      console.error("getBoardCount error:", error);
+      return { count: 0, error };
+    }
+  }
+
+  async getRecentPosts(limit = 5) {
+    try {
+      const rows = await sql`
+        SELECT b.seq, b.title, b.cre_date, b.hit, u.name AS user_name, u.profile_url
+        FROM board b
+        LEFT JOIN "user" u ON b.user_seq = u.seq
+        WHERE COALESCE(b.del_yn, 'N') = 'N'
+        ORDER BY b.seq DESC
+        LIMIT ${limit}
+      `;
+      const formatted = rows.map((r) => ({
+        seq: r.seq,
+        title: r.title,
+        cre_date: r.cre_date,
+        hit: r.hit,
+        user: { name: r.user_name || "익명", profile_url: r.profile_url }
+      }));
+      return { data: formatted, error: null };
+    } catch (error) {
+      console.error("getRecentPosts error:", error);
+      return { data: [], error };
+    }
+  }
+
+  async getMonthlyUserYears() {
+    try {
+      const rows = await sql`
+        SELECT DISTINCT TO_CHAR(cre_date, 'YYYY') AS year
+        FROM "user"
+        WHERE COALESCE(del_yn, 'N') = 'N' AND cre_date IS NOT NULL
+        ORDER BY year DESC
+      `;
+      return { data: rows, error: null };
+    } catch (error) {
+      console.error("getMonthlyUserYears error:", error);
+      return { data: [], error };
+    }
+  }
+
+  async getMonthlyUserCounts(year) {
+    try {
+      let rows;
+      if (year) {
+        rows = await sql`
+          SELECT TO_CHAR(cre_date, 'MM') AS month, COUNT(*)::int AS user_count
+          FROM "user"
+          WHERE COALESCE(del_yn, 'N') = 'N' AND TO_CHAR(cre_date, 'YYYY') = ${year}
+          GROUP BY TO_CHAR(cre_date, 'MM')
+          ORDER BY month ASC
+        `;
+      } else {
+        rows = await sql`
+          SELECT TO_CHAR(cre_date, 'MM') AS month, COUNT(*)::int AS user_count
+          FROM "user"
+          WHERE COALESCE(del_yn, 'N') = 'N'
+          GROUP BY TO_CHAR(cre_date, 'MM')
+          ORDER BY month ASC
+        `;
+      }
+      return { data: rows, error: null };
+    } catch (error) {
+      console.error("getMonthlyUserCounts error:", error);
+      return { data: [], error };
+    }
+  }
+
+  async getMonthlyPostYears() {
+    try {
+      const rows = await sql`
+        SELECT DISTINCT TO_CHAR(cre_date, 'YYYY') AS year
+        FROM board
+        WHERE COALESCE(del_yn, 'N') = 'N' AND cre_date IS NOT NULL
+        ORDER BY year DESC
+      `;
+      return { data: rows, error: null };
+    } catch (error) {
+      console.error("getMonthlyPostYears error:", error);
+      return { data: [], error };
+    }
+  }
+
+  async getMonthlyPostCounts(year) {
+    try {
+      let rows;
+      if (year) {
+        rows = await sql`
+          SELECT TO_CHAR(cre_date, 'MM') AS month, COUNT(*)::int AS post_count
+          FROM board
+          WHERE COALESCE(del_yn, 'N') = 'N' AND TO_CHAR(cre_date, 'YYYY') = ${year}
+          GROUP BY TO_CHAR(cre_date, 'MM')
+          ORDER BY month ASC
+        `;
+      } else {
+        rows = await sql`
+          SELECT TO_CHAR(cre_date, 'MM') AS month, COUNT(*)::int AS post_count
+          FROM board
+          WHERE COALESCE(del_yn, 'N') = 'N'
+          GROUP BY TO_CHAR(cre_date, 'MM')
+          ORDER BY month ASC
+        `;
+      }
+      return { data: rows, error: null };
+    } catch (error) {
+      console.error("getMonthlyPostCounts error:", error);
+      return { data: [], error };
     }
   }
 
