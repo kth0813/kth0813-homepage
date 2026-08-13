@@ -139,20 +139,6 @@ function Main() {
     setLoading(false);
   }
 
-  const highlights = [
-    {
-      title: "효율적인 데이터베이스 설계 & 쿼리 최적화",
-      desc: "대용량 데이터 처리 경험 및 MSSQL/PostgreSQL 중심의 관계형 데이터베이스 모델링 및 인덱스 최적화 능력"
-    },
-    {
-      title: "유지보수성이 높은 컴포넌트 아키텍처",
-      desc: "React 기반의 재사용 가능한 UI 컴포넌트 설계 및 직관적인 상태 관리 체계 구축"
-    },
-    {
-      title: "풀스택 데이터 흐름 이해 & API 연동",
-      desc: "RESTful API 설계부터 Serverless 환경 및 외부 서비스(유튜브, 스토리지) 연동까지 전반적인 데이터 흐름 제어"
-    }
-  ];
 
   return (
     <div className="page-container">

@@ -536,31 +536,6 @@ class DatabaseService {
     }
   }
 
-  async getRecentPosts(limit = 5) {
-    try {
-      const rows = await sql`
-        SELECT b.seq, b.title, b.cre_date, json_build_object('name', u.name, 'profile_url', u.profile_url) AS "user"
-        FROM board b
-        LEFT JOIN "user" u ON b.user_seq = u.seq
-        WHERE b.del_yn = 'N'
-        ORDER BY b.seq DESC
-        LIMIT ${limit}
-      `;
-      return { data: rows, error: null };
-    } catch (error) {
-      return { data: null, error };
-    }
-  }
-
-  async getBoardCount() {
-    try {
-      const rows = await sql`SELECT COUNT(*) FROM board WHERE del_yn = 'N'`;
-      return { count: parseInt(rows[0]?.count || "0", 10), error: null };
-    } catch (error) {
-      return { count: 0, error };
-    }
-  }
-
   async getBoardList({ page = 1, pageSize = 10, category = null, globalKeyword = null, searchType = "title", searchKeyword = "", isAdmin = false }) {
     try {
       const offset = (page - 1) * pageSize;
@@ -1095,44 +1070,6 @@ class DatabaseService {
     }
   }
 
-  // ==========================================
-  // Charts
-  // ==========================================
-  async getMonthlyUserYears() {
-    try {
-      const rows = await sql`SELECT DISTINCT year FROM monthly_user_counts ORDER BY year DESC`;
-      return { data: rows, error: null };
-    } catch (error) {
-      return { data: null, error };
-    }
-  }
-
-  async getMonthlyUserCounts(year) {
-    try {
-      const rows = await sql`SELECT month, user_count FROM monthly_user_counts WHERE year = ${year} ORDER BY month ASC`;
-      return { data: rows, error: null };
-    } catch (error) {
-      return { data: null, error };
-    }
-  }
-
-  async getMonthlyPostYears() {
-    try {
-      const rows = await sql`SELECT DISTINCT year FROM monthly_post_counts ORDER BY year DESC`;
-      return { data: rows, error: null };
-    } catch (error) {
-      return { data: null, error };
-    }
-  }
-
-  async getMonthlyPostCounts(year) {
-    try {
-      const rows = await sql`SELECT month, post_count FROM monthly_post_counts WHERE year = ${year} ORDER BY month ASC`;
-      return { data: rows, error: null };
-    } catch (error) {
-      return { data: null, error };
-    }
-  }
 
   // ==========================================
   // YouTube Trending (DashBoard / Main)

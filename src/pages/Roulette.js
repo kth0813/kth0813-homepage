@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { dbService } from "../services/DbService";
-import { showToast, showAlert } from "../utils/Alert";
-import { IconRoulette, IconUser, IconClock } from "../components/Icons";
+import { showToast } from "../utils/Alert";
+import { IconRoulette, IconUser } from "../components/Icons";
 import PageHeader from "../components/PageHeader";
 
 function triggerConfetti() {
@@ -67,7 +67,6 @@ function triggerConfetti() {
 
 const Roulette = () => {
   const [candidates, setCandidates] = useState([]);
-  const [newCandidateName, setNewCandidateName] = useState("");
   const [isSpinning, setIsSpinning] = useState(false);
   const [winner, setWinner] = useState(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -96,31 +95,7 @@ const Roulette = () => {
     }
   };
 
-  const handleAddCandidate = (e) => {
-    e.preventDefault();
-    const trimmed = newCandidateName.trim();
-    if (!trimmed) {
-      showAlert("참가자 이름을 입력해주세요.");
-      return;
-    }
-    const newEntry = {
-      seq: `temp-${Date.now()}-${Math.random()}`,
-      user_name: trimmed,
-      gender: "N"
-    };
-    setCandidates((prev) => [...prev, newEntry]);
-    setNewCandidateName("");
-  };
 
-  const handleRemoveCandidate = (index) => {
-    if (isSpinning) return;
-    setCandidates((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleClearAll = () => {
-    if (isSpinning) return;
-    setCandidates([]);
-  };
 
   const getSegmentColor = useCallback((index, total) => {
     // Harmonious Blue & Slate 6-color palette for clear adjacent contrast
@@ -247,52 +222,7 @@ const Roulette = () => {
     requestAnimationFrame(animate);
   };
 
-  const handleRemoveWinnerAndSpinAgain = () => {
-    if (!winner) return;
-    const winnerSeq = winner.seq;
-    const updated = candidates.filter((c) => c.seq !== winnerSeq);
-    setCandidates(updated);
-    setShowWinnerModal(false);
-    setWinner(null);
 
-    if (updated.length > 0) {
-      setTimeout(() => {
-        // Trigger next spin smoothly
-        const winnerIdx = Math.floor(Math.random() * updated.length);
-        const selectedWinner = updated[winnerIdx];
-        const arc = (Math.PI * 2) / updated.length;
-        const spins = Math.PI * 2 * 4;
-        const finalRotation = spins - Math.PI / 2 - (winnerIdx + 0.5) * arc;
-
-        setIsSpinning(true);
-        let startTimestamp = null;
-        const duration = 5500;
-        const startRotation = rotation % (Math.PI * 2);
-
-        const animate = (timestamp) => {
-          if (!startTimestamp) startTimestamp = timestamp;
-          const progress = timestamp - startTimestamp;
-
-          if (progress < duration) {
-            const t = progress / duration;
-            const easeOut = 1 - Math.pow(1 - t, 3);
-            const currentR = startRotation + (finalRotation - startRotation) * easeOut;
-            setRotation(currentR);
-            requestAnimationFrame(animate);
-          } else {
-            setRotation(finalRotation);
-            setIsSpinning(false);
-            setWinner(selectedWinner);
-            setShowWinnerModal(true);
-            triggerConfetti();
-          }
-        };
-        requestAnimationFrame(animate);
-      }, 300);
-    } else {
-      showToast("더 이상 추첨할 참가자가 없습니다.", "info");
-    }
-  };
 
   return (
     <div className={isFullScreen ? "fullscreen-mode page-container" : "page-container"}>

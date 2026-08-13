@@ -6,7 +6,6 @@ import {
   IconGithub,
   IconCode,
   IconFlame,
-  IconBoard,
   IconHome,
   IconExternal
 } from "../components/Icons";

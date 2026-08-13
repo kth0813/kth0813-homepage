@@ -1,14 +1,11 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import "../css/App.css";
 import {
   IconCode,
-  IconUser,
   IconMail,
   IconGithub,
   IconClock,
-  IconProjects,
-  IconBoard
+  IconProjects
 } from "../components/Icons";
 
 const AboutMe = () => {
