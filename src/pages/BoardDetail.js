@@ -95,7 +95,7 @@ function BoardDetail() {
       setNewComment("");
       fetchComments();
 
-      if (post && post.user_seq !== loginUser.seq) {
+      if (post && String(post.user_seq) !== String(loginUser.seq)) {
         await dbService.insertNotification({
           user_seq: post.user_seq,
           type: "COMMENT",
@@ -203,7 +203,7 @@ function BoardDetail() {
         <button onClick={() => navigate(post.category_seq ? `/board?category=${post.category_seq}` : "/board")} className="btn-outline">
           목록으로
         </button>
-        {loginUser && (loginUser.seq === post.user_seq || loginUser.admin_yn === "Y") && (
+        {loginUser && (String(loginUser.seq) === String(post.user_seq) || loginUser.admin_yn === "Y") && (
           <div className="action-bar-right">
             <button onClick={() => navigate(`/board/edit/${post.seq}`)} className="btn-outline">
               수정
@@ -230,7 +230,7 @@ function BoardDetail() {
                     <span className="comment-date">{dayjs(c.cre_date).format("YY.MM.DD HH:mm")}</span>
                   </div>
                   <p className="comment-content">{c.contents}</p>
-                  {loginUser && (loginUser.seq === c.user_seq || loginUser.admin_yn === "Y") && (
+                  {loginUser && (String(loginUser.seq) === String(c.user_seq) || loginUser.admin_yn === "Y") && (
                     <button onClick={() => handleCommentDelete(c.seq)} className="btn-text-danger">
                       삭제
                     </button>

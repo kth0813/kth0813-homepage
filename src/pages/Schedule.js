@@ -98,12 +98,12 @@ const Schedule = () => {
       return;
     }
 
-    setSelectedDate(dayjs(evt.start_datetime.slice(0, 19)));
+    setSelectedDate(dayjs(evt.start_datetime));
     setTitle(evt.title);
     setDescription(evt.description || "");
     setCategorySeq(evt.category_seq);
-    setStartDateStr(dayjs(evt.start_datetime.slice(0, 19)).format("YYYY-MM-DDTHH:mm"));
-    setEndDateStr(dayjs(evt.end_datetime.slice(0, 19)).format("YYYY-MM-DDTHH:mm"));
+    setStartDateStr(dayjs(evt.start_datetime).format("YYYY-MM-DDTHH:mm"));
+    setEndDateStr(dayjs(evt.end_datetime).format("YYYY-MM-DDTHH:mm"));
     setColorCode(evt.color_code || "");
     setLocation(evt.location || "");
     setRepeatYn(evt.repeat_yn || "N");
@@ -302,8 +302,9 @@ const Schedule = () => {
             const isToday = date.isSame(dayjs(), "day");
 
             const dayEvents = schedules.filter((s) => {
-              const start = dayjs(s.start_datetime.slice(0, 19)).startOf("day");
-              const end = dayjs(s.end_datetime.slice(0, 19)).endOf("day");
+              if (!s || !s.start_datetime || !s.end_datetime) return false;
+              const start = dayjs(s.start_datetime).startOf("day");
+              const end = dayjs(s.end_datetime).endOf("day");
 
               if (s.repeat_yn === "Y") {
                 // For repeating events, check if the current date matches the month and day,
@@ -379,7 +380,7 @@ const Schedule = () => {
                           fontWeight: "500",
                           cursor: "pointer"
                         }}
-                        title={`${evt.title} (${dayjs(evt.start_datetime.slice(0, 19)).format("HH:mm")})`}
+                        title={`${evt.title} (${dayjs(evt.start_datetime).format("HH:mm")})`}
                       >
                         {evt.title}
                       </div>

@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
 import { dbService } from "../services/DbService";
-import { supabase } from "../supabaseClient";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { showAlert, showToast, showConfirm } from "../utils/Alert";
@@ -41,26 +40,12 @@ function MessageList() {
     }
     fetchMessages();
 
-    const channel = supabase
-      .channel("message-realtime-list")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "message",
-          filter: `receiver_seq=eq.${loginUser.seq}`
-        },
-        (payload) => {
-          if (tab === "received") {
-            fetchMessages();
-          }
-        }
-      )
-      .subscribe();
+    const interval = setInterval(() => {
+      fetchMessages();
+    }, 10000);
 
     return () => {
-      supabase.removeChannel(channel);
+      clearInterval(interval);
     };
   }, [loginUser, tab, navigate, fetchMessages]);
 

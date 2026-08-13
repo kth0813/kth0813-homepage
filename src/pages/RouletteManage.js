@@ -17,7 +17,10 @@ const RouletteManage = () => {
     try {
       const { data, error } = await dbService.getAllRouletteParticipants();
       if (error) throw error;
-      setParticipants(data || []);
+      const sorted = (data || []).sort((a, b) =>
+        (a.user_name || a.name || "").localeCompare(b.user_name || b.name || "", "ko")
+      );
+      setParticipants(sorted);
     } catch (err) {
       console.error(err);
       showToast("참가자 목록을 불러오는 데 실패했습니다.", "error");
@@ -138,10 +141,10 @@ const RouletteManage = () => {
                 </tr>
               </thead>
               <tbody>
-                {participants.map((p) => (
+                {participants.map((p, index) => (
                   <tr key={p.seq} style={{ borderBottom: "1px solid var(--border-color)" }}>
-                    <td className="p12 text14 text-muted">{p.seq}</td>
-                    <td className="p12 text14 font-semibold">{p.user_name}</td>
+                    <td className="p12 text14 text-muted">{index + 1}</td>
+                    <td className="p12 text14 font-semibold">{p.user_name || p.name}</td>
                     <td className="p12 text14">{p.gender === "M" ? "남" : p.gender === "F" ? "여" : "선택안함"}</td>
                     <td className="p12 text14">
                       <span
@@ -162,7 +165,7 @@ const RouletteManage = () => {
                       <button className="btn-secondary" onClick={() => handleToggleWin(p.seq, p.win_yn)} style={{ padding: "6px 12px", fontSize: "12px" }}>
                         상태 변경
                       </button>
-                      <button className="btn-danger" onClick={() => handleDelete(p.seq, p.user_name)} style={{ padding: "6px 12px", fontSize: "12px" }}>
+                      <button className="btn-danger" onClick={() => handleDelete(p.seq, p.user_name || p.name)} style={{ padding: "6px 12px", fontSize: "12px" }}>
                         삭제
                       </button>
                     </td>

@@ -1,7 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState, useCallback } from "react";
 import { dbService } from "../services/DbService";
-import { supabase } from "../supabaseClient";
 import { showToast } from "../utils/Alert";
 
 function TopMenu({ onMenuToggle }) {
@@ -24,26 +23,12 @@ function TopMenu({ onMenuToggle }) {
 
     fetchUnreadCounts();
 
-    const channel = supabase
-      .channel("top-menu-realtime")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "message", filter: `receiver_seq=eq.${loginUser.seq}` }, (payload) => {
-        fetchUnreadCounts();
-        showToast("새로운 쪽지가 도착했습니다!");
-      })
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notification", filter: `user_seq=eq.${loginUser.seq}` }, (payload) => {
-        fetchUnreadCounts();
-        showToast("새로운 알림이 도착했습니다!");
-      })
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "message", filter: `receiver_seq=eq.${loginUser.seq}` }, () => {
-        fetchUnreadCounts();
-      })
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "notification", filter: `user_seq=eq.${loginUser.seq}` }, () => {
-        fetchUnreadCounts();
-      })
-      .subscribe();
+    const interval = setInterval(() => {
+      fetchUnreadCounts();
+    }, 10000);
 
     return () => {
-      supabase.removeChannel(channel);
+      clearInterval(interval);
     };
   }, [loginUser?.seq, loginUser, fetchUnreadCounts]);
 

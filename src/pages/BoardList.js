@@ -59,11 +59,9 @@ function BoardList() {
     query = query.order("seq", { ascending: false }).range(from, to);
 
     const { data: rawData, error, count } = await query;
-    if (!error) {
-      // inner join eq 필터링의 결과로 category 관련 null 이슈가 있을 수 있으므로 필터링 보완
-      const filteredData = loginUser?.admin_yn === "Y" ? rawData : rawData.filter((post) => post.category && post.category.show_yn === "Y");
-      setPosts(filteredData);
-      setTotalCount(loginUser?.admin_yn === "Y" ? count : filteredData.length); // 페이지네이션 보완
+    if (!error && rawData) {
+      setPosts(rawData);
+      setTotalCount(count || 0);
     }
     setLoading(false);
   }, [currentPage, pageSize, activeSearchType, activeSearchKeyword, category, globalKeyword, loginUser?.admin_yn]);
