@@ -3,10 +3,10 @@
  * Supports full CRUD: Create/Upload, Read/Get, Update/Upload, Delete
  */
 
-const ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || "de44c6a3ae70655650ef9b3041d0ac74";
-const SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY || "27029cf3f0c56d22bc8e7dcacb8a45a864691971f470331349bc06a198bc68f7";
-const ENDPOINT = (process.env.R2_ENDPOINT || "https://512f97425f2bc024206df0f42c7f6248.r2.cloudflarestorage.com").replace(/\/$/, "");
-const DEFAULT_BUCKET = process.env.R2_BUCKET_NAME || "kth0813";
+const ACCESS_KEY_ID = process.env.REACT_APP_R2_ACCESS_KEY_ID || "de44c6a3ae70655650ef9b3041d0ac74";
+const SECRET_ACCESS_KEY = process.env.REACT_APP_R2_SECRET_ACCESS_KEY || "27029cf3f0c56d22bc8e7dcacb8a45a864691971f470331349bc06a198bc68f7";
+const ENDPOINT = (process.env.REACT_APP_R2_ENDPOINT || "https://512f97425f2bc024206df0f42c7f6248.r2.cloudflarestorage.com").replace(/\/$/, "");
+const DEFAULT_BUCKET = process.env.REACT_APP_R2_BUCKET_NAME || "kth0813";
 const REGION = "auto";
 const SERVICE = "s3";
 
