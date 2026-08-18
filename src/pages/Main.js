@@ -56,7 +56,7 @@ function Main() {
 
     if (needsUpdate) {
       try {
-        const YOUTUBE_API_KEY = process.env.REACT_APP_YOUTUBE_API_KEY;
+        const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
         if (YOUTUBE_API_KEY) {
           const videoResponse = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&chart=mostPopular&regionCode=KR&maxResults=10&key=${YOUTUBE_API_KEY}`);
           const videoData = await videoResponse.json();
