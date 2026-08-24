@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { dbService } from "../services/DbService";
-import { useNavigate } from "react-router-dom";
 import { showAlert } from "../utils/Alert";
 import { SkeletonLine } from "../components/Skeleton";
 import { IconSettings } from "../components/Icons";
 import PageHeader from "../components/PageHeader";
+import AdminDemoBanner from "../components/AdminDemoBanner";
 
 function MenuManage() {
-  const navigate = useNavigate();
   const loginUser = useMemo(() => JSON.parse(localStorage.getItem("loginUser")), []);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,13 +26,16 @@ function MenuManage() {
   }, []);
 
   useEffect(() => {
-    if (!loginUser || loginUser.admin_yn !== "Y") {
-      showAlert("관리자만 접근할 수 있는 페이지입니다.");
-      navigate("/");
-      return;
-    }
     fetchCategories();
-  }, [fetchCategories, loginUser, navigate]);
+  }, [fetchCategories]);
+
+  const checkDemoGuard = () => {
+    if (loginUser?.admin_yn !== "Y") {
+      showAlert("포트폴리오 체험 모드에서는 읽기 권한만 제공됩니다.");
+      return true;
+    }
+    return false;
+  };
 
   useEffect(() => {
     if (categories.length > 0) {
@@ -43,6 +45,7 @@ function MenuManage() {
   }, [categories]);
 
   const handleAdd = async () => {
+    if (checkDemoGuard()) return;
     if (!newMenu.name.trim()) {
       showAlert("메뉴 이름을 입력해주세요.");
       return;
@@ -70,6 +73,7 @@ function MenuManage() {
   };
 
   const startEdit = (cat) => {
+    if (checkDemoGuard()) return;
     setEditingSeq(cat.seq);
     setEditMenu({ name: cat.name, description: cat.description || "", order: cat.order || 0, show_yn: cat.show_yn || "Y" });
   };
@@ -80,6 +84,7 @@ function MenuManage() {
   };
 
   const handleUpdate = async () => {
+    if (checkDemoGuard()) return;
     if (!editMenu.name.trim()) {
       showAlert("메뉴 이름을 입력해주세요.");
       return;
@@ -107,6 +112,7 @@ function MenuManage() {
   };
 
   const handleDelete = async (seq) => {
+    if (checkDemoGuard()) return;
     if (seq === 1) {
       showAlert("자유 게시판은 삭제할 수 없습니다.");
       return;
@@ -137,6 +143,9 @@ function MenuManage() {
 
   return (
     <div className="page-container">
+      {/* Admin Demo Banner */}
+      <AdminDemoBanner />
+
       {/* Standardized Header Banner */}
       <PageHeader
         icon={IconSettings}
@@ -144,7 +153,7 @@ function MenuManage() {
         description="사이트 전체 카테고리 메뉴 구조와 정렬 순서를 설정합니다."
       />
 
-      <div className="dashboard-card mb32 p24" style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "12px" }}>
+      <div className="dashboard-card mb20 p24" style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "12px", marginBottom: "20px" }}>
         <h3 className="text16 font-bold mb16" style={{ color: "#0F172A" }}>새 메뉴 추가</h3>
         <div className="flex items-center gap12 flex-wrap">
           <input

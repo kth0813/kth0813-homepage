@@ -3,6 +3,8 @@ import { dbService } from "../services/DbService";
 import { showToast } from "../utils/Alert";
 import { IconRoulette, IconUser } from "../components/Icons";
 import PageHeader from "../components/PageHeader";
+import TechSpecLayer from "../components/TechSpecLayer";
+import NextActionCard from "../components/NextActionCard";
 
 function triggerConfetti() {
   const canvas = document.createElement("canvas");
@@ -355,6 +357,22 @@ const Roulette = () => {
           </div>
         </div>
       )}
+
+      {/* Tech Spec & Intent Overlay */}
+      <TechSpecLayer
+        intentText="HTML5 Canvas 2D Context 물리 엔진 기반으로 가속도/감속도 팩터와 동적 세그먼트 각도를 실시간 연산하는 인터랙티브 룰렛 시뮬레이터입니다."
+        techStack={["HTML5 Canvas 2D", "Rotational Physics Engine", "Web Audio Synthesizer", "PostgreSQL Admin Sync"]}
+        isOpen={false}
+      />
+
+      {/* Contextual Next Action CTA Banner */}
+      <NextActionCard
+        badge="NEXT ACTION"
+        title="순수 CSS 3D 물리 엔진을 경험하고 싶다면?"
+        description="Web Audio API 사운드 합성기 및 Preserved-3D 파워 주사위 시뮬레이터를 굴려보세요."
+        buttonText="🎲 3D 주사위 던지기 체험하기 ➔"
+        to="/dice"
+      />
     </div>
   );
 };

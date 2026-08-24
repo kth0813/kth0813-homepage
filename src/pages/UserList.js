@@ -1,16 +1,13 @@
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { dbService } from "../services/DbService";
 import dayjs from "dayjs";
 import { Highlight } from "../utils/Highlight";
-import { useNavigate } from "react-router-dom";
-import { showAlert } from "../utils/Alert";
 import { SkeletonLine } from "../components/Skeleton";
 import { IconUsers, IconUser } from "../components/Icons";
 import PageHeader from "../components/PageHeader";
+import AdminDemoBanner from "../components/AdminDemoBanner";
 
 function UserList() {
-  const navigate = useNavigate();
-  const loginUser = useMemo(() => JSON.parse(localStorage.getItem("loginUser")), []);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,13 +41,8 @@ function UserList() {
   }, [currentPage, pageSize, activeSearchType, activeSearchKeyword]);
 
   useEffect(() => {
-    if (!loginUser || loginUser.admin_yn !== "Y") {
-      showAlert("관리자만 접근할 수 있는 페이지입니다.");
-      navigate("/");
-      return;
-    }
     fetchUsers();
-  }, [fetchUsers, currentPage, pageSize, loginUser, navigate]);
+  }, [fetchUsers]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -63,6 +55,9 @@ function UserList() {
 
   return (
     <div className="page-container">
+      {/* Admin Demo Banner */}
+      <AdminDemoBanner />
+
       {/* Standardized Header Banner */}
       <PageHeader
         icon={IconUsers}
@@ -70,7 +65,7 @@ function UserList() {
         description="사이트에 등록된 전체 회원 목록을 검색하고 관리합니다."
       />
 
-      <div className="filter-bar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "nowrap", marginBottom: "16px" }}>
+      <div className="filter-bar mb16" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "nowrap", marginBottom: "16px" }}>
         <form onSubmit={handleSearch} className="filter-group" style={{ display: "flex", gap: "10px", alignItems: "center", flex: 1 }}>
           <select value={searchType} onChange={(e) => setSearchType(e.target.value)} className="select-field" style={{ height: "38px", fontSize: "13px", padding: "0 10px" }}>
             <option value="id">아이디</option>

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { IconLadder } from "../components/Icons";
 import PageHeader from "../components/PageHeader";
+import TechSpecLayer from "../components/TechSpecLayer";
+import NextActionCard from "../components/NextActionCard";
 
 const Ladder = () => {
   const [participantCount, setParticipantCount] = useState(4);
@@ -411,6 +413,22 @@ const Ladder = () => {
           </div>
         </div>
       )}
+
+      {/* Tech Spec & Intent Overlay */}
+      <TechSpecLayer
+        intentText="Dynamic Path Finder 알고리즘과 Canvas 좌표 동기화를 통해 당첨 경로 탐색 과정과 트레이스 애니메이션을 시각화한 사다리타기 시뮬레이터입니다."
+        techStack={["Dynamic Path Finder", "Canvas Path Tracer", "SVG Coordinate Matrix", "Interactive Sound Engine"]}
+        isOpen={false}
+      />
+
+      {/* Contextual Next Action CTA Banner */}
+      <NextActionCard
+        badge="NEXT ACTION"
+        title="다른 방식의 무작위 추첨 유틸리티가 궁금하다면?"
+        description="Fisher-Yates 무작위 셔플 알고리즘과 비복원 난수 추첨 시스템을 이용해보세요."
+        buttonText="🎯 무작위 추첨하기 체험하기 ➔"
+        to="/luckydraw"
+      />
     </div>
   );
 };

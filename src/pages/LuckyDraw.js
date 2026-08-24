@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import "../css/App.css";
 import { IconDice, IconFlame } from "../components/Icons";
 import PageHeader from "../components/PageHeader";
+import TechSpecLayer from "../components/TechSpecLayer";
+import NextActionCard from "../components/NextActionCard";
 
 function LuckyDraw() {
   const [candidatesText, setCandidatesText] = useState("");
@@ -405,6 +407,22 @@ function LuckyDraw() {
           </div>
         )}
       </div>
+
+      {/* Tech Spec & Intent Overlay */}
+      <TechSpecLayer
+        intentText="Fisher-Yates 무작위 셔플 알고리즘과 비복원 추출 난수 엔진을 활용하여 공정한 실시간 무작위 추첨 및 통계 리포트를 제공하는 유틸리티입니다."
+        techStack={["Fisher-Yates Shuffle", "Crypto Random Engine", "Real-time Stat Analytics", "CSV Export"]}
+        isOpen={false}
+      />
+
+      {/* Contextual Next Action CTA Banner */}
+      <NextActionCard
+        badge="NEXT ACTION"
+        title="더 화려한 시각 효과의 실시간 추첨이 필요하다면?"
+        description="HTML5 Canvas 2D 회전 물리 엔진과 사운드가 융합된 룰렛 추첨기를 경험해보세요."
+        buttonText="🎰 룰렛 돌리기 체험하기 ➔"
+        to="/roulette"
+      />
     </div>
   );
 }

@@ -3,12 +3,23 @@ import { dbService } from "../services/DbService";
 import { showToast, showConfirm } from "../utils/Alert";
 import { IconRoulette } from "../components/Icons";
 import PageHeader from "../components/PageHeader";
+import AdminDemoBanner from "../components/AdminDemoBanner";
 
 const RouletteManage = () => {
   const [participants, setParticipants] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [newName, setNewName] = useState("");
   const [newGender, setNewGender] = useState("N"); // 'M', 'F', 'N'
+
+  const checkDemoGuard = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const loginUser = JSON.parse(localStorage.getItem("loginUser"));
+    if (loginUser?.admin_yn !== "Y") {
+      showToast("포트폴리오 체험 모드에서는 읽기 권한만 제공됩니다.", "warning");
+      return true;
+    }
+    return false;
+  };
 
   useEffect(() => {
     fetchParticipants();
@@ -33,6 +44,7 @@ const RouletteManage = () => {
 
   const handleAddSubmit = async (e) => {
     e.preventDefault();
+    if (checkDemoGuard(e)) return;
     if (!newName.trim()) {
       showToast("이름을 입력해주세요.", "error");
       return;
@@ -57,6 +69,7 @@ const RouletteManage = () => {
   };
 
   const handleDelete = async (seq, name) => {
+    if (checkDemoGuard()) return;
     const isConfirmed = await showConfirm(`'${name}' 참가자를 삭제하시겠습니까?`);
     if (!isConfirmed) return;
 
@@ -72,6 +85,7 @@ const RouletteManage = () => {
   };
 
   const handleToggleWin = async (seq, currentStatus) => {
+    if (checkDemoGuard()) return;
     const newStatus = currentStatus === "Y" ? "N" : "Y";
     try {
       const { error } = await dbService.updateRouletteParticipant(seq, { win_yn: newStatus });
@@ -86,6 +100,9 @@ const RouletteManage = () => {
 
   return (
     <div className="page-container">
+      {/* Admin Demo Banner */}
+      <AdminDemoBanner />
+
       {/* Standardized Header Banner */}
       <PageHeader
         icon={IconRoulette}
@@ -94,7 +111,7 @@ const RouletteManage = () => {
       />
 
       {/* Add New Candidate Card */}
-      <div className="dashboard-card mb32 p24" style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "12px" }}>
+      <div className="dashboard-card mb20 p24" style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "12px", marginBottom: "20px" }}>
         <h3 className="text16 font-bold mb16" style={{ color: "#0F172A" }}>신규 참가자 추가</h3>
         <form onSubmit={handleAddSubmit} className="flex items-center gap16 flex-wrap">
           <div className="flex items-center gap8 flex-1" style={{ minWidth: "200px" }}>

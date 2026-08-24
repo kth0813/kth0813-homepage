@@ -173,7 +173,7 @@ function LeftMenu({ isOpen, onClose }) {
       </Link>
 
       {/* 1. PORTFOLIO Section */}
-      <div className="nav-group mb16">
+      <div className="nav-group mb12">
         <div className="nav-group-title">PORTFOLIO</div>
         <Link to="/about" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/about" ? "active" : ""}`}>
           <IconUser size={16} color={location.pathname === "/about" ? "#2563EB" : "#64748B"} />
@@ -186,7 +186,7 @@ function LeftMenu({ isOpen, onClose }) {
       </div>
 
       {/* 2. DASHBOARD Section */}
-      <div className="nav-group mb16">
+      <div className="nav-group mb12">
         <div className="nav-group-title">DASHBOARD</div>
         <Link to="/schedule" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/schedule" ? "active" : ""}`}>
           <IconSchedule size={16} color={location.pathname === "/schedule" ? "#2563EB" : "#64748B"} />
@@ -209,7 +209,7 @@ function LeftMenu({ isOpen, onClose }) {
       </div>
 
       {/* 3. UTILS Section */}
-      <div className="nav-group mb16">
+      <div className="nav-group mb12">
         <div className="nav-group-title">UTILS</div>
         <Link to="/luckydraw" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/luckydraw" ? "active" : ""}`}>
           <IconFlame size={16} color={location.pathname === "/luckydraw" ? "#2563EB" : "#64748B"} />
@@ -230,27 +230,46 @@ function LeftMenu({ isOpen, onClose }) {
       </div>
 
       {/* 4. ADMIN Section */}
-      {loginUser?.admin_yn === "Y" && (
-        <div className="nav-group mb16">
-          <div className="nav-group-title text-blue-600">ADMIN</div>
-          <Link to="/admin" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/admin" ? "active" : ""}`}>
-            <IconBarChart size={16} color={location.pathname === "/admin" ? "#2563EB" : "#64748B"} />
-            <span>통계 대시보드</span>
-          </Link>
-          <Link to="/user/list" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/user/list" ? "active" : ""}`}>
-            <IconUsers size={16} color={location.pathname === "/user/list" ? "#2563EB" : "#64748B"} />
-            <span>사용자 목록</span>
-          </Link>
-          <Link to="/menu/manage" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/menu/manage" ? "active" : ""}`}>
-            <IconSettings size={16} color={location.pathname === "/menu/manage" ? "#2563EB" : "#64748B"} />
-            <span>메뉴 관리</span>
-          </Link>
-          <Link to="/roulette/manage" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/roulette/manage" ? "active" : ""}`}>
-            <IconRoulette size={16} color={location.pathname === "/roulette/manage" ? "#2563EB" : "#64748B"} />
-            <span>룰렛 참가자 관리</span>
-          </Link>
+      <div className="nav-group mb12">
+        <div className="nav-group-title text-blue-600 flex items-center justify-between" style={{ paddingRight: "4px" }}>
+          <span>ADMIN</span>
+          {loginUser?.admin_yn !== "Y" && (
+            <span
+              style={{
+                fontSize: "10px",
+                background: "#FEF3C7",
+                color: "#D97706",
+                border: "1px solid #FDE68A",
+                padding: "2px 8px",
+                borderRadius: "10px",
+                fontWeight: "700",
+                marginLeft: "auto",
+                lineHeight: "1.2",
+                display: "inline-flex",
+                alignItems: "center"
+              }}
+            >
+              체험 모드
+            </span>
+          )}
         </div>
-      )}
+        <Link to="/admin" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/admin" || location.pathname === "/dashboard" ? "active" : ""}`}>
+          <IconBarChart size={16} color={location.pathname === "/admin" || location.pathname === "/dashboard" ? "#2563EB" : "#64748B"} />
+          <span>통계 대시보드</span>
+        </Link>
+        <Link to="/users" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/users" ? "active" : ""}`}>
+          <IconUsers size={16} color={location.pathname === "/users" ? "#2563EB" : "#64748B"} />
+          <span>사용자 목록</span>
+        </Link>
+        <Link to="/menus" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/menus" ? "active" : ""}`}>
+          <IconSettings size={16} color={location.pathname === "/menus" ? "#2563EB" : "#64748B"} />
+          <span>메뉴 관리</span>
+        </Link>
+        <Link to="/roulette/manage" className={`nav-link sub-link flex items-center gap8 ${location.pathname === "/roulette/manage" || location.pathname === "/roulette-manage" ? "active" : ""}`}>
+          <IconRoulette size={16} color={location.pathname === "/roulette/manage" || location.pathname === "/roulette-manage" ? "#2563EB" : "#64748B"} />
+          <span>룰렛 참가자 관리</span>
+        </Link>
+      </div>
     </nav>
   );
 }

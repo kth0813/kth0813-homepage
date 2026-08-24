@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./Layout";
+import ScrollToTop from "./components/ScrollToTop";
 import CategoryManage from "./pages/CategoryManage";
 import DashBoard from "./pages/DashBoard";
 import Login from "./pages/Login";
@@ -16,6 +17,7 @@ import RouletteManage from "./pages/RouletteManage";
 import LuckyDraw from "./pages/LuckyDraw";
 import Ladder from "./pages/Ladder";
 import Roulette from "./pages/Roulette";
+import Dice from "./pages/Dice";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import NotificationList from "./pages/NotificationList";
 import MessageList from "./pages/MessageList";
@@ -27,6 +29,7 @@ import "./css/App.css";
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <Layout>
         <Routes>
           <Route path="/" element={<Main />} />
@@ -40,18 +43,21 @@ function App() {
           <Route path="/board/:seq" element={<BoardDetail />} />
           <Route path="/board/write" element={<BoardWrite />} />
           <Route path="/board/edit/:seq" element={<BoardWrite />} />
-          <Route path="/menus" element={<MenuManage />} />
           <Route path="/schedule" element={<Schedule />} />
           <Route path="/category-manage" element={<CategoryManage />} />
           <Route path="/dashboard" element={<DashBoard />} />
           <Route path="/roulette-manage" element={<RouletteManage />} />
-          <Route path="/users" element={<UserList />} />
           <Route path="/luckydraw" element={<LuckyDraw />} />
+          <Route path="/dice" element={<Dice />} />
           <Route path="/ladder" element={<Ladder />} />
           <Route path="/roulette" element={<Roulette />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/notifications" element={<NotificationList />} />
           <Route path="/messages" element={<MessageList />} />
+          <Route path="/admin" element={<DashBoard />} />
+          <Route path="/users" element={<UserList />} />
+          <Route path="/menus" element={<MenuManage />} />
+          <Route path="/roulette/manage" element={<RouletteManage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>

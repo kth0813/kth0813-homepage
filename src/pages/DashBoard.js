@@ -7,6 +7,7 @@ import UserChart from "../components/UserChart";
 import { SkeletonLine } from "../components/Skeleton";
 import { IconBarChart, IconUsers, IconBoard, IconUser } from "../components/Icons";
 import PageHeader from "../components/PageHeader";
+import AdminDemoBanner from "../components/AdminDemoBanner";
 
 function DashBoard() {
   const [stats, setStats] = useState({ userCount: 0, boardCount: 0 });
@@ -32,6 +33,9 @@ function DashBoard() {
 
   return (
     <div className="page-container">
+      {/* Admin Demo Notification Banner */}
+      <AdminDemoBanner />
+
       {/* Standardized Header Banner */}
       <PageHeader
         icon={IconBarChart}
@@ -40,8 +44,8 @@ function DashBoard() {
       />
 
       {/* KPI Cards */}
-      <div className="grid-cols-2 gap24 mb32" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "24px" }}>
-        <div className="dashboard-card p20" style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "12px" }}>
+      <div className="grid-cols-2 gap20 mb20" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "20px", marginBottom: "20px" }}>
+        <div className="dashboard-card p20" style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "12px", marginBottom: 0 }}>
           <div className="flex justify-between items-center mb12">
             <span className="text14 font-bold text-muted">총 회원 수</span>
             <div style={{ padding: "8px", background: "#EFF6FF", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -57,7 +61,7 @@ function DashBoard() {
           )}
         </div>
 
-        <div className="dashboard-card p20" style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "12px" }}>
+        <div className="dashboard-card p20" style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "12px", marginBottom: 0 }}>
           <div className="flex justify-between items-center mb12">
             <span className="text14 font-bold text-muted">전체 게시글</span>
             <div style={{ padding: "8px", background: "#EFF6FF", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -75,7 +79,7 @@ function DashBoard() {
       </div>
 
       {/* Charts Section */}
-      <div className="grid-cols-2 gap24 mb32" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "24px" }}>
+      <div className="grid-cols-2 gap20 mb20" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "20px", marginBottom: "20px" }}>
         <div style={{ minWidth: 0 }}>
           <UserChart />
         </div>
@@ -85,7 +89,7 @@ function DashBoard() {
       </div>
 
       {/* Recent Posts Section */}
-      <div className="dashboard-card p24" style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "12px" }}>
+      <div className="dashboard-card p24" style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "12px", marginBottom: "20px" }}>
         <div className="flex justify-between items-center mb16">
           <h3 className="text18 font-bold m0" style={{ color: "#0F172A" }}>
             최근 올라온 글

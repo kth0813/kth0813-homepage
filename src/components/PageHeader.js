@@ -3,35 +3,36 @@ import React from "react";
 function PageHeader({ icon: IconComponent, iconColor = "#2563EB", title, description, children, extraLeft }) {
   return (
     <div
-      className="dashboard-card mb32 flex justify-between items-center flex-wrap gap16"
+      className="dashboard-card mb20 flex justify-between items-center flex-wrap gap16"
       style={{
         background: "#FFFFFF",
         border: "1px solid #E2E8F0",
-        borderRadius: "12px",
-        padding: "16px 24px",
-        minHeight: "72px",
+        borderRadius: "14px",
+        padding: "18px 24px",
+        marginBottom: "20px",
         boxSizing: "border-box",
         width: "100%"
       }}
     >
-      {/* Left Title & Description & Extra Left Content */}
-      <div className="flex items-center gap16 flex-wrap" style={{ flex: 1, minWidth: 0 }}>
-        <div className="flex items-center gap10" style={{ whiteSpace: "nowrap" }}>
-          {IconComponent && <IconComponent size={24} color={iconColor} />}
-          <h2 className="page-title text22 font-bold m0" style={{ color: "#0F172A", whiteSpace: "nowrap" }}>
+      {/* Left Title & Description Column Group */}
+      <div className="flex flex-col items-start gap4 flex-1" style={{ minWidth: 0 }}>
+        {/* Main Title Row */}
+        <div className="flex items-center gap10 flex-wrap">
+          {IconComponent && <IconComponent size={22} color={iconColor} />}
+          <h2 className="page-title text22 font-extrabold m0" style={{ color: "#0F172A", letterSpacing: "-0.4px" }}>
             {title}
           </h2>
+          {extraLeft && (
+            <div className="flex items-center gap8 ml8">
+              <div style={{ width: "1px", height: "16px", background: "#E2E8F0" }} className="hide-mobile" />
+              {extraLeft}
+            </div>
+          )}
         </div>
 
-        {extraLeft && (
-          <>
-            <div style={{ width: "1px", height: "20px", background: "#E2E8F0", margin: "0 4px" }} className="hide-mobile" />
-            {extraLeft}
-          </>
-        )}
-
-        {description && !extraLeft && (
-          <p className="text14 text-muted m0 hide-mobile" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        {/* Description Row (Placed Directly Below Main Title) */}
+        {description && (
+          <p className="text13 text-slate-500 m0 mt4" style={{ color: "#64748B", lineHeight: "1.5", wordBreak: "keep-all" }}>
             {description}
           </p>
         )}

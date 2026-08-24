@@ -388,7 +388,7 @@ const Schedule = () => {
       </PageHeader>
 
       {/* Calendar Grid Container */}
-      <div className="dashboard-card p0" style={{ overflow: "hidden" }}>
+      <div className="dashboard-card p0" style={{ overflow: "hidden", marginTop: "0px", marginBottom: "20px" }}>
         {/* Days of Week Header */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", background: "#F8FAFC", borderBottom: "1px solid #E2E8F0" }}>
           {daysOfWeek.map((day, idx) => (
